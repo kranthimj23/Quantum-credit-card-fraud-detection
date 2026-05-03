@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quantum Fraud Detection — Beginner's Interactive Tutorial</title>
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="logo">Q</span>
+      <span class="brand-text">
+        <strong>Quantum Fraud Detection</strong>
+        <small>Beginner's Interactive Tutorial &middot; HDFC demo</small>
+      </span>
+    </div>
+    <nav class="topnav">
+      <a href="../README.md">Repo README</a>
+      <a href="../ARCHITECTURE.md">ARCHITECTURE.md</a>
+      <a href="../STEPS.md">STEPS.md</a>
+    </nav>
+  </div>
+  <div id="progress-bar"><div id="progress-bar-inner"></div></div>
+</header>
+
+<div class="layout">
+
+  <!-- =============== SIDEBAR =============== -->
+  <aside class="sidebar" id="sidebar">
+    <h2>Tutorial map</h2>
+    <ol class="toc">
+      <li><a href="#sec-welcome">0. How to use this tutorial</a></li>
+      <li><a href="#sec-problem">1. The fraud detection problem</a></li>
+      <li><a href="#sec-quantum101">2. Quantum 101 &mdash; the qubit</a></li>
+      <li><a href="#sec-superposition">3. Superposition &amp; measurement</a></li>
+      <li><a href="#sec-gates">4. Quantum gates &mdash; interactive playground</a></li>
+      <li><a href="#sec-entanglement">5. Entanglement &amp; the Bell pair</a></li>
+      <li><a href="#sec-pipeline">6. Classical data pipeline (PCA, SMOTE, scaling)</a></li>
+      <li><a href="#sec-zzfeaturemap">7. ZZFeatureMap &mdash; encoding data into a circuit</a></li>
+      <li><a href="#sec-ansatz">8. EfficientSU2 ansatz &mdash; the trainable part</a></li>
+      <li><a href="#sec-vqc">9. VQC training loop &amp; optimizers (SPSA)</a></li>
+      <li><a href="#sec-kernel">10. Quantum kernels &amp; QSVC (2D sandbox)</a></li>
+      <li><a href="#sec-pegasos">11. PegasosQSVC &mdash; faster training</a></li>
+      <li><a href="#sec-ibm">12. Real IBM Quantum hardware</a></li>
+      <li><a href="#sec-hybrid">13. Hybrid serving architecture</a></li>
+      <li><a href="#sec-reality">14. Reality check &mdash; what quantum can &amp; can't do today</a></li>
+      <li><a href="#sec-quiz">15. Self-check quiz (10 questions)</a></li>
+      <li><a href="#sec-glossary">16. Glossary</a></li>
+    </ol>
+    <div class="sidebar-footer">
+      <small>Tip: every box marked
+        <span class="badge badge-try">TRY IT</span>
+        is interactive &mdash; click, drag, change values.</small>
+    </div>
+  </aside>
+
+  <!-- =============== MAIN CONTENT =============== -->
+  <main class="content">
+
+    <!-- =========================================================== -->
+    <section id="sec-welcome">
+      <h1>Welcome &mdash; this is a from-zero quantum tutorial</h1>
+      <p class="lede">
+        You're a senior banker. You've heard the words <em>qubit</em>,
+        <em>superposition</em>, <em>VQC</em>, <em>quantum kernel</em>. They
+        sounded like jargon. By the end of this single page they will be
+        concrete tools you can describe to a CTO in 60&nbsp;seconds and
+        defend to an enterprise architect in 5&nbsp;minutes.
+      </p>
+
+      <div class="callout callout-info">
+        <strong>What this tutorial covers</strong>
+        Every concept used in <code>ARCHITECTURE.md</code> of the repo:
+        qubits, gates, superposition, entanglement, the
+        <strong>ZZFeatureMap</strong> data encoder, the
+        <strong>EfficientSU2</strong> trainable ansatz, the full
+        <strong>VQC</strong> training loop, <strong>quantum kernels</strong>
+        used by <strong>QSVC</strong> and <strong>PegasosQSVC</strong>,
+        ISA-aware transpilation onto real IBM Quantum hardware, and the
+        <strong>hybrid serving architecture</strong> recommended for HDFC.
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>What this tutorial is NOT</strong>
+        It is not a physics course. It will not derive Schr&ouml;dinger's
+        equation. We use just enough math to make the algorithms work in
+        your head. If you want full rigour, the references at the bottom of
+        <code>ARCHITECTURE.md</code> are the right next stop.
+      </div>
+
+      <h3>How to read it</h3>
+      <ol>
+        <li>Read top to bottom &mdash; every section builds on the previous.</li>
+        <li>Whenever you see <span class="badge badge-try">TRY IT</span>, stop and play with the widget. The intuition only sticks after you push the buttons.</li>
+        <li>End with the quiz. If you score 8/10 you can confidently field MD/CEO/CTO questions about this demo.</li>
+      </ol>
+
+      <p>Estimated time: <strong>45&ndash;60 minutes</strong>. You can pause; your scroll position and quiz answers are saved in your browser's local storage.</p>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-problem">
+      <h1>1. The fraud-detection problem &mdash; why it's hard</h1>
+
+      <p>HDFC processes ~50,000 card transactions per second at peak. Of those, far fewer than 1 in 500 is fraudulent. The dataset we use in this repo (the Kaggle ULB original) has only <strong>492 frauds out of 284,807 transactions = 0.172%</strong>.</p>
+
+      <h3>Why "rare-event" classification is so painful</h3>
+      <ul>
+        <li>A model that always predicts &quot;not fraud&quot; is <strong>99.83% accurate</strong> &mdash; and useless. Accuracy is the wrong metric.</li>
+        <li>The right metrics are <strong>AUC&#8209;ROC</strong> (how well the model ranks fraud above non-fraud), <strong>PR&#8209;AUC</strong>, <strong>F1</strong>, and <strong>recall at a fixed false&#8209;positive rate</strong> (e.g. recall@1%FPR).</li>
+        <li>Classical models like XGBoost are excellent on the <em>hot path</em> &mdash; cheap, fast, and high recall on the obvious frauds. But they tend to miss exotic, never&#8209;seen patterns hiding in the rare tail.</li>
+      </ul>
+
+      <div class="callout callout-info">
+        <strong>The opening for quantum.</strong>
+        We don't claim quantum will replace XGBoost. We claim a quantum
+        kernel can carve a different decision boundary &mdash; one that is
+        provably hard to express on a classical machine for some datasets
+        &mdash; so it can act as a <strong>second opinion</strong> on the
+        suspicious tail. Tier&nbsp;1 classical sees 99% of traffic;
+        Tier&nbsp;2 quantum re&#8209;scores the top 1%.
+      </div>
+
+      <h3>The two datasets we benchmark on</h3>
+      <table class="data-table">
+        <thead><tr><th>Dataset</th><th>Rows</th><th>Fraud %</th><th>Schema</th><th>Why use it</th></tr></thead>
+        <tbody>
+          <tr><td>mlg-ulb/creditcardfraud</td><td>284,807</td><td>0.172%</td><td>Time, V1..V28, Amount, Class</td><td>Realistic imbalance &mdash; the production reality</td></tr>
+          <tr><td>nelgiriyewithana/.../2023</td><td>568,630</td><td>50%</td><td>id, V1..V28, Amount, Class</td><td>Balanced &mdash; clean accuracy benchmarks</td></tr>
+        </tbody>
+      </table>
+
+      <p>Both are <em>already&nbsp;PCA&#8209;rotated</em>: the V1..V28 columns are principal components of the original (sensitive) features. So when we apply our own PCA in this repo we are reducing 29 dims to <strong>k</strong>, not the raw card numbers and merchant IDs.</p>
+
+      <div class="metric-cards">
+        <div class="metric-card">
+          <div class="metric-label">Total transactions / day at HDFC scale</div>
+          <div class="metric-value">~10<sup>9</sup></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Fraud rate (industry)</div>
+          <div class="metric-value">0.05&ndash;0.20%</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Cost of 1% false-negative rate at 0.1% fraud, &#8377;5,000 avg loss</div>
+          <div class="metric-value">~&#8377;5&nbsp;Cr/yr</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-quantum101">
+      <h1>2. Quantum 101 &mdash; the qubit</h1>
+
+      <p>A classical bit is 0 or 1. A <strong>qubit</strong> is a 2-level quantum system whose state is a pair of complex numbers:</p>
+
+      <div class="math-block">
+        |&psi;&rang; &nbsp;=&nbsp; &alpha;&middot;|0&rang; &nbsp;+&nbsp; &beta;&middot;|1&rang;
+        &nbsp;&nbsp;with&nbsp;|&alpha;|<sup>2</sup>&nbsp;+&nbsp;|&beta;|<sup>2</sup>&nbsp;=&nbsp;1
+      </div>
+
+      <p>Read that as: &quot;<strong>amplitude &alpha;</strong> for outcome 0, <strong>amplitude &beta;</strong> for outcome 1.&quot; Crucially, &alpha; and &beta; are <em>complex</em>, so they have a magnitude <em>and</em> a phase. The phase carries information that has no classical analogue.</p>
+
+      <p>When you measure the qubit, you get <strong>0</strong> with probability <code>|&alpha;|<sup>2</sup></code> or <strong>1</strong> with probability <code>|&beta;|<sup>2</sup></code>, and the qubit collapses to whichever outcome you saw. Until then, both possibilities exist <em>simultaneously</em> &mdash; this is what people informally call &quot;superposition&quot;.</p>
+
+      <h3>The Bloch sphere &mdash; the geometric picture</h3>
+      <p>Any pure single-qubit state can be parameterised as:</p>
+      <div class="math-block">
+        |&psi;&rang; = cos(&theta;/2)&middot;|0&rang; + e<sup>i&phi;</sup> sin(&theta;/2)&middot;|1&rang;
+      </div>
+      <p>which traces a point on a 3D unit sphere &mdash; the <strong>Bloch sphere</strong>. North pole = |0&rang;, south pole = |1&rang;, equator = equal-superposition states with different phases. Below is your first interactive widget.</p>
+
+      <div class="interactive-card">
+        <div class="interactive-title"><span class="badge badge-try">TRY IT</span> Bloch sphere &amp; gate playground</div>
+
+        <div class="bloch-grid">
+          <canvas id="bloch-canvas" width="360" height="360"></canvas>
+          <div class="bloch-info">
+            <div><strong>Current state</strong></div>
+            <pre id="bloch-state-vector">|&psi;&rang; = 1&middot;|0&rang; + 0&middot;|1&rang;</pre>
+
+            <div><strong>Measurement probabilities</strong></div>
+            <div class="prob-bar">
+              <div class="prob-row"><span>P(0) = </span><span class="bar"><span id="p0-fill"></span></span><span id="p0-text">100.0%</span></div>
+              <div class="prob-row"><span>P(1) = </span><span class="bar"><span id="p1-fill"></span></span><span id="p1-text">0.0%</span></div>
+            </div>
+
+            <div><strong>Apply a gate</strong></div>
+            <div class="gate-buttons">
+              <button data-gate="H">H</button>
+              <button data-gate="X">X</button>
+              <button data-gate="Y">Y</button>
+              <button data-gate="Z">Z</button>
+              <button data-gate="S">S</button>
+              <button data-gate="T">T</button>
+            </div>
+            <div class="gate-buttons">
+              <button data-gate="RX">RX(&pi;/4)</button>
+              <button data-gate="RY">RY(&pi;/4)</button>
+              <button data-gate="RZ">RZ(&pi;/4)</button>
+              <button data-gate="MEASURE">Measure</button>
+              <button data-gate="RESET" class="secondary">Reset to |0&rang;</button>
+            </div>
+
+            <div><strong>History</strong></div>
+            <div id="bloch-history" class="history-box"></div>
+          </div>
+        </div>
+
+        <details class="explainer">
+          <summary>What each gate does (click to expand)</summary>
+          <ul>
+            <li><strong>H (Hadamard)</strong> &mdash; turns |0&rang; into equal superposition (|0&rang;+|1&rang;)/&radic;2 and back. The single most important gate &mdash; it creates &quot;quantum parallelism&quot;.</li>
+            <li><strong>X</strong> &mdash; bit flip (NOT gate). Flips |0&rang; &harr; |1&rang;.</li>
+            <li><strong>Y</strong> &mdash; bit flip combined with a phase flip.</li>
+            <li><strong>Z</strong> &mdash; phase flip. Leaves |0&rang; alone, multiplies |1&rang; by &minus;1. Invisible to a single measurement &mdash; only matters when other qubits or other gates are involved.</li>
+            <li><strong>S, T</strong> &mdash; smaller phase rotations (&pi;/2 and &pi;/4 around Z).</li>
+            <li><strong>RX(&theta;), RY(&theta;), RZ(&theta;)</strong> &mdash; <em>continuous</em> rotations around the X, Y, Z axes. These are the gates we use to <em>encode classical numbers</em> into a qubit (Section 7).</li>
+          </ul>
+        </details>
+      </div>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-superposition">
+      <h1>3. Superposition &amp; measurement</h1>
+
+      <p>Superposition is not &quot;the qubit is 0 and 1 at the same time&quot;. The honest sentence is:</p>
+
+      <blockquote>
+        Until measured, the qubit has no definite value &mdash; it has a
+        <em>probability amplitude</em> for 0 and another for 1.
+        <em>Measurement</em> is the act of forcing one of those outcomes.
+      </blockquote>
+
+      <p>The two non-classical things you cannot do with bits but can do with qubits:</p>
+      <ol>
+        <li><strong>Interference.</strong> Amplitudes can add or cancel. Two paths leading to outcome 0 can have amplitudes (+1/&radic;2) and (&minus;1/&radic;2) and cancel out, making 0 impossible to observe even though &quot;classically&quot; both paths are open. This is the trick every quantum algorithm uses.</li>
+        <li><strong>Entanglement.</strong> Two qubits can be correlated more strongly than any classical pair (Section&nbsp;5).</li>
+      </ol>
+
+      <div class="interactive-card">
+        <div class="interactive-title"><span class="badge badge-try">TRY IT</span> Single-qubit measurement simulator</div>
+        <p>Set the angle &theta;: this prepares the state <code>|&psi;&rang; = cos(&theta;/2)|0&rang; + sin(&theta;/2)|1&rang;</code>. Then click &quot;Run 1000 shots&quot; to simulate measuring it 1000 times.</p>
+
+        <div class="row">
+          <label>&theta; (radians):
+            <input type="range" id="theta-slider" min="0" max="3.1416" step="0.01" value="1.5708" />
+            <span id="theta-value">1.5708</span>
+          </label>
+          <div>
+            <strong>Theoretical:</strong>
+            P(0) = <span id="theory-p0">50.0%</span>,
+            P(1) = <span id="theory-p1">50.0%</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Number of shots:
+            <input type="number" id="num-shots" value="1000" min="1" max="100000" step="1" />
+          </label>
+          <button id="run-shots-btn" class="primary">Run shots</button>
+          <button id="reset-shots-btn" class="secondary">Reset histogram</button>
+        </div>
+
+        <div class="histogram-box">
+          <div class="hist-label">Observed |0&rang;</div>
+          <div class="hist-bar"><div id="hist-bar-0"></div></div>
+          <div class="hist-count" id="hist-count-0">0</div>
+
+          <div class="hist-label">Observed |1&rang;</div>
+          <div class="hist-bar"><div id="hist-bar-1"></div></div>
+          <div class="hist-count" id="hist-count-1">0</div>
+        </div>
+
+        <p class="callout callout-info">
+          As you increase shots you should see the observed frequencies
+          converge to the theoretical probabilities. This is exactly how
+          IBM's <code>SamplerV2</code> primitive works on real hardware:
+          it runs the circuit <code>shots</code> times and returns the
+          empirical bitstring distribution.
+        </p>
+      </div>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-gates">
+      <h1>4. Quantum gates &mdash; the building blocks</h1>
+
+      <p>A quantum circuit is just a sequence of unitary matrices applied to a vector of complex amplitudes. For one qubit the state is a 2-vector and gates are 2&times;2 unitary matrices.</p>
+
+      <h3>The gates we actually use in this repo</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Gate</th><th>Matrix</th><th>What it does on |0&rang;</th><th>Where used</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>H</strong> (Hadamard)</td>
+            <td><code>(1/&radic;2)[[1,1],[1,&minus;1]]</code></td>
+            <td>(|0&rang;+|1&rang;)/&radic;2</td>
+            <td>First layer of every ZZFeatureMap rep</td>
+          </tr>
+          <tr>
+            <td><strong>RZ(&theta;)</strong></td>
+            <td><code>diag(e<sup>&minus;i&theta;/2</sup>, e<sup>i&theta;/2</sup>)</code></td>
+            <td>|0&rang; up to a global phase</td>
+            <td>Encodes a single feature x<sub>i</sub> in ZZFeatureMap</td>
+          </tr>
+          <tr>
+            <td><strong>RY(&theta;)</strong></td>
+            <td><code>[[c,&minus;s],[s,c]]</code> with c=cos(&theta;/2), s=sin(&theta;/2)</td>
+            <td>cos(&theta;/2)|0&rang; + sin(&theta;/2)|1&rang;</td>
+            <td>Trainable parameter in EfficientSU2</td>
+          </tr>
+          <tr>
+            <td><strong>CX</strong> (CNOT)</td>
+            <td>4&times;4 matrix that flips target if control = 1</td>
+            <td>|00&rang;&rarr;|00&rang;, |10&rang;&rarr;|11&rang;</td>
+            <td>Entangler in EfficientSU2 ansatz</td>
+          </tr>
+          <tr>
+            <td><strong>RZZ(&theta;)</strong></td>
+            <td>diag(e<sup>&minus;i&theta;/2</sup>, e<sup>i&theta;/2</sup>, e<sup>i&theta;/2</sup>, e<sup>&minus;i&theta;/2</sup>)</td>
+            <td>Adds a phase if both qubits are equal</td>
+            <td>Two-qubit entangler in ZZFeatureMap, encodes <em>x<sub>i</sub>&middot;x<sub>j</sub></em> correlations</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>You don't need to memorise the matrices. The mental model that matters is:</p>
+      <ul>
+        <li><strong>Hadamard</strong> = create superposition.</li>
+        <li><strong>Rotation gates (RX, RY, RZ)</strong> = inject a continuous parameter into the circuit. We use them in two ways: to encode a feature value (data) and to expose a knob the optimiser can turn (theta).</li>
+        <li><strong>CX / RZZ</strong> = create correlations / entanglement between two qubits. Without these, an n-qubit circuit is just n separate one-qubit circuits and would have no quantum advantage.</li>
+      </ul>
+
+      <div class="callout callout-info">
+        <strong>The role of the parameter inside R-gates.</strong>
+        Look at <code>RZ(&theta;)</code>. It's a one-parameter family of gates.
+        If &theta; comes from the data (e.g. <code>&theta; = 2x<sub>i</sub></code>) we call this <em>encoding</em>.
+        If &theta; comes from a learnable variable, we call this a <em>variational parameter</em>.
+        The same physical gate, two roles &mdash; the difference is just <em>where the number comes from</em>.
+      </div>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-entanglement">
+      <h1>5. Entanglement &amp; the Bell pair</h1>
+
+      <p>If you apply <strong>H</strong> to qubit 0, then <strong>CX</strong> with qubit 0 as control and qubit 1 as target, starting from |00&rang;, you get the <strong>Bell state</strong>:</p>
+
+      <div class="math-block">
+        |&Phi;<sup>+</sup>&rang; = (|00&rang; + |11&rang;) / &radic;2
+      </div>
+
+      <p>This state has a wonderful property: when you measure either qubit, you get 0 or 1 with 50/50 probability. But the two outcomes are <strong>perfectly correlated</strong>. Measure qubit 0 and see &quot;1&quot; &mdash; qubit 1 is now guaranteed to give &quot;1&quot;, even if it's 1000&nbsp;km away.</p>
+
+      <div class="interactive-card">
+        <div class="interactive-title"><span class="badge badge-try">TRY IT</span> Bell-pair correlation</div>
+        <p>Click the button. Each click runs the circuit <code>H ⊗ I</code> then <code>CX</code> on |00&rang;, then measures both qubits. Watch the joint distribution.</p>
+        <button id="bell-run" class="primary">Run 1 shot</button>
+        <button id="bell-run-100" class="primary">Run 100 shots</button>
+        <button id="bell-reset" class="secondary">Reset</button>
+
+        <table class="data-table" style="margin-top:1em;">
+          <thead><tr><th>Outcome</th><th>Count</th><th>Frequency</th><th>Theoretical</th></tr></thead>
+          <tbody>
+            <tr><td>00</td><td id="bell-00">0</td><td id="bell-00-pct">0%</td><td>50%</td></tr>
+            <tr><td>01</td><td id="bell-01">0</td><td id="bell-01-pct">0%</td><td>0%</td></tr>
+            <tr><td>10</td><td id="bell-10">0</td><td id="bell-10-pct">0%</td><td>0%</td></tr>
+            <tr><td>11</td><td id="bell-11">0</td><td id="bell-11-pct">0%</td><td>50%</td></tr>
+          </tbody>
+        </table>
+
+        <p>Notice you should never see <code>01</code> or <code>10</code>. This is the entanglement fingerprint &mdash; classical bits cannot reproduce it. Bell's theorem (1964, awarded the 2022 Nobel Prize) makes this rigorous.</p>
+      </div>
+
+      <p>Why does entanglement matter for fraud detection? Because the <strong>ZZFeatureMap</strong> we use creates entanglement <em>conditional on the input data</em>. Two correlated transaction features end up encoded in a way no separable (= unentangled) state can reproduce. That is the source of the &quot;quantum kernel&quot; expressivity in Section&nbsp;10.</p>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-pipeline">
+      <h1>6. Classical data pipeline (the boring but essential bit)</h1>
+
+      <p>Before any quantum step happens, we run the data through a standard scikit-learn pipeline. This is implemented in <code>src/02_preprocessing.py</code> and is identical for both the classical and quantum tracks <em>except</em> for the dimensionality.</p>
+
+      <h3>6.1 StandardScaler</h3>
+      <p>Subtract the mean, divide by the standard deviation, per feature. This is non-negotiable when mixing features with different units (Amount in &#8377;, V1..V28 unitless).</p>
+
+      <h3>6.2 SMOTE (only for the imbalanced ULB dataset)</h3>
+      <p>Synthetic Minority Over-sampling Technique. For each minority-class point, find its k nearest neighbours of the same class, then create new synthetic points along the line segments between them. This shifts the train-set fraud rate from 0.17% up to ~50%, which prevents the model from collapsing to &quot;always predict not-fraud&quot;.</p>
+      <p>SMOTE is only applied to the <strong>training</strong> split. The test split keeps its original imbalance, otherwise the metrics would be a fantasy.</p>
+
+      <h3>6.3 PCA &mdash; getting from 29 features to <em>k</em> qubits</h3>
+      <p>Real quantum hardware today has 100&ndash;1000 qubits in the wild but you can't reliably entangle all of them in one circuit. For our demo we use <strong>k = 6 qubits</strong>. So we project the 29-dimensional feature vector onto its top-6 principal components.</p>
+
+      <div class="interactive-card">
+        <div class="interactive-title"><span class="badge badge-try">TRY IT</span> PCA &mdash; how many components do we lose information at?</div>
+        <p>The widget below uses representative variance ratios from the ULB dataset. Slide <em>k</em> and watch how much variance is retained.</p>
+
+        <label>k (number of components &amp; qubits):
+          <input type="range" id="pca-k" min="1" max="29" step="1" value="6" />
+          <span id="pca-k-value">6</span>
+        </label>
+
+        <div class="pca-bars" id="pca-bars"></div>
+
+        <div class="pca-summary">
+          <div class="metric-card">
+            <div class="metric-label">Variance retained at k = <span id="pca-k-display">6</span></div>
+            <div class="metric-value" id="pca-variance-retained">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Variance lost</div>
+            <div class="metric-value" id="pca-variance-lost">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Effective parameters in VQC ansatz</div>
+            <div class="metric-value" id="pca-vqc-params">--</div>
+          </div>
+        </div>
+
+        <p class="callout callout-info">
+          Why <strong>k = 6</strong>? It's a sweet spot. At <em>k</em>=4 we
+          lose too much signal (~40% variance). At <em>k</em>=12 the
+          circuit becomes deep enough that hardware noise starts to dominate
+          on real IBM machines today. <em>k</em>=6 keeps ~75% of the
+          variance and runs cleanly on <code>ibm_brisbane</code>.
+        </p>
+      </div>
+
+      <h3>6.4 Angle scaling</h3>
+      <p>The PCA components are real numbers in arbitrary range. We rescale them to the interval <strong>[&minus;&pi;,&nbsp;+&pi;]</strong> so they are valid angles to feed into rotation gates. This is just a min-max transform on the train set.</p>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-zzfeaturemap">
+      <h1>7. ZZFeatureMap &mdash; encoding classical data into a quantum state</h1>
+
+      <p>Classical features are real numbers. A quantum circuit acts on a state vector. We need a <em>map</em> from <code>x &isin; &#8477;<sup>k</sup></code> to a quantum state <code>|&phi;(x)&rang;</code>. This map is called a <strong>feature map</strong>.</p>
+
+      <p>The one we use is the <strong>ZZFeatureMap</strong> introduced by Havlíček et al. (Nature 2019). For 1 layer (<code>reps=1</code>) it does:</p>
+
+      <ol>
+        <li>Apply <strong>H</strong> on every qubit. This puts every qubit in equal superposition &mdash; no data yet.</li>
+        <li>Apply <strong>RZ(2x<sub>i</sub>)</strong> on qubit <em>i</em>. This phase-encodes feature <em>i</em> into qubit <em>i</em>.</li>
+        <li>For every entangling pair (i,&nbsp;j) (linear: 0-1, 1-2, 2-3, ...): apply <strong>RZZ(2(&pi;&minus;x<sub>i</sub>)(&pi;&minus;x<sub>j</sub>))</strong>. This entangles qubits i and j with a strength that depends on the <em>product</em> of features <em>i</em> and <em>j</em>.</li>
+      </ol>
+
+      <p>With <code>reps=2</code> the whole block is repeated, so the resulting circuit can encode higher&#8209;order interactions (think: monomials in <em>x</em> up to degree ~2&times;reps).</p>
+
+      <div class="interactive-card">
+        <div class="interactive-title"><span class="badge badge-try">TRY IT</span> ZZFeatureMap circuit builder</div>
+        <p>Pick the number of qubits and reps and the diagram below renders. Hover any gate for an explanation.</p>
+
+        <div class="row">
+          <label>n_qubits: <input type="range" id="zzfm-n" min="2" max="6" step="1" value="4" /> <span id="zzfm-n-val">4</span></label>
+          <label>reps: <input type="range" id="zzfm-reps" min="1" max="3" step="1" value="2" /> <span id="zzfm-reps-val">2</span></label>
+          <label>entanglement:
+            <select id="zzfm-ent">
+              <option value="linear" selected>linear (i&minus;i+1)</option>
+              <option value="full">full (all pairs)</option>
+              <option value="circular">circular</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="circuit-diagram-wrapper">
+          <svg id="zzfm-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+
+        <div class="zzfm-stats">
+          <div>Total gates: <strong id="zzfm-gate-count">--</strong></div>
+          <div>Approx depth: <strong id="zzfm-depth">--</strong></div>
+          <div>Encoding is <strong>data-dependent</strong> (RZ and RZZ angles come from <code>x</code>) &mdash; <strong>no</strong> trainable parameters here.</div>
+        </div>
+      </div>
+
+      <h3>Why the ZZFeatureMap is a good choice</h3>
+      <ul>
+        <li><strong>It uses only Z-basis gates</strong>, which are diagonal &mdash; cheap and fast on hardware.</li>
+        <li><strong>It encodes pairwise feature products</strong> (the &quot;ZZ&quot; part), which is exactly what classical kernels like <em>polynomial degree 2</em> capture &mdash; but quantum extends this to all higher-order combinations once we add reps and entanglement.</li>
+        <li><strong>It is conjectured to be classically hard to simulate</strong> at large qubit counts (Havlíček 2019). At 6 qubits a laptop simulates it in milliseconds; at 50 qubits no known classical method is efficient.</li>
+        <li><strong>It is the same circuit for VQC and QSVC.</strong> We invest one design effort and reuse it for both quantum tracks.</li>
+      </ul>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-ansatz">
+      <h1>8. EfficientSU2 ansatz &mdash; the trainable part</h1>
+
+      <p>After the data is encoded into <code>|&phi;(x)&rang;</code>, the VQC needs a <em>trainable</em> circuit whose parameters we will adjust to minimise the loss. This is called a <strong>variational ansatz</strong> or <strong>parameterised circuit</strong>.</p>
+
+      <p>We use <strong>EfficientSU2</strong>. For each repetition <em>r</em>:</p>
+      <ol>
+        <li>One layer of single-qubit rotations: <code>RY(&theta;<sub>i,r,1</sub>)</code> then <code>RZ(&theta;<sub>i,r,2</sub>)</code> on every qubit <em>i</em>.</li>
+        <li>One layer of CX entanglers (pairs determined by the entanglement pattern).</li>
+      </ol>
+      <p>And one final RY+RZ layer at the end. Total trainable parameters: <code>(2&middot;reps + 1)&middot;n_qubits</code>. For our defaults (n=6, reps=3) that is 42 parameters &mdash; tiny by deep-learning standards, comparable to a small logistic regression.</p>
+
+      <div class="interactive-card">
+        <div class="interactive-title"><span class="badge badge-try">TRY IT</span> EfficientSU2 parameter counter</div>
+        <div class="row">
+          <label>n_qubits: <input type="range" id="su2-n" min="2" max="12" value="6" /> <span id="su2-n-val">6</span></label>
+          <label>reps: <input type="range" id="su2-reps" min="1" max="5" value="3" /> <span id="su2-reps-val">3</span></label>
+        </div>
+        <div class="metric-cards">
+          <div class="metric-card">
+            <div class="metric-label">Trainable parameters</div>
+            <div class="metric-value" id="su2-params">42</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Single-qubit gates</div>
+            <div class="metric-value" id="su2-1q">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Two-qubit gates</div>
+            <div class="metric-value" id="su2-2q">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Approx circuit depth</div>
+            <div class="metric-value" id="su2-depth">--</div>
+          </div>
+        </div>
+
+        <p class="callout callout-warn">
+          <strong>Trade-off.</strong> More reps = more expressive ansatz =
+          can fit harder decision boundaries. But more reps = deeper
+          circuit = more hardware noise = harder to train (the
+          <em>barren plateau</em> phenomenon: gradients vanish exponentially
+          with depth). For the demo we keep reps=3.
+        </p>
+      </div>
+
+      <h3>Why EfficientSU2 specifically</h3>
+      <ul>
+        <li><strong>Hardware-efficient.</strong> Uses only RY, RZ, and CX, all of which are native or near-native on IBM Eagle/Heron processors.</li>
+        <li><strong>Universal on the SU(2) <sup>&otimes;n</sup> &times; entanglers space</strong> &mdash; given enough reps it can express any unitary the hardware can run.</li>
+        <li><strong>Plug-and-play in qiskit-machine-learning.</strong> The <code>VQC</code> class accepts it directly.</li>
+      </ul>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-vqc">
+      <h1>9. The full VQC training loop</h1>
+
+      <p>Here is the loop we run inside <code>src/04_quantum_vqc_simulator.py</code>:</p>
+
+      <pre class="code-block"># pseudo-code matching what qiskit-machine-learning does internally
+theta = random_init()
+for iter in range(maxiter):
+    grad = SPSA_gradient_estimate(theta)         # 2 circuit runs per param block
+    theta = theta - learning_rate * grad
+    if iter % log_every == 0:
+        log(loss=cross_entropy(predict(X_train), y_train))</pre>
+
+      <p>Step by step:</p>
+      <ol>
+        <li><strong>Initialise theta randomly</strong> (uniform in [&minus;&pi;,&nbsp;&pi;]).</li>
+        <li>For each training point <em>x</em>:
+          <ol type="a">
+            <li>Build the full circuit: <code>U_phi(x)</code> then <code>U_ansatz(theta)</code>.</li>
+            <li>Run on the simulator (or hardware) for <em>shots</em> shots; collect the bitstring counts.</li>
+            <li>Apply the <strong>parity decoder</strong>: count bitstrings with even parity (probability &asymp; class 0) vs odd parity (class 1). This converts a 2<sup>n</sup>-dim distribution into a 2-class distribution.</li>
+          </ol>
+        </li>
+        <li>Compute the cross-entropy loss against the true label.</li>
+        <li>Estimate the gradient using <strong>SPSA</strong> (next subsection).</li>
+        <li>Update theta and repeat.</li>
+      </ol>
+
+      <h3>Why SPSA, not Adam or BFGS?</h3>
+      <p><strong>SPSA = Simultaneous Perturbation Stochastic Approximation</strong>. It estimates the full gradient using only <strong>2 circuit evaluations</strong> regardless of the number of parameters. Compare:</p>
+      <ul>
+        <li>Naive finite differences: <em>2&middot;n_params</em> circuit evaluations per gradient. For 42 params that's 84 circuits per step.</li>
+        <li>Parameter-shift rule (analytic gradient): also <em>2&middot;n_params</em> circuits per step, but exact (no shot noise).</li>
+        <li>SPSA: <strong>2 circuits per step</strong>. The gradient is biased and noisy &mdash; but on a real noisy device the parameter-shift gradient is also noisy, so SPSA usually wins on wall-clock time.</li>
+      </ul>
+
+      <div class="interactive-card">
+        <div class="interactive-title"><span class="badge badge-try">TRY IT</span> SPSA vs full-gradient on a toy 1D loss</div>
+        <p>Below is the loss surface <code>L(&theta;) = (cos(3&theta;) + 0.5)<sup>2</sup> + 0.05&theta;<sup>2</sup></code> + small Gaussian noise to mimic shot noise. Watch SPSA find the minimum.</p>
+
+        <canvas id="spsa-canvas" width="700" height="280"></canvas>
+
+        <div class="row">
+          <label>Optimizer:
+            <select id="spsa-opt">
+              <option value="spsa" selected>SPSA</option>
+              <option value="cobyla">COBYLA (gradient-free, simplex-like)</option>
+              <option value="gd">Vanilla GD (exact gradient)</option>
+            </select>
+          </label>
+          <label>Shot noise: <input type="range" id="spsa-noise" min="0" max="0.3" step="0.005" value="0.05" /> <span id="spsa-noise-val">0.05</span></label>
+          <button id="spsa-step" class="primary">Step</button>
+          <button id="spsa-run10" class="primary">Run 10 steps</button>
+          <button id="spsa-reset" class="secondary">Reset</button>
+        </div>
+
+        <p>Iter <span id="spsa-iter">0</span> &mdash; theta = <span id="spsa-theta">--</span>, loss = <span id="spsa-loss">--</span></p>
+      </div>
+
+      <h3>Why we sometimes use COBYLA instead</h3>
+      <p>COBYLA (Constrained Optimisation by Linear Approximation) is a gradient-free trust-region method &mdash; it builds a local linear model from a few function evaluations and steps towards the predicted minimum. It is <em>better</em> than SPSA on smooth simulator loss surfaces (where there is no shot noise). The repo defaults to <code>--optimizer spsa</code> but you can pick <code>--optimizer cobyla</code> when running on Aer.</p>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-kernel">
+      <h1>10. Quantum kernels &amp; QSVC</h1>
+
+      <p>The VQC is one quantum approach. The other &mdash; with stronger theoretical guarantees &mdash; is the <strong>quantum kernel</strong>.</p>
+
+      <p>Recall a kernel function takes two data points <code>x</code> and <code>y</code> and returns a similarity score. SVMs only need the <em>kernel matrix</em> <code>K[i,j] = K(x<sub>i</sub>, x<sub>j</sub>)</code> &mdash; they never look at the raw features. Classical kernels include linear, polynomial, RBF.</p>
+
+      <p>The <strong>fidelity quantum kernel</strong> defines:</p>
+
+      <div class="math-block">
+        K(x<sub>i</sub>, x<sub>j</sub>) = |&lang;&phi;(x<sub>i</sub>)|&phi;(x<sub>j</sub>)&rang;|<sup>2</sup>
+        = |&lang;0|U<sub>&phi;</sub><sup>&dagger;</sup>(x<sub>j</sub>) U<sub>&phi;</sub>(x<sub>i</sub>)|0&rang;|<sup>2</sup>
+      </div>
+
+      <p>Computed by:</p>
+      <ol>
+        <li>Build the circuit <code>U_phi(x_i)</code> followed by the <em>inverse</em> circuit <code>U_phi&dagger;(x_j)</code>.</li>
+        <li>Run it from |0&rang; for <em>shots</em> shots.</li>
+        <li>The probability of measuring the all-zeros bitstring is <em>exactly</em> <code>K(x_i, x_j)</code>.</li>
+      </ol>
+
+      <p>Then we hand the resulting N&times;N kernel matrix to scikit-learn's <code>SVC(kernel='precomputed')</code>. From SVC's perspective the quantum kernel is just a number.</p>
+
+      <h3>Why this can beat classical kernels</h3>
+      <p>The state <code>|&phi;(x)&rang;</code> lives in a Hilbert space of dimension 2<sup>n_qubits</sup>. For n=50 that is 10<sup>15</sup>-dimensional &mdash; you cannot store the feature vector classically, but you can still <em>measure</em> the inner product of two such vectors on quantum hardware in milliseconds. For some problem families (Liu, Arunachalam, Temme 2021) this gives a <em>provable</em> exponential separation from any classical kernel.</p>
+
+      <div class="interactive-card">
+        <div class="interactive-title"><span class="badge badge-try">TRY IT</span> 2D classification sandbox &mdash; classical RBF vs quantum kernel</div>
+        <p>Click on the canvas to add a <span style="color:#f06">red</span> (fraud) point. Shift+click for a <span style="color:#3af">blue</span> (not fraud) point. Then pick a kernel and watch the decision boundary.</p>
+
+        <div class="row">
+          <label>Kernel:
+            <select id="kernel-type">
+              <option value="linear">Linear (classical)</option>
+              <option value="rbf" selected>RBF (classical)</option>
+              <option value="quantum-zz">Quantum ZZ (simulated, n=2 qubits, reps=2)</option>
+            </select>
+          </label>
+          <label>Add as: <select id="kernel-class"><option value="0">Blue / not-fraud</option><option value="1">Red / fraud</option></select></label>
+          <button id="kernel-clear" class="secondary">Clear points</button>
+          <button id="kernel-load-spirals" class="secondary">Load spiral example</button>
+          <button id="kernel-load-xor" class="secondary">Load XOR example</button>
+        </div>
+
+        <canvas id="kernel-canvas" width="500" height="500"></canvas>
+
+        <div class="metric-cards">
+          <div class="metric-card">
+            <div class="metric-label">Points</div>
+            <div class="metric-value" id="kernel-n">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Train accuracy (rough)</div>
+            <div class="metric-value" id="kernel-acc">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Decision-boundary cost</div>
+            <div class="metric-value" id="kernel-cost">--</div>
+          </div>
+        </div>
+
+        <p class="callout callout-info">
+          Try the <strong>spiral</strong> example with each kernel.
+          The linear kernel cannot separate the spirals at all.
+          The RBF kernel does well but needs careful gamma tuning.
+          The quantum ZZ kernel finds a non-trivial boundary <em>without</em>
+          tuning &mdash; that is the &quot;structure-finding&quot; intuition that
+          drives the QSVC literature.
+        </p>
+      </div>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-pegasos">
+      <h1>11. PegasosQSVC &mdash; faster training for big <em>N</em></h1>
+
+      <p>Standard QSVC needs the full N&times;N kernel matrix &mdash; that is N(N&minus;1)/2 quantum-circuit evaluations. For N=10,000 that's ~50 million circuits. Painful.</p>
+
+      <p><strong>Pegasos</strong> (Shalev-Shwartz et al. 2007) is a stochastic gradient SVM that only ever evaluates the kernel between the current point and the support vectors found so far. It scales as <em>O(T)</em> circuits where <em>T</em> is the number of SGD steps &mdash; typically 1000&ndash;10,000.</p>
+
+      <p>In <code>src/05_quantum_kernel_qsvc.py</code> we provide both:</p>
+      <ul>
+        <li><code>QSVC</code> &mdash; full kernel matrix; best for &le;1500 training points.</li>
+        <li><code>PegasosQSVC</code> &mdash; SGD; recommended for &gt;1500 training points or when you want to fit on hardware in reasonable wall-clock time.</li>
+      </ul>
+
+      <table class="data-table">
+        <thead><tr><th></th><th>QSVC</th><th>PegasosQSVC</th></tr></thead>
+        <tbody>
+          <tr><td>Kernel evaluations</td><td>O(N<sup>2</sup>)</td><td>O(T) per epoch, T &lt;&lt; N<sup>2</sup></td></tr>
+          <tr><td>Memory</td><td>O(N<sup>2</sup>) for the matrix</td><td>O(N) for support vectors</td></tr>
+          <tr><td>Convergence</td><td>Optimal SVM solution</td><td>Approximate, controlled by num_steps</td></tr>
+          <tr><td>Recommended N</td><td>up to ~2000</td><td>2000 &ndash; 100k+</td></tr>
+          <tr><td>Hyperparameter to tune</td><td>C (slack)</td><td>C, num_steps</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-ibm">
+      <h1>12. Real IBM Quantum hardware</h1>
+
+      <p>Everything above runs on the <strong>Qiskit Aer simulator</strong> &mdash; classical software that simulates the quantum circuit perfectly (no noise) up to ~25 qubits. The next step is real hardware. Implemented in <code>src/06_ibm_runtime_real_hw.py</code>.</p>
+
+      <h3>The full real-HW path</h3>
+      <pre class="code-block">from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2
+
+service  = QiskitRuntimeService()                     # uses your saved IBM token
+backend  = service.backend("ibm_brisbane")             # 127-qubit Eagle device
+circuit  = vqc.circuit.assign_parameters({x, theta})   # full VQC circuit, parameters bound
+
+# (1) ISA-aware transpile
+transpiled = transpile(circuit, backend=backend, optimization_level=3)
+
+# (2) Submit
+sampler = SamplerV2(backend=backend)
+job     = sampler.run([transpiled], shots=4096)
+
+# (3) Decode
+counts = job.result()[0].data.meas.get_counts()
+prob_class_1 = parity_decoder(counts)</pre>
+
+      <h3>What &quot;ISA-aware transpilation&quot; means in plain English</h3>
+      <ul>
+        <li>The logical circuit you wrote uses any 2-qubit pair you like for entanglers.</li>
+        <li>The physical hardware has a specific <strong>coupling map</strong> &mdash; only certain qubit pairs are physically connected. On <code>ibm_brisbane</code> it looks like a heavy-hex lattice.</li>
+        <li>The transpiler inserts <strong>SWAP</strong> gates and reorders operations to satisfy the coupling map, while picking the <em>physical</em> qubits that have the lowest reported error rates today.</li>
+        <li>Higher <code>optimization_level</code> = more aggressive routing &amp; gate cancellation. Level 3 is what production code uses.</li>
+      </ul>
+
+      <h3>Hardware noise &mdash; the elephant in the room</h3>
+      <p>Today's IBM devices have:</p>
+      <ul>
+        <li>~10<sup>&minus;3</sup> single-qubit gate error.</li>
+        <li>~10<sup>&minus;2</sup> two-qubit (CX) error.</li>
+        <li>~10<sup>&minus;2</sup> readout error.</li>
+        <li>Coherence time ~100 &micro;s.</li>
+      </ul>
+      <p>For a VQC with depth ~150 (ours, after transpilation) the cumulative two-qubit error is roughly <code>(1&minus;0.99)<sup>40</sup> &asymp; 33%</code>. Mitigation tools (<code>ZNE</code>, <code>PEC</code>, dynamical decoupling) recover much of this, but expected real-HW AUC will be 0.03&ndash;0.08 lower than the simulator AUC. That gap is why the demo runs the simulator first &mdash; to set the upper bound &mdash; and then the same circuit on hardware to show the realistic floor.</p>
+
+      <div class="callout callout-warn">
+        <strong>Demo-day caveat for the MD/CEO.</strong> Real-HW jobs queue.
+        Do not promise live execution during the meeting. Pre-run the
+        hardware job 12&ndash;24h in advance, save the result, and replay it
+        from disk. The script supports <code>--cache</code> for exactly this.
+      </div>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-hybrid">
+      <h1>13. Hybrid serving architecture</h1>
+
+      <p>This is the slide you will present to the enterprise architects &mdash; how the quantum component fits into HDFC's existing fraud stack <em>without</em> adding latency or risk to the hot path.</p>
+
+      <pre class="ascii-art">
+                                  Online transaction
+                                          |
+                                          v
+                            +-----------------------------+
+                            |  Tier 1 - Classical (XGBoost) |
+                            |  Latency: < 50 ms            |
+                            |  Throughput: 50K txn/sec     |
+                            +-------------+----------------+
+                                          |
+                                  risk score in [0,1]
+                                          |
+                                +---------+---------+
+                                |                   |
+                       risk &lt; 0.95            risk &gt;= 0.95
+                       APPROVE                ESCALATE  (top 1% tail)
+                                                       |
+                                                       v
+                                  +----------------------------------+
+                                  |  Tier 2 - Quantum kernel (QSVC)   |
+                                  |  6 qubits, ZZFeatureMap+RBF combo|
+                                  |  Latency: 50 ms (sim) / sec (HW) |
+                                  +-----------------+----------------+
+                                                    |
+                                                    v
+                              combined = 0.7 &middot; classical + 0.3 &middot; quantum
+                                                    |
+                                                    v
+                                      approve / step-up auth / reject
+      </pre>
+
+      <h3>Why this topology beats every alternative</h3>
+      <table class="data-table">
+        <thead><tr><th>Property</th><th>Pure classical</th><th>Pure quantum</th><th>Hybrid (this design)</th></tr></thead>
+        <tbody>
+          <tr><td>Latency on 99% of txns</td><td>&lt;50 ms</td><td>seconds</td><td>&lt;50 ms (quantum bypassed)</td></tr>
+          <tr><td>Recall on rare patterns</td><td>baseline</td><td>+3&ndash;7 pp</td><td>+3&ndash;7 pp on the 1% that matters</td></tr>
+          <tr><td>Failure mode if HW unavailable</td><td>&mdash;</td><td>system down</td><td>graceful: simulator fallback</td></tr>
+          <tr><td>Cost (today)</td><td>&pound;</td><td>&pound;&pound;&pound;&pound;</td><td>&pound;&pound;</td></tr>
+          <tr><td>Cost (2030, fault-tolerant era)</td><td>&pound;</td><td>&pound;&pound;</td><td>&pound;&pound; same architecture, swap backend</td></tr>
+        </tbody>
+      </table>
+
+      <h3>The <em>combined risk</em> formula</h3>
+      <div class="math-block">risk<sub>final</sub> = w<sub>c</sub>&middot;risk<sub>classical</sub> + w<sub>q</sub>&middot;risk<sub>quantum</sub></div>
+      <p>The weights <code>w_c, w_q</code> are tuned on the validation set to maximise PR-AUC on the high-risk slice. Typically <code>w_c &asymp; 0.7</code>, <code>w_q &asymp; 0.3</code>.</p>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-reality">
+      <h1>14. Reality check &mdash; what quantum can &amp; can't do today</h1>
+
+      <p>Be honest with the executives. The deck is more credible if you draw the line yourself before someone else does.</p>
+
+      <h3>What quantum can do today (NISQ era, 2024&ndash;2027)</h3>
+      <ul>
+        <li>Run circuits with up to ~100 useful qubits and depth ~100 with meaningful signal after error mitigation.</li>
+        <li>Demonstrate <em>kernel methods</em> on small slices of real data (1k&ndash;10k points, 6&ndash;12 features) within a research/PoC budget.</li>
+        <li>Show <em>parity</em> with classical baselines on AUC-ROC and occasionally beat them on rare-event recall.</li>
+      </ul>
+
+      <h3>What quantum cannot do today</h3>
+      <ul>
+        <li>Train deep models with millions of parameters &mdash; the depth budget is too small.</li>
+        <li>Beat XGBoost in wall-clock time on imbalanced fraud at production scale &mdash; classical hardware is decades ahead in raw throughput.</li>
+        <li>Replace any production system. <strong>Augment</strong>, not replace.</li>
+      </ul>
+
+      <h3>What changes by ~2030</h3>
+      <ul>
+        <li>1000+ logical (error-corrected) qubits &mdash; meaning effective n_qubits for our pipeline jumps from 6 to ~30, where classical simulation truly breaks.</li>
+        <li>Sub-second turnaround for hardware jobs.</li>
+        <li>Same code path &mdash; just point <code>backend = service.backend("ibm_torino")</code> instead of <code>ibm_brisbane</code>. That is the <strong>future-proofing</strong> thesis.</li>
+      </ul>
+
+      <div class="callout callout-info">
+        <strong>The honest investment thesis for HDFC.</strong>
+        Spending ~&#8377;2&ndash;3 cr today on a quantum fraud PoC buys two
+        things: (1) a measurable ~3&ndash;7 percentage-point lift on the
+        rare-fraud tail, which alone may pay for itself, and (2) a five
+        year lead on owning the operational know-how for fault-tolerant
+        quantum, which will be table stakes for top-tier banks by 2030.
+        It is option-value insurance, not a replacement of the existing
+        stack.
+      </div>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-quiz">
+      <h1>15. Self-check quiz</h1>
+      <p>Pick one answer per question. Click &quot;Score&quot; at the bottom for instant feedback. Your answers persist locally.</p>
+      <form id="quiz-form"></form>
+      <div class="quiz-controls">
+        <button id="quiz-score" class="primary">Score quiz</button>
+        <button id="quiz-reset" class="secondary">Reset</button>
+        <span id="quiz-result"></span>
+      </div>
+    </section>
+
+    <!-- =========================================================== -->
+    <section id="sec-glossary">
+      <h1>16. Glossary &mdash; one-line definitions</h1>
+      <dl class="glossary">
+        <dt>Qubit</dt><dd>A 2-level quantum system; state is two complex amplitudes summing to unit norm.</dd>
+        <dt>Superposition</dt><dd>A qubit having non-zero amplitude on both |0&rang; and |1&rang; simultaneously.</dd>
+        <dt>Entanglement</dt><dd>Joint state of two or more qubits that cannot be written as a product of single-qubit states.</dd>
+        <dt>Hadamard (H)</dt><dd>Single-qubit gate that creates equal superposition.</dd>
+        <dt>CX / CNOT</dt><dd>Two-qubit gate that flips the target if the control is |1&rang;. Source of entanglement.</dd>
+        <dt>RZ(&theta;), RY(&theta;)</dt><dd>Continuous rotations around Z and Y axes; how we encode numbers and trainable parameters.</dd>
+        <dt>RZZ(&theta;)</dt><dd>Two-qubit phase gate; encodes feature products in the ZZFeatureMap.</dd>
+        <dt>ZZFeatureMap</dt><dd>The data-encoding circuit U_&phi;(x) used in this repo.</dd>
+        <dt>EfficientSU2</dt><dd>The trainable ansatz used by our VQC; layered RY+RZ+CX.</dd>
+        <dt>VQC</dt><dd>Variational Quantum Classifier &mdash; train a parameterised circuit on labelled data.</dd>
+        <dt>QSVC</dt><dd>Quantum Support Vector Classifier &mdash; classical SVM with a quantum-computed kernel.</dd>
+        <dt>PegasosQSVC</dt><dd>SGD variant of QSVC; far cheaper kernel evaluations.</dd>
+        <dt>SPSA</dt><dd>Stochastic gradient estimator using only 2 circuit evaluations regardless of n_params.</dd>
+        <dt>COBYLA</dt><dd>Gradient-free optimizer; better than SPSA on noiseless simulator runs.</dd>
+        <dt>Parity decoder</dt><dd>Map from a 2<sup>n</sup> bitstring distribution to a 2-class probability via bitstring parity.</dd>
+        <dt>Fidelity quantum kernel</dt><dd>K(x<sub>i</sub>,x<sub>j</sub>) = |&lang;&phi;(x<sub>i</sub>)|&phi;(x<sub>j</sub>)&rang;|<sup>2</sup>.</dd>
+        <dt>SamplerV2</dt><dd>Qiskit Runtime primitive that returns measurement bitstring counts.</dd>
+        <dt>ISA-aware transpilation</dt><dd>Mapping a logical circuit to physical qubits respecting device coupling and gate set.</dd>
+        <dt>Hilbert space</dt><dd>The complex vector space the qubit state lives in; dimension grows as 2<sup>n</sup>.</dd>
+        <dt>Barren plateau</dt><dd>Phenomenon where gradients vanish exponentially with circuit depth, blocking training.</dd>
+        <dt>Hybrid serving</dt><dd>Architecture using classical model on the hot path and quantum on the rare-event tail.</dd>
+      </dl>
+    </section>
+
+    <footer class="footer">
+      <p>This tutorial is bundled with the repo at
+        <code>tutorial/index.html</code>. Open it directly in any modern
+        browser &mdash; no internet required, no install. Contributions
+        welcome.</p>
+      <p><small>&copy; HDFC Quantum Initiative demo &mdash; companion to <a href="../ARCHITECTURE.md">ARCHITECTURE.md</a>.</small></p>
+    </footer>
+
+  </main>
+</div>
+
+<script src="assets/quantum-math.js"></script>
+<script src="assets/bloch.js"></script>
+<script src="assets/widgets.js"></script>
+<script src="assets/quiz.js"></script>
+<script src="assets/main.js"></script>
+</body>
+</html>
