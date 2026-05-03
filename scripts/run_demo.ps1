@@ -1,7 +1,13 @@
 # Quantum Credit-Card Fraud Detection -- one-shot Windows pipeline runner.
 #
-# Run from the repo root:
+# Runs from anywhere -- the script auto-detects its own location and
+# operates against the repo root (its parent folder).
+#
+# Usage:
+#     # From repo root:
 #     .\scripts\run_demo.ps1
+#     # From inside scripts\:
+#     .\run_demo.ps1
 #
 # Optional parameters:
 #     -NQubits <int>      number of qubits / PCA components (default 6)
@@ -40,14 +46,29 @@ function Write-Section($message) {
 function Time-Step($label, $scriptBlock) {
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     & $scriptBlock
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Step '$label' failed with exit code $LASTEXITCODE"
+        exit 1
+    }
     $sw.Stop()
     Write-Host ("[{0}] completed in {1:N1} sec" -f $label, $sw.Elapsed.TotalSeconds) -ForegroundColor Green
 }
 
+# ----- Resolve repo root (parent of scripts\) and switch to it -----
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+Set-Location $RepoRoot
+Write-Host "Repo root: $RepoRoot" -ForegroundColor DarkGray
+
 # ----- Pre-flight -----
 if (-not (Test-Path ".venv\Scripts\Activate.ps1")) {
-    Write-Error ".venv not found. Run .\scripts\install_deps.ps1 first."
+    Write-Error ".venv not found at $RepoRoot. Run .\scripts\install_deps.ps1 first."
     exit 1
+}
+foreach ($f in @("requirements.txt", "src\01_eda.py", "src\02_preprocessing.py")) {
+    if (-not (Test-Path $f)) {
+        Write-Error "$f not found at $RepoRoot. The repo checkout looks incomplete."
+        exit 1
+    }
 }
 
 Write-Section "Activating .venv"
@@ -59,23 +80,24 @@ $dataPresent = (Test-Path "data\creditcard.csv") -or
                (Test-Path "data\creditcard_synthetic.csv")
 if (-not $dataPresent) {
     Write-Warning "No dataset CSV found in data\\. Generating synthetic fallback..."
-    python src\00_generate_synthetic.py --rows 10000 --fraud-rate 0.0017
+    python "src\00_generate_synthetic.py" --rows 10000 --fraud-rate 0.0017
+    if ($LASTEXITCODE -ne 0) { Write-Error "Synthetic data generation failed."; exit 1 }
 }
 
 # ----- Pipeline -----
 Write-Section "Step 1/5 -- Exploratory data analysis (01_eda.py)"
-Time-Step "EDA" { python src\01_eda.py }
+Time-Step "EDA" { python "src\01_eda.py" }
 
 Write-Section "Step 2/5 -- Preprocessing (02_preprocessing.py) -- n_qubits=$NQubits"
 Time-Step "Preprocess" {
-    python src\02_preprocessing.py `
+    python "src\02_preprocessing.py" `
         --n-qubits $NQubits `
         --train-size $TrainSize `
         --test-size $TestSize
 }
 
 Write-Section "Step 3/5 -- Classical baselines (03_classical_baseline.py)"
-Time-Step "Classical" { python src\03_classical_baseline.py }
+Time-Step "Classical" { python "src\03_classical_baseline.py" }
 
 if ($SkipQuantum) {
     Write-Host ""
@@ -84,17 +106,17 @@ if ($SkipQuantum) {
 else {
     Write-Section "Step 4/5 -- VQC simulator (04_quantum_vqc_simulator.py) -- optimizer=$Optimizer maxiter=$MaxIter"
     Time-Step "VQC" {
-        python src\04_quantum_vqc_simulator.py `
+        python "src\04_quantum_vqc_simulator.py" `
             --optimizer $Optimizer `
             --maxiter $MaxIter
     }
 
     Write-Section "Step 5/5 -- Quantum kernel SVM (05_quantum_kernel_qsvc.py)"
     if ($SkipPegasos) {
-        Time-Step "QSVC" { python src\05_quantum_kernel_qsvc.py --reps 2 --C 1.0 --skip-pegasos }
+        Time-Step "QSVC" { python "src\05_quantum_kernel_qsvc.py" --reps 2 --C 1.0 --skip-pegasos }
     }
     else {
-        Time-Step "QSVC + Pegasos" { python src\05_quantum_kernel_qsvc.py --reps 2 --C 1.0 }
+        Time-Step "QSVC + Pegasos" { python "src\05_quantum_kernel_qsvc.py" --reps 2 --C 1.0 }
     }
 }
 

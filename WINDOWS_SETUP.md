@@ -398,6 +398,8 @@ For just dependency setup (steps 6 + 7) on a fresh machine:
 .\scripts\install_deps.ps1
 ```
 
+> **Important:** these scripts now auto-resolve to the repo root via `$PSScriptRoot`, so it doesn't matter whether you run them from the repo root, from inside `scripts\`, or by absolute path — they always operate on the repo as a whole. They also abort immediately on any error (no silent "success" messages after a failed step).
+
 ---
 
 ## Section 12 — Demo-day checklist
@@ -451,6 +453,32 @@ deactivate                          # if venv is still active
 Remove-Item -Recurse -Force .venv   # delete the virtual env
 # (CSVs in data\ are large — keep them or delete with Remove-Item -Path data\creditcard*.csv)
 ```
+
+### Recovery: I created a `.venv` in the wrong folder
+
+If you accidentally ran `install_deps.ps1` from inside `scripts\` on an older
+version of the script, you'll have a `.venv` folder under `scripts\` (instead
+of the repo root) and dependencies were not installed. Fix:
+
+```powershell
+# Make sure no venv is currently active
+deactivate 2>$null
+
+# Go to the repo root
+cd <repo-root>     # e.g. cd D:\quantum-credit-card-real-hw\Quantum-credit-card-fraud-detection
+
+# Remove the misplaced venv
+Remove-Item -Recurse -Force scripts\.venv
+
+# Pull the script fix
+git pull
+
+# Re-run from the repo root
+.\scripts\install_deps.ps1
+```
+
+The current scripts auto-resolve to the repo root, so you can run them from
+any directory without this kind of confusion.
 
 ---
 
