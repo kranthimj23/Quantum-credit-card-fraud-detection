@@ -114,6 +114,13 @@ hybrid serving architecture) see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## 3. Quick start (15 minutes on a laptop)
 
+> **On Windows?** Follow the granular [`WINDOWS_SETUP.md`](WINDOWS_SETUP.md)
+> guide instead — it covers Python install, PowerShell execution policy,
+> Kaggle API token, and demo-day checklist. The two convenience scripts
+> [`scripts/install_deps.ps1`](scripts/install_deps.ps1) and
+> [`scripts/run_demo.ps1`](scripts/run_demo.ps1) do everything below in one
+> command.
+
 ```bash
 # 1. Clone & install
 git clone https://github.com/kranthimj23/Quantum-credit-card-fraud-detection.git
