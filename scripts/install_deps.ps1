@@ -1,0 +1,83 @@
+# Quantum Credit-Card Fraud Detection -- one-shot Windows dependency installer.
+#
+# Run from the repo root:
+#     .\scripts\install_deps.ps1
+#
+# What it does:
+#   1. Verifies Python 3.12+ is on PATH.
+#   2. Creates .venv if it does not exist.
+#   3. Activates the venv.
+#   4. Upgrades pip.
+#   5. Installs requirements.txt.
+#   6. Generates synthetic data (only if no real Kaggle CSV is present).
+#
+# Re-runnable: skips steps that are already done.
+
+$ErrorActionPreference = "Stop"
+
+function Write-Section($message) {
+    Write-Host ""
+    Write-Host "==================================================================" -ForegroundColor Cyan
+    Write-Host $message -ForegroundColor Cyan
+    Write-Host "==================================================================" -ForegroundColor Cyan
+}
+
+# ----- Step 1: Python check -----
+Write-Section "Step 1/6 -- Verifying Python is installed"
+try {
+    $pyVersion = & python --version 2>&1
+    Write-Host "Found: $pyVersion"
+    if ($pyVersion -notmatch "Python 3\.(1[12]|13)") {
+        Write-Warning "Python 3.12 is recommended. You have $pyVersion. Pipeline may still work but is unverified."
+    }
+}
+catch {
+    Write-Error "Python not found on PATH. Install from https://www.python.org/downloads/windows/ and re-run."
+    exit 1
+}
+
+# ----- Step 2: venv -----
+Write-Section "Step 2/6 -- Creating virtual environment (.venv)"
+if (-not (Test-Path ".venv")) {
+    python -m venv .venv
+    Write-Host ".venv created."
+}
+else {
+    Write-Host ".venv already exists -- skipping."
+}
+
+# ----- Step 3: activate -----
+Write-Section "Step 3/6 -- Activating .venv"
+& ".\.venv\Scripts\Activate.ps1"
+Write-Host "venv activated. Prompt should now show (.venv)."
+
+# ----- Step 4: pip upgrade -----
+Write-Section "Step 4/6 -- Upgrading pip"
+python -m pip install --upgrade pip --quiet
+Write-Host "pip upgraded."
+
+# ----- Step 5: install requirements -----
+Write-Section "Step 5/6 -- Installing project dependencies (this may take 10-15 min)"
+pip install -r requirements.txt
+Write-Host "Dependencies installed."
+
+# ----- Step 6: synthetic data fallback -----
+Write-Section "Step 6/6 -- Ensuring at least one dataset is available"
+$dataPresent = (Test-Path "data\creditcard.csv") -or
+               (Test-Path "data\creditcard_2023.csv") -or
+               (Test-Path "data\creditcard_synthetic.csv")
+if (-not $dataPresent) {
+    Write-Host "No dataset found. Generating synthetic fallback (5000 rows, 0.17% fraud)..."
+    python src\00_generate_synthetic.py --rows 5000 --fraud-rate 0.0017
+}
+else {
+    Write-Host "Dataset already present -- skipping synthetic generation."
+}
+
+Write-Section "All set!"
+Write-Host ""
+Write-Host "Next steps:" -ForegroundColor Green
+Write-Host "  1. (Optional) Download real Kaggle data into data\\ -- see WINDOWS_SETUP.md Section 8."
+Write-Host "  2. Run the demo pipeline:    .\scripts\run_demo.ps1"
+Write-Host "  3. Launch dashboard:         streamlit run src\07_compare_dashboard.py"
+Write-Host ""
