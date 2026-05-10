@@ -38,6 +38,38 @@ ORANGE   = RGBColor(0xE6, 0x7E, 0x22)
 SLIDE_W = Inches(13.333)
 SLIDE_H = Inches(7.5)
 
+# ---------- Brand asset paths ----------
+import os as _os
+_ASSET_DIR = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "assets")
+HDFC_LOGO_PATH = _os.path.join(_ASSET_DIR, "hdfc_bank_logo.png")
+
+# ---------- Auto slide-number counter ----------
+_SLIDE_IDX = [0]
+def _idx():
+    _SLIDE_IDX[0] += 1
+    return _SLIDE_IDX[0]
+
+
+def add_logo(slide, *, large=False):
+    """Place the HDFC Bank logo on a slide.
+
+    Standard placement: top-right corner, above the title row, ~1.4 in wide.
+    Title placement (large=True): bigger, top-right of title slide.
+    """
+    if not _os.path.exists(HDFC_LOGO_PATH):
+        return None
+    if large:
+        # Title slide: top-right, larger
+        w = Inches(2.6); h = Inches(0.45)
+        left = SLIDE_W - w - Inches(0.55)
+        top = Inches(0.55)
+    else:
+        # Standard slide: top-right, fits above the header rule (y < 1.35)
+        w = Inches(1.45); h = Inches(0.25)
+        left = SLIDE_W - w - Inches(0.40)
+        top = Inches(0.40)
+    return slide.shapes.add_picture(HDFC_LOGO_PATH, left, top, width=w, height=h)
+
 
 def add_bg(slide, color=NAVY):
     bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, SLIDE_W, SLIDE_H)
@@ -204,10 +236,14 @@ def header(slide, idx, title, kicker=None):
     if kicker:
         add_text(slide, Inches(0.72), Inches(0.40), Inches(8), Inches(0.35),
                  kicker.upper(), size=11, color=GOLD, bold=True)
-    add_text(slide, Inches(0.72), Inches(0.66), Inches(12.3), Inches(0.65),
+    # title — width reduced from 12.3 to 10.5 so it doesn't collide with the
+    # HDFC logo placed in the top-right corner.
+    add_text(slide, Inches(0.72), Inches(0.66), Inches(10.5), Inches(0.65),
              title, size=24, bold=True, color=WHITE)
     # rule
     add_rect(slide, Inches(0.5), Inches(1.35), Inches(12.3), Emu(9525), NAVY2)
+    # HDFC logo (top-right, above the rule line)
+    add_logo(slide)
     # footer
     footer(slide, idx)
 
@@ -230,11 +266,14 @@ prs.slide_height = SLIDE_H
 blank = prs.slide_layouts[6]
 
 # --------------------- 1. TITLE ---------------------------------------
+_idx()  # advance counter (title is slide 1, no visible footer index)
 s = prs.slides.add_slide(blank)
 add_bg(s, NAVY)
 # diagonal accent
 add_rect(s, 0, Inches(6.8), SLIDE_W, Inches(0.7), NAVY2)
 add_rect(s, 0, Inches(0), Inches(0.4), SLIDE_H, RED)
+# HDFC logo (top-right, larger on the title slide)
+add_logo(s, large=True)
 # kicker
 add_text(s, Inches(1.0), Inches(0.9), Inches(8), Inches(0.4),
          "HDFC BANK \u2022 BOARD AND EXECUTIVE BRIEFING", size=12, color=GOLD, bold=True)
@@ -260,7 +299,7 @@ add_text(s, Inches(1.0), Inches(6.95), Inches(11), Inches(0.4),
 
 # --------------------- 2. EXECUTIVE SUMMARY ---------------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 2, "Executive summary \u2014 the ask in one slide", kicker="Why we are here")
+header(s, _idx(), "Executive summary \u2014 the ask in one slide", kicker="Why we are here")
 
 # Three-column ask
 col_y = Inches(1.7); col_h = Inches(2.5); col_w = Inches(4.0); gap = Inches(0.15)
@@ -301,7 +340,7 @@ for i, (big, small) in enumerate(kpis):
 
 # --------------------- 3. THE FRAUD PROBLEM AT HDFC SCALE -------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 3, "The fraud problem at HDFC scale",
+header(s, _idx(), "The fraud problem at HDFC scale",
        kicker="Section A \u2022 The case")
 
 add_text(s, Inches(0.5), Inches(1.6), Inches(6.3), Inches(0.45),
@@ -358,7 +397,7 @@ add_text(s, right_x + Inches(0.3), Inches(6.2), Inches(5), Inches(0.4),
 
 # --------------------- 4. CLASSICAL CEILING ---------------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 4, "Why classical ML alone is hitting a ceiling",
+header(s, _idx(), "Why classical ML alone is hitting a ceiling",
        kicker="Section A \u2022 The case")
 
 # left bullet "what classical does well"
@@ -388,7 +427,7 @@ add_bullets(s, Inches(7.0), Inches(2.2), Inches(5.7), Inches(4.6), [
 
 # --------------------- 5. QUANTUM 101 IN 60 SECONDS -------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 5, "Quantum 101 \u2014 the only three ideas the board needs",
+header(s, _idx(), "Quantum 101 \u2014 the only three ideas the board needs",
        kicker="Section A \u2022 The case")
 
 cards = [
@@ -421,7 +460,7 @@ add_text(s, Inches(0.5), Inches(6.82), Inches(12), Inches(0.3),
 
 # --------------------- 6. HYBRID SERVING ARCHITECTURE -----------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 6, "Hybrid serving architecture \u2014 the realistic deployment",
+header(s, _idx(), "Hybrid serving architecture \u2014 the realistic deployment",
        kicker="Section A \u2022 The case")
 
 add_text(s, Inches(0.5), Inches(1.55), Inches(12.3), Inches(0.4),
@@ -473,7 +512,7 @@ add_text(s, Inches(0.6), Inches(6.78), Inches(12), Inches(0.45),
 
 # --------------------- 7. CREDIT-CARD FRAUD PIPELINE ------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 7, "Credit-card fraud \u2014 our reference pipeline",
+header(s, _idx(), "Credit-card fraud \u2014 our reference pipeline",
        kicker="Section B \u2022 The proof")
 
 add_text(s, Inches(0.5), Inches(1.55), Inches(12.3), Inches(0.4),
@@ -517,7 +556,7 @@ add_bullets(s, Inches(0.7), Inches(5.55), Inches(12), Inches(1.5), [
 
 # --------------------- 8. DEMO RESULTS --------------------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 8, "Demo results \u2014 classical vs quantum on real fraud data",
+header(s, _idx(), "Demo results \u2014 classical vs quantum on real fraud data",
        kicker="Section B \u2022 The proof")
 
 # Comparison table
@@ -589,7 +628,7 @@ add_text(s, Inches(0.5), Inches(6.72), Inches(12.3), Inches(0.3),
 
 # --------------------- 9. ADVANTAGE CURVE: SCALING --------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 9, "The advantage curve \u2014 why more features helps quantum more",
+header(s, _idx(), "The advantage curve \u2014 why more features helps quantum more",
        kicker="Section B \u2022 The proof")
 
 add_text(s, Inches(0.5), Inches(1.55), Inches(7.5), Inches(0.5),
@@ -646,7 +685,7 @@ add_text(s, Inches(0.5), Inches(6.85), Inches(12), Inches(0.3),
 
 # --------------------- 10. OUT-OF-BOUNDARY PATTERNS -------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 10, "Detecting novel patterns \u2014 the fraud we miss today",
+header(s, _idx(), "Detecting novel patterns \u2014 the fraud we miss today",
        kicker="Section B \u2022 The proof")
 
 add_text(s, Inches(0.5), Inches(1.55), Inches(12), Inches(0.4),
@@ -701,100 +740,271 @@ add_bullets(s, Inches(7.0), Inches(2.75), Inches(5.6), Inches(4.0), [
     "**This is the fraud we are leaving on the table today.**",
 ], size=12, color=LIGHT, bullet_color=RED)
 
-# --------------------- 11. REALITY CHECK ------------------------------
+# --------------------- 11. USE CASES + REALITY CHECK (combined) -------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 11, "Reality check \u2014 what is true today, in 2027, in 2030",
-       kicker="Section B \u2022 The proof")
+header(s, _idx(), "Six use cases at HDFC \u2014 and an honest timeline",
+       kicker="Section B \u2022 The proof \u2192 Section C \u2022 Beyond credit cards")
 
-add_text(s, Inches(0.5), Inches(1.55), Inches(12), Inches(0.45),
-         "We are not selling magic. We are selling a 24-month head-start with a clear off-ramp.",
-         size=14, italic=True, color=LIGHT)
+# Top half: 6 use case cards (2 rows x 3 cols)
+add_text(s, Inches(0.5), Inches(1.55), Inches(12), Inches(0.35),
+         "Where quantum wins for HDFC \u2014 same plumbing, same talent, multiplied across business lines.",
+         size=12, italic=True, color=LIGHT)
 
-# 3 horizon columns
+uc_cases = [
+    ("Credit-card fraud", "Cards, Risk",
+     "Non-linear rare-event recall \u2014 sim-swap rings, micro card-testing, ATO trajectories.", RED),
+    ("AML / transaction monitoring", "Compliance, Risk",
+     "Graph anomaly detection across multi-hop laundering rings; quantum walks find suspicious sub-graphs.", RED),
+    ("Portfolio optimisation", "Treasury, Wealth",
+     "QAOA / Grover-based search on 1,000+ asset allocations under regulatory + liquidity constraints.", GOLD),
+    ("Derivatives pricing & XVA", "Markets, ALM",
+     "Quantum amplitude estimation \u2014 quadratic Monte Carlo speed-up; lower CVA/FVA capital.", TEAL),
+    ("KYC / synthetic identity", "Onboarding, KYC",
+     "High-dim similarity search across device + biometric + behavioural feature space.", GOLD),
+    ("Underwriting (thin-file)", "Retail Lending",
+     "Quantum kernels on alternative data (telco, utility, social-graph) for SME / new-to-credit.", TEAL),
+]
+ucx0 = Inches(0.5); ucy0 = Inches(1.95)
+ucw = Inches(4.07); uch = Inches(1.10)
+ucgx = Inches(0.18); ucgy = Inches(0.10)
+for i, (title, owner, body, c) in enumerate(uc_cases):
+    col = i % 3; row = i // 3
+    x = ucx0 + col * (ucw + ucgx)
+    y = ucy0 + row * (uch + ucgy)
+    add_round_rect(s, x, y, ucw, uch, NAVY2)
+    add_rect(s, x, y, Inches(0.06), uch, c)
+    add_text(s, x + Inches(0.18), y + Inches(0.08), ucw - Inches(0.4), Inches(0.30),
+             title, size=11, bold=True, color=WHITE)
+    add_text(s, x + Inches(0.18), y + Inches(0.36), ucw - Inches(0.4), Inches(0.22),
+             owner, size=9, color=c, italic=True, bold=True)
+    add_text(s, x + Inches(0.18), y + Inches(0.58), ucw - Inches(0.36), Inches(0.50),
+             body, size=10, color=LIGHT)
+
+# Bottom half: 3 horizon columns (reality check)
+add_text(s, Inches(0.5), Inches(4.30), Inches(12), Inches(0.30),
+         "Reality check \u2014 not magic, a 24-month head-start with off-ramps.",
+         size=12, italic=True, color=GOLD)
+
 horizons = [
-    ("TODAY (2024-25)",
+    ("TODAY (2024-25) \u2014 NISQ era",
      [
-        "**NISQ era** \u2014 50\u2013150 qubit machines, noisy.",
-        "Quantum runs on **simulators** for accuracy; real HW for limited demos.",
+        "50\u2013150 noisy qubits; runs on **simulators**, real HW for demos.",
         "Wins on **rare-event recall**, not throughput.",
         "**Hybrid serving is the right answer** \u2014 quantum re-scores top 1%."
      ], TEAL),
-    ("2027 (mid-term)",
+    ("2027 \u2014 mid-term",
      [
-        "**500\u20131000+ qubit** machines, error mitigation maturing.",
+        "**500\u20131,000+ qubits**, error mitigation maturing.",
         "Quantum kernels viable for **30\u2013100 features** in production.",
-        "First **regulated banks** putting quantum models in tier-2 risk decisions.",
-        "Talent and patents start to gate competitive advantage."
+        "First **regulated banks** putting quantum into tier-2 risk decisions."
      ], GOLD),
-    ("2030 (long-term)",
+    ("2030 \u2014 long-term",
      [
-        "**Fault-tolerant quantum** for select workloads.",
-        "Quantum advantage on **portfolio optimisation, derivatives pricing, AML graph search** in addition to fraud.",
-        "**Late entrants** face a 3\u20135 year talent + IP gap.",
-        "Banks who started in 2025 are 2 product cycles ahead."
+        "**Fault-tolerant** for select workloads.",
+        "Advantage on optimisation, derivatives, AML graph search.",
+        "**Late entrants** face a 3\u20135 year talent + IP gap."
      ], RED),
 ]
-hy = Inches(2.05); hw = Inches(4.05); hh = Inches(4.6); hgap = Inches(0.18)
+hy = Inches(4.65); hw = Inches(4.07); hh = Inches(2.10); hgap = Inches(0.18)
 for i, (title, items, c) in enumerate(horizons):
     x = Inches(0.5) + i * (hw + hgap)
     add_round_rect(s, x, hy, hw, hh, NAVY2)
     add_rect(s, x, hy, hw, Inches(0.05), c)
-    add_text(s, x + Inches(0.2), hy + Inches(0.18), hw - Inches(0.4), Inches(0.4),
-             title, size=12, bold=True, color=c)
-    add_bullets(s, x + Inches(0.2), hy + Inches(0.7), hw - Inches(0.4), Inches(3.8),
-                items, size=11, color=LIGHT, bullet_color=c, line_spacing=1.15)
+    add_text(s, x + Inches(0.2), hy + Inches(0.13), hw - Inches(0.4), Inches(0.32),
+             title, size=11, bold=True, color=c)
+    add_bullets(s, x + Inches(0.2), hy + Inches(0.50), hw - Inches(0.4), Inches(1.6),
+                items, size=10, color=LIGHT, bullet_color=c, line_spacing=1.10)
 
-add_round_rect(s, Inches(0.5), Inches(6.75), Inches(12.3), Inches(0.55), NAVY2)
-add_text(s, Inches(0.7), Inches(6.83), Inches(12), Inches(0.45),
-         "Honest framing for the board: the bet is **organisational learning**, not raw FLOPs \u2014 the team and IP we build 2025\u20132027 is the moat.",
-         size=12, bold=True, color=GOLD)
+# Bottom belt
+add_round_rect(s, Inches(0.5), Inches(6.85), Inches(12.3), Inches(0.40), NAVY2)
+add_text(s, Inches(0.7), Inches(6.90), Inches(12), Inches(0.30),
+         "**The bet is organisational learning, not raw FLOPs** \u2014 the team and IP we build 2025\u20132027 is the moat.",
+         size=11, bold=True, color=GOLD, anchor=MSO_ANCHOR.MIDDLE)
 
-# --------------------- 12. OTHER USE CASES ----------------------------
+# --------------------- 12. CC FRAUD DEEP DIVE (single-page) -----------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 12, "Beyond credit-card fraud \u2014 where else quantum helps HDFC",
-       kicker="Section C \u2022 Beyond credit cards")
+header(s, _idx(), "Use case #1 \u2014 Credit-card fraud detection",
+       kicker="Flagship use case \u2022 Cards, Risk")
 
-add_text(s, Inches(0.5), Inches(1.55), Inches(12), Inches(0.4),
-         "Same plumbing, same talent, multiplied across business lines.",
-         size=14, italic=True, color=LIGHT)
+# 4 quadrants
+qx0 = Inches(0.5); qy0 = Inches(1.55)
+qw = Inches(6.07); qh = Inches(2.65)
+qgx = Inches(0.18); qgy = Inches(0.18)
 
-cases = [
-    ("Anti-Money Laundering (AML)",
-     "Graph anomaly detection across 10\u2078 monthly transactions; quantum walks find structurally suspicious sub-graphs classical heuristics miss.",
-     "Compliance, risk", RED),
-    ("Portfolio optimisation (Treasury / WM)",
-     "Quantum-inspired QAOA / Grover-based search for optimal asset allocations under regulatory and liquidity constraints (1000+ assets).",
-     "Treasury, Wealth Management", GOLD),
-    ("Derivatives pricing & XVA",
-     "Quantum amplitude estimation gives **quadratic speed-up** on Monte Carlo \u2014 lower CVA/FVA capital, faster end-of-day risk.",
-     "Markets, ALM", TEAL),
-    ("KYC / synthetic identity detection",
-     "High-dimensional similarity search in feature space, including device + biometric + behavioural \u2014 the ID-stitching problem classical struggles with.",
-     "Onboarding, KYC", RED),
-    ("Credit underwriting (thin-file)",
-     "Quantum kernels on alternative-data features (telco, utility, social-graph) for SME / new-to-credit segments.",
-     "Retail Lending", GOLD),
-    ("Network / cyber threat detection",
-     "Same VQC/QSVC stack applied to SOC log streams \u2014 detect lateral movement and zero-day TTPs.",
-     "InfoSec, CISO", TEAL),
-]
-gx0 = Inches(0.5); gy0 = Inches(2.1); gw = Inches(4.05); gh = Inches(2.3); gap_x = Inches(0.18); gap_y = Inches(0.18)
-for i, (title, body, owner, c) in enumerate(cases):
-    col = i % 3; row = i // 3
-    x = gx0 + col * (gw + gap_x)
-    y = gy0 + row * (gh + gap_y)
-    add_round_rect(s, x, y, gw, gh, NAVY2)
-    add_rect(s, x, y, Inches(0.06), gh, c)
-    add_text(s, x + Inches(0.2), y + Inches(0.15), gw - Inches(0.4), Inches(0.45),
-             title, size=12, bold=True, color=WHITE)
-    add_text(s, x + Inches(0.2), y + Inches(0.6), gw - Inches(0.4), Inches(1.3),
-             body, size=11, color=LIGHT)
-    add_text(s, x + Inches(0.2), y + Inches(1.95), gw - Inches(0.4), Inches(0.3),
-             "Owner: " + owner, size=10, color=c, italic=True, bold=True)
+def _quad(slide, col, row, title, color, builder):
+    x = qx0 + col * (qw + qgx)
+    y = qy0 + row * (qh + qgy)
+    add_round_rect(slide, x, y, qw, qh, NAVY2)
+    add_rect(slide, x, y, qw, Inches(0.06), color)
+    add_text(slide, x + Inches(0.2), y + Inches(0.13), qw - Inches(0.4), Inches(0.32),
+             title, size=12, bold=True, color=color)
+    builder(x, y)
+
+# Q1 — The problem at HDFC scale
+def _q1(x, y):
+    add_bullets(s, x + Inches(0.2), y + Inches(0.55), qw - Inches(0.4), qh - Inches(0.6), [
+        "**~10 Cr+ card transactions / month** through HDFC issuing & acquiring rails.",
+        "**Fraud rate 0.05\u20130.2%** \u2014 needle in a haystack (~1:1,000).",
+        "**Industry losses**: Rs ~1,300 Cr in FY24, **+20%+ YoY**.",
+        "Attack patterns shift weekly: SIM-swap, OTP-bypass, micro card-testing, ATO, friendly-fraud.",
+        "Every **false decline on a premium card** erodes wallet share + NPS.",
+    ], size=10, color=LIGHT, bullet_color=RED, line_spacing=1.12)
+_quad(s, 0, 0, "1. The problem at HDFC scale", RED, _q1)
+
+# Q2 — Quantum approach (pipeline)
+def _q2(x, y):
+    add_bullets(s, x + Inches(0.2), y + Inches(0.55), qw - Inches(0.4), qh - Inches(0.6), [
+        "Features: **30 today \u2192 500+ over 24 months** (device, geo, velocity, graph, biometrics).",
+        "**StandardScaler \u2192 SMOTE \u2192 PCA(k=6) \u2192 angle-rescale [\u2212\u03c0, \u03c0]**.",
+        "Encode with **ZZFeatureMap** (RZ + RZZ entanglers; linear / circular / full).",
+        "Score with **QSVC quantum kernel** (FidelityQuantumKernel \u2192 SVM on Gram matrix).",
+        "Optimizer: **SPSA / COBYLA** on Aer simulator \u2192 IBM HW for top events.",
+        "Output: **parity decoder \u2192 calibrated P(fraud)** with confidence intervals.",
+    ], size=10, color=LIGHT, bullet_color=TEAL, line_spacing=1.12)
+_quad(s, 1, 0, "2. Quantum approach \u2014 the pipeline", TEAL, _q2)
+
+# Q3 — Where it wins (metrics table)
+def _q3(x, y):
+    # Mini results table
+    table_left = x + Inches(0.2); table_top = y + Inches(0.5)
+    table_w = qw - Inches(0.4); table_h = Inches(1.35)
+    rows = 4; cols = 4
+    tbl_shape = s.shapes.add_table(rows, cols, table_left, table_top, table_w, table_h)
+    tbl = tbl_shape.table
+    headers_ = ["Metric", "XGBoost", "QSVC", "\u0394"]
+    rows_data = [
+        ["AUC-ROC",                 "0.989", "0.992", "+0.3 pt"],
+        ["PR-AUC (rare-event)",     "0.864", "0.901", "+3.7 pts"],
+        ["Recall @ 1% FPR",         "0.798", "0.841", "+4.3 pts"],
+    ]
+    for i, w in enumerate([Inches(2.4), Inches(1.0), Inches(1.0), Inches(1.0)]):
+        tbl.columns[i].width = w
+    for j, h in enumerate(headers_):
+        c = tbl.cell(0, j); c.fill.solid(); c.fill.fore_color.rgb = NAVY
+        c.text = ""; p = c.text_frame.paragraphs[0]; r = p.add_run(); r.text = h
+        r.font.size = Pt(9); r.font.bold = True; r.font.color.rgb = GOLD; r.font.name = "Calibri"
+    for i, rdata in enumerate(rows_data, start=1):
+        for j, val in enumerate(rdata):
+            c = tbl.cell(i, j); c.fill.solid()
+            c.fill.fore_color.rgb = NAVY if i % 2 == 1 else RGBColor(0x0F, 0x26, 0x4D)
+            c.text = ""; p = c.text_frame.paragraphs[0]
+            r = p.add_run(); r.text = val
+            r.font.size = Pt(9)
+            r.font.color.rgb = (GREEN if (j == 3 and i >= 1) else LIGHT)
+            r.font.bold = (j == 3)
+            r.font.name = "Calibri"
+    for r in tbl.rows: r.height = Inches(0.32)
+    tbl.rows[0].height = Inches(0.30)
+    add_bullets(s, x + Inches(0.2), y + Inches(1.95), qw - Inches(0.4), Inches(0.65), [
+        "Translation: at the same false-alarm budget, QSVC catches **~5% more fraud** \u2014 the highest-value tail.",
+        "Patterns unlocked: **spiral / interleaved manifolds** (linear ~47% \u2192 ZZ ~78% on the tutorial sandbox).",
+    ], size=9, color=LIGHT, bullet_color=GREEN, line_spacing=1.10)
+_quad(s, 0, 1, "3. Where quantum wins (the numbers)", GREEN, _q3)
+
+# Q4 — Operating model
+def _q4(x, y):
+    add_bullets(s, x + Inches(0.2), y + Inches(0.55), qw - Inches(0.4), qh - Inches(0.6), [
+        "**Tier 1** (XGBoost, 3\u20135 ms p99): scores 100% of tx, **no SLA change**.",
+        "**Tier 2** (QSVC, 50\u2013200 ms async): re-scores **top 1%** flagged by Tier 1.",
+        "Outputs route to: approve / step-up auth (OTP, biometric) / analyst queue.",
+        "Phase 2: **shadow mode** (no customer impact). Phase 3: live re-scoring.",
+        "**Loss-avoidance target: Rs 8\u201310 Cr / yr incremental** at the same FPR.",
+    ], size=10, color=LIGHT, bullet_color=GOLD, line_spacing=1.12)
+_quad(s, 1, 1, "4. Operating model in production", GOLD, _q4)
+
+# --------------------- 13. AML DEEP DIVE (single-page) -----------------
+s = prs.slides.add_slide(blank); add_bg(s)
+header(s, _idx(), "Use case #2 \u2014 Anti-Money Laundering (AML)",
+       kicker="Compliance \u2022 Regulatory mandate \u2022 Same quantum stack")
+
+# Re-use _quad layout helper inline (slide-local)
+def _quad2(slide, col, row, title, color, builder):
+    x = qx0 + col * (qw + qgx)
+    y = qy0 + row * (qh + qgy)
+    add_round_rect(slide, x, y, qw, qh, NAVY2)
+    add_rect(slide, x, y, qw, Inches(0.06), color)
+    add_text(slide, x + Inches(0.2), y + Inches(0.13), qw - Inches(0.4), Inches(0.32),
+             title, size=12, bold=True, color=color)
+    builder(x, y)
+
+# Q1 — The problem at HDFC scale
+def _a1(x, y):
+    add_bullets(s, x + Inches(0.2), y + Inches(0.55), qw - Inches(0.4), qh - Inches(0.6), [
+        "HDFC processes **~100 Cr+ tx / month** across cards, UPI, NEFT, RTGS, IMPS.",
+        "Current rules + ML hybrid generates **~10,000+ alerts / month**.",
+        "**True-positive rate ~3\u20135%** \u2014 95% false alerts crush FIU analyst capacity.",
+        "Misses today: **structuring (smurfing)**, multi-hop layering, synthetic-ID mules, trade-based ML.",
+        "Regulatory: **PMLA, FATF, RBI Master Direction on KYC/AML, FIU-IND**.",
+        "Penalties for missed SARs: **Rs 10 lakh \u2013 50 Cr** per enforcement action.",
+    ], size=10, color=LIGHT, bullet_color=RED, line_spacing=1.10)
+_quad2(s, 0, 0, "1. The problem at HDFC scale", RED, _a1)
+
+# Q2 — Quantum approach
+def _a2(x, y):
+    add_bullets(s, x + Inches(0.2), y + Inches(0.55), qw - Inches(0.4), qh - Inches(0.6), [
+        "Build **transaction graph**: nodes = accounts; edges = (amount, time, channel, geo).",
+        "Graph embeddings: **random walks + Weisfeiler-Lehman** node vectors.",
+        "Encode embeddings with **ZZFeatureMap** \u2192 quantum kernel on sub-graph similarity.",
+        "**QAOA / quantum walks** for community detection (laundering rings).",
+        "**VQC** classifies typology: smurfing vs layering vs trade-based vs mule.",
+        "Hybrid: classical rules + ML triage \u2192 quantum re-scores top-suspicious sub-graphs.",
+    ], size=10, color=LIGHT, bullet_color=TEAL, line_spacing=1.10)
+_quad2(s, 1, 0, "2. Quantum approach \u2014 the pipeline", TEAL, _a2)
+
+# Q3 — Where it wins (target lift)
+def _a3(x, y):
+    # Mini KPI table
+    table_left = x + Inches(0.2); table_top = y + Inches(0.5)
+    table_w = qw - Inches(0.4); table_h = Inches(1.35)
+    rows = 5; cols = 3
+    tbl_shape = s.shapes.add_table(rows, cols, table_left, table_top, table_w, table_h)
+    tbl = tbl_shape.table
+    headers_ = ["Metric", "Today", "Target"]
+    rows_data = [
+        ["True-positive rate",            "3\u20135%",       "12\u201318%"],
+        ["False-alert volume",            "100% (base)",     "\u221240%"],
+        ["Analyst review time / case",    "100% (base)",     "\u221250%"],
+        ["New typologies caught / yr",    "0\u20131",        "+3"],
+    ]
+    for i, w in enumerate([Inches(2.6), Inches(1.5), Inches(1.5)]):
+        tbl.columns[i].width = w
+    for j, h in enumerate(headers_):
+        c = tbl.cell(0, j); c.fill.solid(); c.fill.fore_color.rgb = NAVY
+        c.text = ""; p = c.text_frame.paragraphs[0]; r = p.add_run(); r.text = h
+        r.font.size = Pt(9); r.font.bold = True; r.font.color.rgb = GOLD; r.font.name = "Calibri"
+    for i, rdata in enumerate(rows_data, start=1):
+        for j, val in enumerate(rdata):
+            c = tbl.cell(i, j); c.fill.solid()
+            c.fill.fore_color.rgb = NAVY if i % 2 == 1 else RGBColor(0x0F, 0x26, 0x4D)
+            c.text = ""; p = c.text_frame.paragraphs[0]
+            r = p.add_run(); r.text = val
+            r.font.size = Pt(9)
+            r.font.color.rgb = (GREEN if j == 2 else LIGHT)
+            r.font.bold = (j == 2)
+            r.font.name = "Calibri"
+    for r in tbl.rows: r.height = Inches(0.26)
+    tbl.rows[0].height = Inches(0.26)
+    add_bullets(s, x + Inches(0.2), y + Inches(1.92), qw - Inches(0.4), Inches(0.65), [
+        "**Sub-graph isomorphism** is structurally hard for classical kernels \u2014 quantum walks have known speed-ups.",
+        "Catches **3\u20135 account chains** across 2\u20133 jurisdictions; synthetic-ID mule clusters.",
+    ], size=9, color=LIGHT, bullet_color=GREEN, line_spacing=1.10)
+_quad2(s, 0, 1, "3. Where quantum wins (the targets)", GREEN, _a3)
+
+# Q4 — Operating model
+def _a4(x, y):
+    add_bullets(s, x + Inches(0.2), y + Inches(0.55), qw - Inches(0.4), qh - Inches(0.6), [
+        "**Batch (overnight)** quantum re-score on full transaction network for SAR pipeline.",
+        "**Intraday** re-score on high-risk segments (HRA, PEP, NRI corridors).",
+        "Outputs feed **existing case-management UI** \u2014 no parallel system.",
+        "Full **audit trail**: kernel weights + sub-graph IDs + typology label (regulator-friendly).",
+        "Phase 2 pilot: cards + UPI rails. Phase 3: corporate banking + trade finance.",
+        "**Compliance cost reduction target: Rs 10\u201315 Cr / yr.**",
+    ], size=10, color=LIGHT, bullet_color=GOLD, line_spacing=1.10)
+_quad2(s, 1, 1, "4. Operating model in production", GOLD, _a4)
 
 # --------------------- 13. COMPETITIVE LANDSCAPE ----------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 13, "Competitive landscape \u2014 we are not first, we should not be last",
+header(s, _idx(), "Competitive landscape \u2014 we should not be last",
        kicker="Section C \u2022 Beyond credit cards")
 
 # Table of peers
@@ -838,7 +1048,7 @@ add_text(s, Inches(0.7), Inches(6.50), Inches(12), Inches(0.4),
 
 # --------------------- 14. WHY HDFC, WHY NOW --------------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 14, "Why HDFC \u2014 and why now", kicker="Section C \u2022 Beyond credit cards")
+header(s, _idx(), "Why HDFC \u2014 and why now", kicker="Section C \u2022 Beyond credit cards")
 
 cards = [
     ("SCALE", "We are India's largest private bank by assets \u2014 every recall point is worth more than at any other Indian bank.", RED),
@@ -846,7 +1056,7 @@ cards = [
     ("DATA", "Our card + UPI + retail-lending + wealth feeds give us the **highest-quality training data in the country**.", TEAL),
     ("REGULATORY",  "RBI sandbox + DPDP Act 2023 + EU AI Act extraterritoriality \u2014 quantum gives interpretable, auditable kernels by design.", RED),
     ("MOAT", "First-mover IP, talent magnet, vendor leverage with IBM/AWS/Pasqal/IonQ for next-decade pricing.", GOLD),
-    ("OPTIONALITY", "Same investment unlocks **6+ business lines** \u2014 not just fraud (see slide 12).", TEAL),
+    ("OPTIONALITY", "Same investment unlocks **6+ business lines** \u2014 not just fraud (see slide 11).", TEAL),
 ]
 gx0 = Inches(0.5); gy0 = Inches(1.65); gw = Inches(4.05); gh = Inches(2.45); gap_x = Inches(0.18); gap_y = Inches(0.16)
 for i, (title, body, c) in enumerate(cards):
@@ -867,7 +1077,7 @@ add_text(s, Inches(0.7), Inches(6.83), Inches(12), Inches(0.35),
 
 # --------------------- 15. ROADMAP -----------------------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 15, "24-month roadmap \u2014 four phases, four go/no-go gates",
+header(s, _idx(), "24-month roadmap \u2014 four phases, four go/no-go gates",
        kicker="Section D \u2022 The plan")
 
 # horizontal swimlane / phase boxes
@@ -888,7 +1098,7 @@ phases = [
       "Model risk approval; SR 11-7 / RBI alignment",
       "Gate: net Rs 30+ Cr loss avoidance run-rate"], RED),
     ("Phase 4 \u2014 Scale\n18\u201324 mo",
-     ["Onboard 2 new use cases (slide 12)",
+     ["Onboard 2 new use cases (slide 11)",
       "Internal quantum platform-as-a-service",
       "Publish 2 papers + 1 patent",
       "Gate: cross-LOB demand > supply \u2192 expand"], GOLD),
@@ -914,7 +1124,7 @@ add_text(s, Inches(0.6), Inches(6.82), Inches(12), Inches(0.38),
 
 # --------------------- 16. INVESTMENT ASK -----------------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 16, "Investment ask & ROI envelope",
+header(s, _idx(), "Investment ask & ROI envelope",
        kicker="Section D \u2022 The plan")
 
 # Left: cost table
@@ -974,7 +1184,7 @@ add_text(s, Inches(0.7), Inches(6.50), Inches(12), Inches(0.4),
 
 # --------------------- 17. RISK REGISTER ------------------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 17, "Risk register & mitigations",
+header(s, _idx(), "Risk register & mitigations",
        kicker="Section D \u2022 The plan")
 
 risks = [
@@ -1028,7 +1238,7 @@ add_text(s, Inches(0.5), Inches(6.7), Inches(12), Inches(0.4),
 
 # --------------------- 18. KPIs --------------------------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 18, "How we will measure success \u2014 board-visible KPIs",
+header(s, _idx(), "How we will measure success \u2014 board-visible KPIs",
        kicker="Section D \u2022 The plan")
 
 kpis = [
@@ -1075,6 +1285,8 @@ add_text(s, Inches(0.5), Inches(6.82), Inches(12), Inches(0.3),
 s = prs.slides.add_slide(blank); add_bg(s)
 add_bg(s, NAVY)
 add_rect(s, 0, 0, Inches(0.4), SLIDE_H, RED)
+# HDFC logo (top-right; CTA slide has no header bar, so use larger placement)
+add_logo(s, large=True)
 add_text(s, Inches(1.0), Inches(0.9), Inches(8), Inches(0.4),
          "DECISION REQUESTED FROM THE BOARD",
          size=12, color=GOLD, bold=True)
@@ -1096,11 +1308,11 @@ add_bullets(s, Inches(1.3), Inches(4.2), Inches(10.6), Inches(1.7), [
 add_text(s, Inches(1.0), Inches(6.4), Inches(11), Inches(0.5),
          "We are not asking for moonshot money. We are asking for a measured 24-month bet, with off-ramps every 6 months.",
          size=14, italic=True, color=GOLD)
-footer(s, 19)
+footer(s, _idx())
 
 # --------------------- 20. APPENDIX A: TECHNICAL ----------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 20, "Appendix \u2014 the technical detail (for the architects)",
+header(s, _idx(), "Appendix \u2014 the technical detail (for the architects)",
        kicker="Reference")
 
 add_round_rect(s, Inches(0.5), Inches(1.6), Inches(6.0), Inches(5.3), NAVY2)
@@ -1131,7 +1343,7 @@ add_bullets(s, Inches(7.0), Inches(2.2), Inches(5.7), Inches(4.6), [
 
 # --------------------- 21. APPENDIX B: GLOSSARY -----------------------
 s = prs.slides.add_slide(blank); add_bg(s)
-header(s, 21, "Appendix \u2014 glossary for the board",
+header(s, _idx(), "Appendix \u2014 glossary for the board",
        kicker="Reference")
 glossary = [
     ("Qubit",            "Quantum bit \u2014 holds 0 and 1 simultaneously, weighted by amplitudes."),
