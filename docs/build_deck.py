@@ -281,18 +281,15 @@ add_text(s, Inches(1.0), Inches(1.5), Inches(11.5), Inches(1.6),
          "Quantum Computing for\nFraud Detection",
          size=54, bold=True, color=WHITE)
 add_text(s, Inches(1.0), Inches(3.7), Inches(11), Inches(0.6),
-         "Why HDFC should invest now \u2014 a credit-card fraud case study,",
+         "A credit-card fraud case study,",
          size=22, color=LIGHT)
 add_text(s, Inches(1.0), Inches(4.1), Inches(11), Inches(0.6),
          "the advantage curve, and the 24-month execution plan",
          size=22, color=LIGHT)
 add_rect(s, Inches(1.0), Inches(5.2), Inches(0.12), Inches(0.35), TEAL)
 add_text(s, Inches(1.2), Inches(5.15), Inches(8), Inches(0.4),
-         "Prepared for: MD \u2022 CEO \u2022 CTO \u2022 Enterprise Architects \u2022 Engineering Heads",
-         size=14, color=LIGHT)
-add_text(s, Inches(1.2), Inches(5.55), Inches(8), Inches(0.4),
-         "Author: SVP \u2022 Office of Emerging Technology",
-         size=14, color=MUTED)
+         "Author: SVP \u2014 Kranthi Molleti",
+         size=14, color=LIGHT, bold=True)
 add_text(s, Inches(1.0), Inches(6.95), Inches(11), Inches(0.4),
          "Confidential \u2014 internal circulation only",
          size=10, color=MUTED, italic=True)
