@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quantum Monte Carlo — Full 36-Chapter Course</title>
+<script>MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--text:#e6edf3;--muted:#9da7b3;--accent:#3b82f6;--border:#30363d;
+    --p1:#3b82f6;--p2:#22c55e;--p3:#a371f7;--p4:#f59e0b;--p5:#ef4444;--p6:#06b6d4;--p7:#ec4899;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--accent);text-decoration:none;}
+  .layout{display:grid;grid-template-columns:320px 1fr;max-width:1400px;margin:0 auto;}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:24px 16px;
+    border-right:1px solid var(--border);background:var(--panel);font-size:13.5px;}
+  .toc-title{font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--muted);margin-bottom:14px;}
+  .toc-part{margin:14px 0;padding-left:10px;}
+  .toc-part>a{font-weight:700;color:var(--text);display:block;margin-bottom:4px;}
+  .toc-part ul{list-style:none;margin:0;padding:0 0 0 4px;}
+  .toc-part li{margin:1px 0;}
+  .toc-part li a{color:var(--muted);display:block;padding:2px 6px;border-radius:6px;}
+  .toc-part li a:hover{color:var(--text);background:#21262d;}
+  main{min-width:0;}
+  header.hero{background:radial-gradient(1100px 380px at 20% -10%,#1e3a8a 0%,transparent 60%),linear-gradient(135deg,#0b1220,#101826);
+    border-bottom:1px solid var(--border);padding:56px 48px 44px;}
+  header.hero h1{margin:0 0 10px;font-size:36px;letter-spacing:-.5px;}
+  header.hero p{margin:0;max-width:760px;color:var(--muted);font-size:18px;}
+  .badges{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;}
+  .badge{background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--muted);}
+  .toc-bar{position:sticky;top:0;z-index:10;background:rgba(13,17,23,.9);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);padding:10px 24px;display:flex;gap:8px;flex-wrap:wrap;}
+  .toc-bar a{font-size:13px;padding:6px 11px;border-radius:8px;border:1px solid transparent;color:var(--muted);}
+  .toc-bar a:hover{color:var(--text);border-color:var(--border);background:var(--panel);}
+  .content{padding:8px 48px 90px;}
+  .part{margin-top:46px;scroll-margin-top:60px;}
+  .part-head{display:flex;align-items:center;gap:16px;margin:0 0 8px;}
+  .part-num{width:50px;height:50px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:19px;color:#fff;}
+  .part-head h2{margin:0;font-size:25px;}
+  .part-head .sub{color:var(--muted);font-size:14px;margin-top:2px;}
+  .chapter{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 26px;margin:18px 0;scroll-margin-top:60px;}
+  .ch-head{display:flex;align-items:center;gap:10px;}
+  .chno{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--muted);}
+  .tag{font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid var(--border);color:var(--muted);}
+  .chapter h3{margin:8px 0 12px;font-size:21px;}
+  .ch-body p{margin:12px 0;}
+  .ch-body ul,.ch-body ol{margin:12px 0;padding-left:24px;}
+  .ch-body li{margin:5px 0;}
+  .eq{background:#0b1119;border:1px solid var(--border);border-left:3px solid var(--accent);
+    border-radius:8px;padding:12px 16px;margin:14px 0;overflow-x:auto;color:#dbe4ef;}
+  code{background:#1f2630;padding:2px 6px;border-radius:5px;font-size:.9em;}
+  footer{padding:30px 48px;border-top:1px solid var(--border);color:var(--muted);font-size:14px;}
+  @media(max-width:960px){.layout{grid-template-columns:1fr;}aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--border);}
+    header.hero,.content,footer{padding-left:20px;padding-right:20px;}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+<div class="toc-title">Contents</div>
+<div class="toc-part" style="border-left:3px solid var(--p1)"><a href="#part1">Part I · Foundations &amp; Intuition</a><ul>
+<li><a href="#ch1">1. Why Simulate Quantum Systems?</a></li>
+<li><a href="#ch2">2. What is Monte Carlo?</a></li>
+<li><a href="#ch3">3. Probability &amp; Statistics Refresher</a></li>
+<li><a href="#ch4">4. A Crash Course in Quantum Mechanics</a></li>
+</ul></div>
+<div class="toc-part" style="border-left:3px solid var(--p2)"><a href="#part2">Part II · Mathematical Machinery</a><ul>
+<li><a href="#ch5">5. Linear Algebra for QMC</a></li>
+<li><a href="#ch6">6. Numerical Integration &amp; the Curse of Dimensionality</a></li>
+<li><a href="#ch7">7. Sampling Theory</a></li>
+<li><a href="#ch8">8. Markov Chains &amp; Detailed Balance</a></li>
+<li><a href="#ch9">9. The Metropolis–Hastings Algorithm</a></li>
+</ul></div>
+<div class="toc-part" style="border-left:3px solid var(--p3)"><a href="#part3">Part III · Variational Monte Carlo (VMC)</a><ul>
+<li><a href="#ch10">10. The Variational Principle</a></li>
+<li><a href="#ch11">11. Trial Wavefunctions</a></li>
+<li><a href="#ch12">12. The Local Energy</a></li>
+<li><a href="#ch13">13. The VMC Algorithm End-to-End</a></li>
+<li><a href="#ch14">14. Wavefunction Optimization</a></li>
+</ul></div>
+<div class="toc-part" style="border-left:3px solid var(--p4)"><a href="#part4">Part IV · Diffusion Monte Carlo &amp; Projector Methods</a><ul>
+<li><a href="#ch15">15. Imaginary-Time Evolution</a></li>
+<li><a href="#ch16">16. The Diffusion–Drift–Branching Picture</a></li>
+<li><a href="#ch17">17. Importance Sampling in DMC</a></li>
+<li><a href="#ch18">18. The Branching (Birth/Death) Process</a></li>
+<li><a href="#ch19">19. The Full DMC Algorithm</a></li>
+<li><a href="#ch20">20. Green's Function &amp; Reptation Monte Carlo</a></li>
+</ul></div>
+<div class="toc-part" style="border-left:3px solid var(--p5)"><a href="#part5">Part V · The Sign Problem &amp; Advanced Physics</a><ul>
+<li><a href="#ch21">21. Fermions and the Sign Problem</a></li>
+<li><a href="#ch22">22. The Fixed-Node Approximation</a></li>
+<li><a href="#ch23">23. Beyond Fixed-Node</a></li>
+<li><a href="#ch24">24. Auxiliary-Field QMC (AFQMC)</a></li>
+<li><a href="#ch25">25. Path-Integral &amp; Finite-Temperature QMC</a></li>
+<li><a href="#ch26">26. Lattice Models &amp; Continuous-Time QMC</a></li>
+</ul></div>
+<div class="toc-part" style="border-left:3px solid var(--p6)"><a href="#part6">Part VI · Practice, Performance &amp; Frontiers</a><ul>
+<li><a href="#ch27">27. Error Analysis &amp; Statistics in Practice</a></li>
+<li><a href="#ch28">28. High-Performance &amp; Parallel QMC</a></li>
+<li><a href="#ch29">29. Machine-Learning Wavefunctions (Neural-Network QMC)</a></li>
+<li><a href="#ch30">30. QMC Meets Quantum Computing</a></li>
+</ul></div>
+<div class="toc-part" style="border-left:3px solid var(--p7)"><a href="#part7">Part VII · Improving the QMC Algorithm</a><ul>
+<li><a href="#ch31">31. Where QMC Still Falls Short</a></li>
+<li><a href="#ch32">32. Attacking the Sign Problem</a></li>
+<li><a href="#ch33">33. Better Wavefunctions = Better Nodes</a></li>
+<li><a href="#ch34">34. Statistical Efficiency</a></li>
+<li><a href="#ch35">35. Cost, Scaling &amp; the Quantum Frontier</a></li>
+<li><a href="#ch36">36. A Practitioner's Improvement Checklist</a></li>
+</ul></div>
+</aside>
+<main>
+<header class="hero">
+  <h1>Quantum Monte Carlo</h1>
+  <p>A progressive, full-content course — from zero-background intuition through rigorous math &amp; physics to research-grade algorithms, the quantum-computing frontier, and open research problems.</p>
+  <div class="badges"><span class="badge">7 Parts</span><span class="badge">36 Chapters</span><span class="badge">Basic → Very Advanced</span><span class="badge">Math · Physics · Algorithms</span></div>
+</header>
+<nav class="toc-bar">
+    <a href="#part1">I · Foundations</a>
+    <a href="#part2">II · Math</a>
+    <a href="#part3">III · VMC</a>
+    <a href="#part4">IV · DMC</a>
+    <a href="#part5">V · Sign Problem</a>
+    <a href="#part6">VI · Frontiers</a>
+    <a href="#part7">VII · Improving QMC</a>
+</nav>
+<div class="content">
+
+  <section class="part" id="part1">
+    <div class="part-head">
+      <div class="part-num" style="background:var(--p1)">I</div>
+      <div><h2>Foundations &amp; Intuition</h2><div class="sub">No prerequisites — build the mental model</div></div>
+    </div>
+    
+      <article class="chapter" id="ch1" style="border-left:3px solid var(--p1)">
+        <div class="ch-head"><span class="chno">CHAPTER 1</span><span class="tag">Intuition</span></div>
+        <h3>Why Simulate Quantum Systems?</h3>
+        <div class="ch-body">
+<p>Almost every property of a molecule or material — its color, strength, reactivity, conductivity — is decided by how its <strong>electrons</strong> arrange themselves. Those electrons obey quantum mechanics, so if we could solve the quantum equations exactly we could design drugs, catalysts, and batteries on a computer instead of in a lab.</p>
+<p>The obstacle is the <strong>many-body problem</strong>. A single electron is easy; but electrons repel one another, so the behavior of each depends on all the others <em>simultaneously</em>. The amount of information needed to describe the joint state grows <strong>exponentially</strong> with the number of electrons.</p>
+<div class="eq">A faithful description of $N$ electrons on a grid of $M$ points per dimension needs $\sim M^{3N}$ numbers.</div>
+<p>For just 50 electrons this already exceeds the number of atoms in the observable universe. This "exponential wall" is why brute force fails and why we need clever methods.</p>
+<p><strong>The payoff.</strong> Methods that scale gently with system size unlock:</p>
+<ul>
+<li><strong>Drug discovery</strong> — predicting how a molecule binds a protein.</li>
+<li><strong>Energy</strong> — better battery cathodes, catalysts, and (potentially) high-temperature superconductors.</li>
+<li><strong>Materials</strong> — strongly-correlated systems where cheaper methods (like DFT) become unreliable.</li>
+</ul>
+<p>Quantum Monte Carlo (QMC) is one of the few approaches that delivers high accuracy <em>and</em> scales to interesting sizes — the subject of this course.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch2" style="border-left:3px solid var(--p1)">
+        <div class="ch-head"><span class="chno">CHAPTER 2</span><span class="tag">Intuition</span></div>
+        <h3>What is Monte Carlo?</h3>
+        <div class="ch-body">
+<p>Monte Carlo means <strong>solving a deterministic problem with random sampling</strong>. The classic picture: to find the area of an irregular lake, enclose it in a square of known area, throw darts blindly, and count the fraction that land in the water.</p>
+<div class="eq">$\text{Area}_{\text{lake}} \approx \text{Area}_{\text{square}} \times \dfrac{\#\,\text{darts in water}}{\#\,\text{darts thrown}}$</div>
+<p>More generally, an integral is an average. If we draw samples $x_i$ from a probability density $p(x)$, then</p>
+<div class="eq">$\displaystyle \int f(x)\,p(x)\,dx \;=\; \mathbb{E}_p[f] \;\approx\; \frac{1}{N}\sum_{i=1}^{N} f(x_i).$</div>
+<p><strong>The crucial property:</strong> the statistical error of this estimate shrinks like</p>
+<div class="eq">$\text{error} \;\propto\; \dfrac{1}{\sqrt{N}}\,,$</div>
+<p><em>independent of the dimension</em>. A grid-based method in $d$ dimensions needs $M^d$ points to reach a fixed spacing — hopeless for the $3N$-dimensional integrals of quantum mechanics. Monte Carlo sidesteps the curse of dimensionality, which is exactly why it dominates quantum simulation.</p>
+<p>The price is randomness: answers come with error bars, and halving the error costs <em>four times</em> the samples. The rest of this course is largely about reducing the prefactor on that $1/\sqrt{N}$.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch3" style="border-left:3px solid var(--p1)">
+        <div class="ch-head"><span class="chno">CHAPTER 3</span><span class="tag">Math</span></div>
+        <h3>Probability &amp; Statistics Refresher</h3>
+        <div class="ch-body">
+<p>QMC <em>is</em> applied statistics, so we fix vocabulary precisely.</p>
+<p><strong>Random variable &amp; expectation.</strong> A random variable $X$ has expectation (mean) and variance</p>
+<div class="eq">$\mu=\mathbb{E}[X]=\int x\,p(x)\,dx, \qquad \sigma^2=\mathrm{Var}[X]=\mathbb{E}[(X-\mu)^2].$</div>
+<p><strong>Estimator.</strong> The sample mean $\bar{X}_N=\frac1N\sum_i X_i$ estimates $\mu$. It is <em>unbiased</em>: $\mathbb{E}[\bar X_N]=\mu$. Its own variance is</p>
+<div class="eq">$\mathrm{Var}[\bar X_N]=\dfrac{\sigma^2}{N}\;\Rightarrow\; \text{standard error}=\dfrac{\sigma}{\sqrt N}.$</div>
+<p><strong>Bias vs. variance.</strong> Bias is a systematic offset; variance is random scatter. A good method controls both — much of advanced QMC is about removing biases (timestep, population, nodal) while keeping variance low.</p>
+<p><strong>Central Limit Theorem.</strong> For large $N$, $\bar X_N$ is approximately Gaussian, $\mathcal{N}(\mu,\sigma^2/N)$, which justifies reporting results as $\mu \pm \sigma/\sqrt N$ and gives meaning to "1-sigma" error bars.</p>
+<p><strong>Correlated samples.</strong> QMC samples are <em>not</em> independent (Chapter 8). The effective sample size is $N/(2\tau_{\text{ac}})$ where $\tau_{\text{ac}}$ is the autocorrelation time, so naive error bars underestimate the true uncertainty — fixed by reblocking (Chapter 27).</p>
+</div>
+      </article>
+      <article class="chapter" id="ch4" style="border-left:3px solid var(--p1)">
+        <div class="ch-head"><span class="chno">CHAPTER 4</span><span class="tag">Physics</span></div>
+        <h3>A Crash Course in Quantum Mechanics</h3>
+        <div class="ch-body">
+<p>We need just enough quantum mechanics to define what QMC computes.</p>
+<p><strong>The wavefunction.</strong> The state of $N$ particles is a complex function $\Psi(\mathbf r_1,\dots,\mathbf r_N)$. Its squared magnitude is a probability density:</p>
+<div class="eq">$|\Psi(R)|^2\,dR = \text{probability of finding the particles in configuration } R.$</div>
+<p>This is the bridge to Monte Carlo: $|\Psi|^2$ is a distribution we can <em>sample</em>.</p>
+<p><strong>Operators and the Hamiltonian.</strong> Observables are operators; the energy operator (Hamiltonian) for electrons is</p>
+<div class="eq">$\hat H = -\tfrac12\sum_i \nabla_i^2 \;+\; \underbrace{\sum_{i<j}\frac{1}{|\mathbf r_i-\mathbf r_j|}}_{\text{e–e repulsion}} \;-\; \sum_{i,A}\frac{Z_A}{|\mathbf r_i-\mathbf R_A|} \quad(\text{atomic units}).$</div>
+<p><strong>The eigenvalue problem.</strong> Stationary states satisfy the time-independent Schrödinger equation</p>
+<div class="eq">$\hat H \Psi = E\,\Psi.$</div>
+<p>The smallest eigenvalue $E_0$ is the <strong>ground-state energy</strong> — the single most important quantity in chemistry and materials, since structure, bonding, and reaction energetics all derive from it. The whole of VMC and DMC is machinery to estimate $E_0$ (and the corresponding $\Psi_0$) without storing the exponentially large wavefunction explicitly.</p>
+</div>
+      </article>
+  </section>
+
+  <section class="part" id="part2">
+    <div class="part-head">
+      <div class="part-num" style="background:var(--p2)">II</div>
+      <div><h2>Mathematical Machinery</h2><div class="sub">The tools every QMC method is built on</div></div>
+    </div>
+    
+      <article class="chapter" id="ch5" style="border-left:3px solid var(--p2)">
+        <div class="ch-head"><span class="chno">CHAPTER 5</span><span class="tag">Math</span></div>
+        <h3>Linear Algebra for QMC</h3>
+        <div class="ch-body">
+<p>Quantum mechanics lives in a <strong>Hilbert space</strong> — a vector space of wavefunctions with an inner product</p>
+<div class="eq">$\langle \phi|\psi\rangle = \int \phi^*(R)\,\psi(R)\,dR.$</div>
+<p>The Hamiltonian $\hat H$ is a <strong>Hermitian operator</strong> ($\hat H=\hat H^\dagger$), which guarantees real eigenvalues $E_0\le E_1\le\cdots$ and an orthonormal eigenbasis $\{\Psi_n\}$:</p>
+<div class="eq">$\hat H \Psi_n = E_n \Psi_n,\qquad \langle \Psi_m|\Psi_n\rangle=\delta_{mn}.$</div>
+<p><strong>Spectral decomposition.</strong> Any state expands as $\Psi=\sum_n c_n\Psi_n$, so</p>
+<div class="eq">$\langle \Psi|\hat H|\Psi\rangle=\sum_n |c_n|^2 E_n \;\ge\; E_0\,\|\Psi\|^2.$</div>
+<p>This single inequality is the seed of the <strong>variational principle</strong> (Chapter 10) and of imaginary-time projection (Chapter 15): the lowest eigenvalue bounds every expectation value from below, and components with larger $E_n$ can be filtered out.</p>
+<p>We will also lean on <strong>determinants</strong>: antisymmetric fermion wavefunctions are built from Slater determinants, and efficient QMC depends on fast determinant ratio/update formulas (the matrix-determinant lemma, Sherman–Morrison updates).</p>
+</div>
+      </article>
+      <article class="chapter" id="ch6" style="border-left:3px solid var(--p2)">
+        <div class="ch-head"><span class="chno">CHAPTER 6</span><span class="tag">Math</span></div>
+        <h3>Numerical Integration &amp; the Curse of Dimensionality</h3>
+        <div class="ch-body">
+<p>Every quantity QMC computes is a high-dimensional integral, e.g. the energy</p>
+<div class="eq">$E=\dfrac{\int \Psi^*(R)\,\hat H\,\Psi(R)\,dR}{\int |\Psi(R)|^2\,dR},\qquad R\in\mathbb{R}^{3N}.$</div>
+<p><strong>Deterministic quadrature</strong> (trapezoid, Simpson, Gauss) places a grid of points. With $M$ points per axis the cost is $M^{3N}$ and the error of a product rule falls only polynomially. For $N=100$ electrons, $3N=300$ dimensions — utterly intractable.</p>
+<p><strong>Monte Carlo integration</strong> replaces the grid with $N_s$ random samples and achieves error $\propto 1/\sqrt{N_s}$ <em>regardless of dimension</em>:</p>
+<div class="eq">$\int g(R)\,dR \approx \frac{V}{N_s}\sum_{i} g(R_i),\qquad R_i\sim\text{Uniform}.$</div>
+<p>The catch: uniform sampling is wildly inefficient because $|\Psi|^2$ is sharply peaked — almost all uniform darts land where the integrand is negligible. The fix is <strong>importance sampling</strong> (Chapter 7): draw points where they matter. This is the conceptual core that makes QMC practical.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch7" style="border-left:3px solid var(--p2)">
+        <div class="ch-head"><span class="chno">CHAPTER 7</span><span class="tag">Algorithms</span></div>
+        <h3>Sampling Theory</h3>
+        <div class="ch-body">
+<p>How do we generate samples from a target density $p(x)$? Three foundational techniques:</p>
+<p><strong>1. Inverse-transform.</strong> If $u\sim\text{Uniform}(0,1)$ then $x=F^{-1}(u)$ has CDF $F$. Exact but needs an invertible CDF — rare in many dimensions.</p>
+<p><strong>2. Rejection sampling.</strong> Propose from an easy $q(x)$ with $p(x)\le c\,q(x)$, accept with probability $p(x)/(c\,q(x))$. Correct but can reject most proposals in high dimension.</p>
+<p><strong>3. Importance sampling.</strong> Instead of sampling $p$, sample an easier $q$ and reweight:</p>
+<div class="eq">$\mathbb{E}_p[f]=\int f(x)\,p(x)\,dx=\int \underbrace{f(x)\frac{p(x)}{q(x)}}_{\text{reweighted}} q(x)\,dx \approx \frac1N\sum_i f(x_i)\frac{p(x_i)}{q(x_i)}.$</div>
+<p>The variance is minimized when $q\propto |f|\,p$, motivating QMC's choice to sample $|\Psi_T|^2$ — the density under which the energy estimator is smoothest.</p>
+<div class="eq">Variance-reduction is the recurring theme: <em>spend samples where the integrand has weight.</em></div>
+<p>In $3N$ dimensions, none of these one-shot schemes suffice on their own; we need a way to <em>walk</em> through configuration space generating correlated-but-correct samples — the Markov chains of Chapter 8.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch8" style="border-left:3px solid var(--p2)">
+        <div class="ch-head"><span class="chno">CHAPTER 8</span><span class="tag">Algorithms</span></div>
+        <h3>Markov Chains &amp; Detailed Balance</h3>
+        <div class="ch-body">
+<p>A <strong>Markov chain</strong> generates a sequence $R_0\to R_1\to R_2\to\cdots$ where each step depends only on the current state via a transition kernel $T(R\to R')$. Under mild conditions the chain forgets its start and settles into a unique <strong>stationary distribution</strong> $\pi$ satisfying</p>
+<div class="eq">$\pi(R')=\int \pi(R)\,T(R\to R')\,dR.$</div>
+<p>We <em>design</em> $T$ so that $\pi$ is exactly our target $|\Psi_T|^2$. The standard sufficient condition is <strong>detailed balance</strong> (reversibility):</p>
+<div class="eq">$\pi(R)\,T(R\to R')=\pi(R')\,T(R'\to R).$</div>
+<p>Two more requirements ensure correctness: <strong>ergodicity</strong> (every region reachable) and <strong>aperiodicity</strong>.</p>
+<p><strong>Autocorrelation.</strong> Consecutive samples are correlated. Define the integrated autocorrelation time $\tau_{\text{ac}}$; the variance of the mean is inflated by $2\tau_{\text{ac}}$:</p>
+<div class="eq">$\mathrm{Var}[\bar X]\approx \dfrac{\sigma^2}{N}\,(1+2\tau_{\text{ac}}).$</div>
+<p>We also discard an initial <strong>burn-in / equilibration</strong> segment before the chain reaches $\pi$. These ideas underpin every Metropolis walk in QMC.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch9" style="border-left:3px solid var(--p2)">
+        <div class="ch-head"><span class="chno">CHAPTER 9</span><span class="tag">Algorithms</span></div>
+        <h3>The Metropolis–Hastings Algorithm</h3>
+        <div class="ch-body">
+<p>Metropolis–Hastings (MH) is the universal recipe for building a chain with a prescribed stationary distribution $\pi$. Given current $R$:</p>
+<ol>
+<li><strong>Propose</strong> $R'$ from a proposal $q(R'\,|\,R)$ (e.g. a small Gaussian move).</li>
+<li><strong>Accept</strong> with probability
+<div class="eq">$A(R\to R')=\min\!\left(1,\ \dfrac{\pi(R')\,q(R\,|\,R')}{\pi(R)\,q(R'\,|\,R)}\right).$</div></li>
+<li>If accepted, move to $R'$; otherwise stay at $R$ (and still record it as a sample).</li>
+</ol>
+<p>For a symmetric proposal $q(R'|R)=q(R|R')$ this reduces to the original Metropolis rule $A=\min(1,\pi(R')/\pi(R))$. In VMC, $\pi=|\Psi_T|^2$, so the ratio is</p>
+<div class="eq">$\dfrac{\pi(R')}{\pi(R)}=\left|\dfrac{\Psi_T(R')}{\Psi_T(R)}\right|^2,$</div>
+<p>a cheap <em>ratio</em> — the normalization cancels, which is the whole reason QMC avoids the intractable normalizing integral.</p>
+<p><strong>Tuning.</strong> Step size controls the acceptance rate: too large ⇒ everything rejected; too small ⇒ slow diffusion. A rule of thumb targets ~50% acceptance to minimize autocorrelation. With MH in hand we can now sample any trial wavefunction — the engine of Part III.</p>
+</div>
+      </article>
+  </section>
+
+  <section class="part" id="part3">
+    <div class="part-head">
+      <div class="part-num" style="background:var(--p3)">III</div>
+      <div><h2>Variational Monte Carlo (VMC)</h2><div class="sub">The first real QMC method, end to end</div></div>
+    </div>
+    
+      <article class="chapter" id="ch10" style="border-left:3px solid var(--p3)">
+        <div class="ch-head"><span class="chno">CHAPTER 10</span><span class="tag">Physics</span></div>
+        <h3>The Variational Principle</h3>
+        <div class="ch-body">
+<p>The variational principle is the theoretical guarantee that makes VMC trustworthy. For <em>any</em> normalizable trial wavefunction $\Psi_T$,</p>
+<div class="eq">$E[\Psi_T]=\dfrac{\langle \Psi_T|\hat H|\Psi_T\rangle}{\langle \Psi_T|\Psi_T\rangle}\;\ge\; E_0,$</div>
+<p>with equality only when $\Psi_T$ equals the true ground state $\Psi_0$. <strong>Proof sketch:</strong> expand $\Psi_T=\sum_n c_n\Psi_n$; then $E[\Psi_T]=\sum_n|c_n|^2 E_n/\sum_n|c_n|^2\ge E_0$ since every $E_n\ge E_0$.</p>
+<p><strong>Consequence:</strong> minimizing the energy over adjustable parameters $\alpha$ can only improve our estimate — we can never undershoot $E_0$. This turns ground-state estimation into an <em>optimization</em>: make $\Psi_T(\alpha)$ as good as possible, and the energy is a rigorous upper bound at every step.</p>
+<p>The energy functional is the object we evaluate by Monte Carlo. Rewriting it in a sampleable form (Chapter 12) gives the local-energy estimator; adjusting $\alpha$ to lower it is wavefunction optimization (Chapter 14).</p>
+</div>
+      </article>
+      <article class="chapter" id="ch11" style="border-left:3px solid var(--p3)">
+        <div class="ch-head"><span class="chno">CHAPTER 11</span><span class="tag">Physics</span></div>
+        <h3>Trial Wavefunctions</h3>
+        <div class="ch-body">
+<p>VMC is only as good as its trial wavefunction $\Psi_T$. For electrons (fermions) $\Psi_T$ must be <strong>antisymmetric</strong> under particle exchange, which is achieved with a <strong>Slater determinant</strong> of single-particle orbitals $\phi_i$:</p>
+<div class="eq">$D=\dfrac{1}{\sqrt{N!}}\det\big[\phi_i(\mathbf r_j)\big].$</div>
+<p>A bare determinant captures antisymmetry but misses electron <em>correlation</em>. We multiply by a symmetric, positive <strong>Jastrow factor</strong> $e^{J}$ that explicitly keeps electrons apart:</p>
+<div class="eq">$\Psi_T(R)=e^{J(R)}\,D^\uparrow D^\downarrow,\qquad J=\sum_{i<j}u(r_{ij})+\sum_{i,A}\chi(r_{iA}).$</div>
+<p>This <strong>Slater–Jastrow</strong> form is the workhorse of QMC. Refinements:</p>
+<ul>
+<li><strong>Cusp conditions</strong> — $u$ is chosen so the divergent Coulomb terms in the local energy cancel as two particles meet (Kato cusps), drastically reducing variance.</li>
+<li><strong>Backflow</strong> — replace $\mathbf r_i$ in the orbitals by collective coordinates $\mathbf r_i+\sum_j \eta(r_{ij})(\mathbf r_i-\mathbf r_j)$, which deforms the <em>nodes</em> and improves DMC.</li>
+<li><strong>Multi-determinant</strong> expansions for systems with strong static correlation.</li>
+</ul>
+</div>
+      </article>
+      <article class="chapter" id="ch12" style="border-left:3px solid var(--p3)">
+        <div class="ch-head"><span class="chno">CHAPTER 12</span><span class="tag">Algorithms</span></div>
+        <h3>The Local Energy</h3>
+        <div class="ch-body">
+<p>To evaluate the energy by sampling, rewrite the functional as an average over $|\Psi_T|^2$. Define the <strong>local energy</strong></p>
+<div class="eq">$E_L(R)\equiv \dfrac{\hat H\,\Psi_T(R)}{\Psi_T(R)}.$</div>
+<p>Then the variational energy is simply its mean under the density $p(R)=|\Psi_T(R)|^2/\!\int|\Psi_T|^2$:</p>
+<div class="eq">$E[\Psi_T]=\int E_L(R)\,p(R)\,dR=\mathbb{E}_{p}[E_L]\approx \frac{1}{N}\sum_i E_L(R_i).$</div>
+<p>So VMC = sample $|\Psi_T|^2$ with Metropolis, average $E_L$.</p>
+<p><strong>Zero-variance principle.</strong> If $\Psi_T\to\Psi_0$ (an exact eigenstate), then $\hat H\Psi_0=E_0\Psi_0$ makes $E_L(R)=E_0$ a <em>constant</em> — its variance vanishes. Hence a better trial function gives not only a lower energy but also <strong>smaller error bars</strong>. The variance of $E_L$ is itself a quality metric and an alternative optimization target.</p>
+<p>Computing $E_L$ requires the Laplacian $\nabla^2\Psi_T/\Psi_T$ (kinetic term) plus the potential — all available analytically (or via autodiff) for Slater–Jastrow forms.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch13" style="border-left:3px solid var(--p3)">
+        <div class="ch-head"><span class="chno">CHAPTER 13</span><span class="tag">Algorithms</span></div>
+        <h3>The VMC Algorithm End-to-End</h3>
+        <div class="ch-body">
+<p>Putting Parts I–II together, the full VMC loop is:</p>
+<ol>
+<li><strong>Initialize</strong> walkers at random electron positions $R_0$ and pick parameters $\alpha$.</li>
+<li><strong>Equilibrate</strong> — run Metropolis moves (Chapter 9) sampling $|\Psi_T|^2$ and discard the burn-in.</li>
+<li><strong>Accumulate</strong> — continue the walk; at each step evaluate $E_L(R_i)$ and accumulate it (and any other observables).</li>
+<li><strong>Estimate</strong> — report the mean energy with an error bar:
+<div class="eq">$\bar E=\frac1N\sum_i E_L(R_i),\qquad \delta E=\dfrac{\sigma_{E_L}}{\sqrt{N/(2\tau_{\text{ac}})}}.$</div></li>
+</ol>
+<p><strong>Blocking analysis.</strong> Because samples are autocorrelated, naive error bars are too small. Group the series into blocks of growing size and watch the block-averaged error grow then plateau; the plateau is the correct $\delta E$ (Chapter 27 makes this rigorous with reblocking/jackknife).</p>
+<p>VMC gives a rigorous variational energy and a fully optimized $\Psi_T$ — which becomes the launch point and importance function for the more accurate Diffusion Monte Carlo of Part IV.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch14" style="border-left:3px solid var(--p3)">
+        <div class="ch-head"><span class="chno">CHAPTER 14</span><span class="tag">Algorithms</span></div>
+        <h3>Wavefunction Optimization</h3>
+        <div class="ch-body">
+<p>The parameters $\alpha$ (Jastrow coefficients, orbital and backflow parameters, determinant weights) must be tuned to minimize energy or variance.</p>
+<p><strong>Energy vs. variance minimization.</strong> Minimizing $\mathbb{E}[E_L]$ targets the physical quantity directly; minimizing $\mathrm{Var}[E_L]$ is more stable but optimizes a proxy. Modern practice often blends both.</p>
+<p><strong>Gradients from sampling.</strong> The energy gradient has a convenient estimator</p>
+<div class="eq">$\partial_\alpha E = 2\,\Big\langle (\partial_\alpha \ln\Psi_T)\,(E_L-\langle E_L\rangle)\Big\rangle.$</div>
+<p><strong>Methods, in increasing power:</strong></p>
+<ul>
+<li><strong>Steepest descent</strong> — simple but slow and noise-sensitive.</li>
+<li><strong>Stochastic Reconfiguration (SR)</strong> — natural-gradient step preconditioned by the overlap (Fisher) matrix $S_{ij}=\langle O_i O_j\rangle-\langle O_i\rangle\langle O_j\rangle$, with $O_i=\partial_{\alpha_i}\ln\Psi_T$:
+<div class="eq">$\Delta\alpha = -\eta\,S^{-1}\,\partial_\alpha E.$</div></li>
+<li><strong>Linear method</strong> — solves a generalized eigenvalue problem in the tangent space; converges in remarkably few iterations.</li>
+<li><strong>Newton / Hessian</strong> approaches for the final polishing.</li>
+</ul>
+<p>For neural-network ansätze (Chapter 29) SR reappears as natural gradient / KFAC, which is essential to train millions of parameters.</p>
+</div>
+      </article>
+  </section>
+
+  <section class="part" id="part4">
+    <div class="part-head">
+      <div class="part-num" style="background:var(--p4)">IV</div>
+      <div><h2>Diffusion Monte Carlo &amp; Projector Methods</h2><div class="sub">Systematically reaching the exact ground state</div></div>
+    </div>
+    
+      <article class="chapter" id="ch15" style="border-left:3px solid var(--p4)">
+        <div class="ch-head"><span class="chno">CHAPTER 15</span><span class="tag">Physics</span></div>
+        <h3>Imaginary-Time Evolution</h3>
+        <div class="ch-body">
+<p>VMC is capped by the quality of $\Psi_T$. Projector methods remove that cap by <em>filtering</em> the trial state toward the exact ground state. The key trick is to evolve in <strong>imaginary time</strong> $\tau=it$:</p>
+<div class="eq">$|\Psi(\tau)\rangle=e^{-(\hat H-E_T)\tau}\,|\Psi_T\rangle.$</div>
+<p>Expand in eigenstates, $|\Psi_T\rangle=\sum_n c_n|\Psi_n\rangle$:</p>
+<div class="eq">$|\Psi(\tau)\rangle=\sum_n c_n\,e^{-(E_n-E_T)\tau}\,|\Psi_n\rangle.$</div>
+<p>Every component decays at a rate set by its energy. Since $E_0$ is smallest, all excited states decay <em>faster</em> than the ground state. As $\tau\to\infty$ only the ground state survives:</p>
+<div class="eq">$\lim_{\tau\to\infty}|\Psi(\tau)\rangle \propto |\Psi_0\rangle,\quad\text{provided } c_0\neq 0.$</div>
+<p>Tuning the reference energy $E_T\to E_0$ keeps the norm finite. The remaining problem is purely computational: how to <em>apply</em> $e^{-\hat H\tau}$ without building exponentially large matrices. The answer (Chapter 16) is that imaginary-time evolution looks exactly like diffusion — which we can simulate with random walkers.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch16" style="border-left:3px solid var(--p4)">
+        <div class="ch-head"><span class="chno">CHAPTER 16</span><span class="tag">Physics</span></div>
+        <h3>The Diffusion–Drift–Branching Picture</h3>
+        <div class="ch-body">
+<p>Write the imaginary-time Schrödinger equation in position space:</p>
+<div class="eq">$-\dfrac{\partial \Psi}{\partial \tau}= -\tfrac12\nabla^2\Psi + (V(R)-E_T)\,\Psi.$</div>
+<p>This is a <strong>diffusion equation with a source/sink term</strong>. The two pieces have direct stochastic meaning:</p>
+<ul>
+<li>The $-\tfrac12\nabla^2\Psi$ term is ordinary <strong>diffusion</strong> — simulated by Gaussian random walks of "walkers".</li>
+<li>The $(V-E_T)\Psi$ term is a <strong>rate</strong> term — it multiplies/removes walker weight (branching).</li>
+</ul>
+<p>Formally the short-time propagator factorizes via a <strong>Green's function</strong></p>
+<div class="eq">$G(R\to R',\delta\tau)\approx \underbrace{(2\pi\delta\tau)^{-3N/2}e^{-\frac{|R'-R|^2}{2\delta\tau}}}_{\text{diffusion}}\;\underbrace{e^{-(\frac{V(R)+V(R')}{2}-E_T)\delta\tau}}_{\text{branching}} ,$</div>
+<p>valid to $O(\delta\tau^2)$ (the source of <em>timestep error</em>, removed by extrapolating $\delta\tau\to0$). Iterating this short-time step many times realizes $e^{-\hat H\tau}$ as a population of diffusing, branching walkers — the essence of DMC.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch17" style="border-left:3px solid var(--p4)">
+        <div class="ch-head"><span class="chno">CHAPTER 17</span><span class="tag">Algorithms</span></div>
+        <h3>Importance Sampling in DMC</h3>
+        <div class="ch-body">
+<p>Naive branching on $V(R)$ is catastrophic: the Coulomb potential diverges, so walker weights explode near nuclei. The cure is <strong>importance sampling</strong> — evolve the product $f(R,\tau)=\Psi_T(R)\,\Psi(R,\tau)$ instead of $\Psi$ itself.</p>
+<p>Substituting $f$ into the imaginary-time equation yields three terms: diffusion, a new <strong>drift</strong> term, and branching governed by the (bounded) <em>local</em> energy rather than the raw potential:</p>
+<div class="eq">$-\partial_\tau f = -\tfrac12\nabla^2 f + \nabla\!\cdot\!\big(\mathbf v_D\,f\big) + \big(E_L(R)-E_T\big)f,$</div>
+<div class="eq">$\text{drift velocity}\quad \mathbf v_D(R)=\nabla \ln|\Psi_T(R)| = \dfrac{\nabla\Psi_T}{\Psi_T}.$</div>
+<p>The drift <strong>pushes walkers toward regions where $|\Psi_T|$ is large</strong>, and branching now uses the smooth $E_L$ (which is constant for a perfect $\Psi_T$, killing the fluctuations). The walker population sampled is $f=\Psi_T\Psi_0$, giving the <strong>mixed estimator</strong></p>
+<div class="eq">$E_0=\dfrac{\langle \Psi_T|\hat H|\Psi_0\rangle}{\langle \Psi_T|\Psi_0\rangle}=\langle E_L\rangle_f,$</div>
+<p>which is exact for the energy even though $f\neq|\Psi_0|^2$.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch18" style="border-left:3px solid var(--p4)">
+        <div class="ch-head"><span class="chno">CHAPTER 18</span><span class="tag">Algorithms</span></div>
+        <h3>The Branching (Birth/Death) Process</h3>
+        <div class="ch-body">
+<p>The branching factor over one step,</p>
+<div class="eq">$b(R\to R')=\exp\!\Big[-\Big(\tfrac{E_L(R)+E_L(R')}{2}-E_T\Big)\delta\tau\Big],$</div>
+<p>controls walker reproduction. Practically, a walker with weight is either:</p>
+<ul>
+<li><strong>cloned</strong> (born) if it sits in a low-$E_L$, favorable region ($b>1$), or</li>
+<li><strong>killed</strong> (dies) if it sits in a high-$E_L$ region ($b<1$).</li>
+</ul>
+<p>Stochastic reconfiguration of the population keeps the integer walker count manageable (e.g. duplicate $\lfloor b+u\rfloor$ copies, $u\sim$Uniform).</p>
+<p><strong>Population-control bias.</strong> Adjusting $E_T$ each step to hold the population steady introduces a small bias $\propto 1/N_{\text{walkers}}$; it is removed by using many walkers and/or extrapolating. Keeping the population stable while unbiased is a central engineering concern:</p>
+<div class="eq">$E_T(\tau+\delta\tau)=E_T(\tau)+\dfrac{\kappa}{\delta\tau}\ln\!\dfrac{N_{\text{target}}}{N(\tau)}.$</div>
+<p>Balanced birth/death plus drift makes the walker distribution converge to $f=\Psi_T\Psi_0$.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch19" style="border-left:3px solid var(--p4)">
+        <div class="ch-head"><span class="chno">CHAPTER 19</span><span class="tag">Algorithms</span></div>
+        <h3>The Full DMC Algorithm</h3>
+        <div class="ch-body">
+<p>The complete fixed-node DMC procedure:</p>
+<ol>
+<li><strong>Start from VMC</strong> — take the optimized $\Psi_T$ and a population of walkers sampled from $|\Psi_T|^2$.</li>
+<li><strong>Drift + diffuse</strong> each walker: $R'=R+\mathbf v_D(R)\,\delta\tau+\boldsymbol{\xi}$, with $\boldsymbol\xi\sim\mathcal N(0,\delta\tau)$.</li>
+<li><strong>Accept/reject</strong> (a Metropolis step restores detailed balance and reduces timestep error).</li>
+<li><strong>Branch</strong> using $b(R\to R')$; adjust $E_T$ for population control.</li>
+<li><strong>Accumulate</strong> $\langle E_L\rangle$ once equilibrated.</li>
+</ol>
+<p><strong>Two systematic errors to control:</strong></p>
+<ul>
+<li><strong>Timestep error</strong> $O(\delta\tau)$ — run several $\delta\tau$ and extrapolate to $\delta\tau\to0$.</li>
+<li><strong>Population-control bias</strong> $O(1/N_w)$ — use large populations.</li>
+</ul>
+<p><strong>Mixed vs. pure estimators.</strong> The energy is exact from the mixed estimator, but other observables $\hat A$ that don't commute with $\hat H$ need correction: $\langle A\rangle_{\text{pure}}\approx 2\langle A\rangle_{\text{mixed}}-\langle A\rangle_{\text{VMC}}$, or forward-walking/future-walking techniques. Aside from the fixed-node approximation (Part V), DMC is otherwise exact.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch20" style="border-left:3px solid var(--p4)">
+        <div class="ch-head"><span class="chno">CHAPTER 20</span><span class="tag">Advanced</span></div>
+        <h3>Green's Function &amp; Reptation Monte Carlo</h3>
+        <div class="ch-body">
+<p>DMC is one realization of projector Monte Carlo; two important relatives:</p>
+<p><strong>Green's Function Monte Carlo (GFMC).</strong> Rather than a short-time Gaussian, GFMC samples the <em>exact</em> Green's function $G=\langle R'|(\hat H-E_T)^{-1}|R\rangle$ (or $e^{-\hat H\tau}$) using domain Green's function / Trotter-free schemes, eliminating timestep error at the cost of more complex sampling. It was historically central for lattice models and liquid helium.</p>
+<p><strong>Reptation Monte Carlo (RMC).</strong> Samples whole imaginary-time <em>paths</em> ("reptiles") with a bounce algorithm, moving one end at a time like a reptating polymer. Its advantages:</p>
+<ul>
+<li>Gives <strong>pure</strong> (not mixed) estimators directly, so static properties and densities are unbiased.</li>
+<li>Avoids population-control bias entirely (fixed number of paths).</li>
+</ul>
+<p>The trade-off is longer autocorrelation along the path. Choosing among DMC / GFMC / RMC depends on whether you need energies (DMC), unbiased observables (RMC), or freedom from timestep error (GFMC). All share the same fixed-node limitation addressed next.</p>
+</div>
+      </article>
+  </section>
+
+  <section class="part" id="part5">
+    <div class="part-head">
+      <div class="part-num" style="background:var(--p5)">V</div>
+      <div><h2>The Sign Problem &amp; Advanced Physics</h2><div class="sub">The hardest open challenges in the field</div></div>
+    </div>
+    
+      <article class="chapter" id="ch21" style="border-left:3px solid var(--p5)">
+        <div class="ch-head"><span class="chno">CHAPTER 21</span><span class="tag">Physics</span></div>
+        <h3>Fermions and the Sign Problem</h3>
+        <div class="ch-body">
+<p>Electrons are <strong>fermions</strong>: the Pauli principle demands that exchanging any two flips the sign of the wavefunction,</p>
+<div class="eq">$\Psi(\dots,\mathbf r_i,\dots,\mathbf r_j,\dots)=-\,\Psi(\dots,\mathbf r_j,\dots,\mathbf r_i,\dots).$</div>
+<p>So $\Psi$ has both positive and negative regions. But DMC interprets the walker density as a <em>probability</em>, which must be non-negative. Trying to represent a signed function with positive walkers leads to catastrophe:</p>
+<div class="eq">$\text{signal/noise}\;\propto\; e^{-(E_F-E_B)\tau}\to 0,$</div>
+<p>where $E_F-E_B$ is the (positive) gap between the fermionic and bosonic ground states. The positive and negative populations grow toward the <em>bosonic</em> ground state and their difference — the fermionic signal — is swamped by noise that grows exponentially in system size and imaginary time.</p>
+<p>This is the <strong>sign problem</strong>, proven NP-hard in general (Troyer &amp; Wiese, 2005). It is the central obstacle of computational many-fermion physics; the rest of Part V is about taming it.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch22" style="border-left:3px solid var(--p5)">
+        <div class="ch-head"><span class="chno">CHAPTER 22</span><span class="tag">Advanced</span></div>
+        <h3>The Fixed-Node Approximation</h3>
+        <div class="ch-body">
+<p>The dominant practical cure is the <strong>fixed-node</strong> approximation. The nodes of a wavefunction are the surface where it vanishes and changes sign:</p>
+<div class="eq">$\mathcal{N}=\{R:\Psi_T(R)=0\}.$</div>
+<p>We <em>impose</em> the nodal surface of the trial function $\Psi_T$ on the projected state and forbid walkers from crossing it (any move across a node is rejected). Within each nodal pocket $\Psi$ has a fixed sign, so the simulation is sign-problem-free and exactly solves the Schrödinger equation <em>with the boundary condition</em> $\Psi=0$ on $\mathcal N$.</p>
+<p><strong>Variational property.</strong> The fixed-node energy is a rigorous upper bound to $E_0$ and becomes exact if the nodes are exact:</p>
+<div class="eq">$E_{\text{FN}}\ge E_0,\qquad E_{\text{FN}}=E_0 \iff \mathcal N=\mathcal N_{\text{exact}}.$</div>
+<p>The only remaining error is the <strong>nodal error</strong> — typically a few percent of the correlation energy, far better than mean-field methods. Improving nodes (via backflow, multi-determinant, or neural ansätze) is therefore the key to higher accuracy, which is why Chapter 33 exists.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch23" style="border-left:3px solid var(--p5)">
+        <div class="ch-head"><span class="chno">CHAPTER 23</span><span class="tag">Advanced</span></div>
+        <h3>Beyond Fixed-Node</h3>
+        <div class="ch-body">
+<p>Fixed-node trades the sign problem for a controllable bias. Several methods aim to reduce or remove that bias:</p>
+<ul>
+<li><strong>Released-node DMC</strong> — let walkers cross nodes but carry a sign, and extract the fermionic signal before the noise dominates. Exact in principle, but only feasible for small systems because the signal decays exponentially.</li>
+<li><strong>Fixed-phase</strong> — the complex-wavefunction generalization (needed in magnetic fields / for complex orbitals): fix the <em>phase</em> of $\Psi_T$ rather than its nodes.</li>
+<li><strong>Nodal optimization</strong> — systematically improve $\mathcal N$ by optimizing backflow, multi-determinant expansions, or neural networks within VMC before running DMC.</li>
+<li><strong>Constrained-path / phaseless</strong> — the same philosophy applied in the auxiliary-field formulation (Chapter 24), constraining walker <em>determinants</em> rather than positions.</li>
+</ul>
+<p>The frontier (Chapter 35) replaces hand-built trial nodes with machine-learned ones and even uses quantum computers to supply better constraints — steadily shrinking the last systematic error of QMC.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch24" style="border-left:3px solid var(--p5)">
+        <div class="ch-head"><span class="chno">CHAPTER 24</span><span class="tag">Advanced</span></div>
+        <h3>Auxiliary-Field QMC (AFQMC)</h3>
+        <div class="ch-body">
+<p>AFQMC works in <em>second quantization</em> and is the method of choice for solids and lattice models. The two-body interaction is decoupled into one-body problems coupled to fluctuating fields via the <strong>Hubbard–Stratonovich</strong> transformation:</p>
+<div class="eq">$e^{-\delta\tau\,\hat H_2}=\int d\mathbf x\;p(\mathbf x)\;e^{-\delta\tau\,\hat h_1(\mathbf x)},$</div>
+<p>turning interacting electrons into <em>non-interacting</em> electrons moving in random auxiliary fields $\mathbf x$. Each field configuration propagates a Slater determinant (cheap, via matrix algebra); averaging over fields restores the interaction.</p>
+<p><strong>The phase problem.</strong> The fields are generally complex, so walker determinants acquire complex phases — AFQMC's version of the sign problem. The <strong>phaseless approximation</strong> (Zhang &amp; Krakauer) constrains the random walk using a trial state $|\Psi_T\rangle$ to keep weights real and positive, analogous to fixed-node. Accuracy hinges on $|\Psi_T\rangle$, motivating multi-determinant and even quantum-computer trial states (Chapter 35). AFQMC scales as a low polynomial in system size and parallelizes superbly.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch25" style="border-left:3px solid var(--p5)">
+        <div class="ch-head"><span class="chno">CHAPTER 25</span><span class="tag">Advanced</span></div>
+        <h3>Path-Integral &amp; Finite-Temperature QMC</h3>
+        <div class="ch-body">
+<p>Everything so far targeted the ground state ($T=0$). At finite temperature we want thermal averages weighted by $e^{-\beta\hat H}$, $\beta=1/k_BT$. Feynman's <strong>path integral</strong> maps a quantum particle at temperature $T$ onto a <em>classical ring polymer</em> of $P$ "beads" connected by springs:</p>
+<div class="eq">$Z=\mathrm{Tr}\,e^{-\beta\hat H}=\oint \mathcal D R(\tau)\;e^{-S[R(\tau)]},\qquad \beta=P\,\delta\tau.$</div>
+<p><strong>Path-Integral Monte Carlo (PIMC)</strong> samples these closed paths with Metropolis moves. It is essentially exact for <strong>bosons</strong> (e.g. superfluid $^4$He) and even captures Bose–Einstein condensation through permutation moves — efficiently sampled by the <strong>worm algorithm</strong>, which opens the paths to update winding/permutation sectors.</p>
+<p>For <strong>fermions</strong> at finite $T$, antisymmetry under permutation reintroduces the sign problem (restricted-PIMC / fixed-node-in-$\beta$ approximations are used). PIMC is the natural framework for thermodynamics, quantum solids/liquids, and warm dense matter.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch26" style="border-left:3px solid var(--p5)">
+        <div class="ch-head"><span class="chno">CHAPTER 26</span><span class="tag">Advanced</span></div>
+        <h3>Lattice Models &amp; Continuous-Time QMC</h3>
+        <div class="ch-body">
+<p>Condensed-matter physics often abstracts materials into <strong>lattice models</strong> — the Hubbard model (itinerant electrons with on-site repulsion $U$) and the Heisenberg model (interacting spins) — that capture magnetism, Mott transitions, and (possibly) high-$T_c$ superconductivity.</p>
+<p>Specialized QMC algorithms dominate here:</p>
+<ul>
+<li><strong>Stochastic Series Expansion (SSE)</strong> — expand $e^{-\beta\hat H}$ as a power series and sample the operator strings; extremely efficient and sign-problem-free for unfrustrated spin models.</li>
+<li><strong>World-line / loop algorithms</strong> — global cluster updates that beat critical slowing down.</li>
+<li><strong>Continuous-Time QMC (CT-QMC)</strong> — works directly in the $\delta\tau\to0$ limit (no Trotter error) by sampling diagrammatic expansions in continuous imaginary time. CT-QMC impurity solvers (CT-INT, CT-HYB) are the engine inside <strong>Dynamical Mean-Field Theory (DMFT)</strong>, the standard tool for strongly-correlated materials.</li>
+</ul>
+<p>Frustrated and doped-fermionic lattices still suffer the sign problem, linking back to the open challenges of Chapters 21–23 and the research directions of Part VII.</p>
+</div>
+      </article>
+  </section>
+
+  <section class="part" id="part6">
+    <div class="part-head">
+      <div class="part-num" style="background:var(--p6)">VI</div>
+      <div><h2>Practice, Performance &amp; Frontiers</h2><div class="sub">Production QMC and where the field is heading</div></div>
+    </div>
+    
+      <article class="chapter" id="ch27" style="border-left:3px solid var(--p6)">
+        <div class="ch-head"><span class="chno">CHAPTER 27</span><span class="tag">Practice</span></div>
+        <h3>Error Analysis &amp; Statistics in Practice</h3>
+        <div class="ch-body">
+<p>A QMC number without a trustworthy error bar is meaningless. The two error types:</p>
+<ul>
+<li><strong>Statistical</strong> — random scatter, $\propto 1/\sqrt N$, <em>reducible</em> by sampling longer.</li>
+<li><strong>Systematic</strong> — biases (timestep, population, nodal, basis set) that <em>do not</em> shrink with $N$ and must be extrapolated away.</li>
+</ul>
+<p><strong>Autocorrelation &amp; reblocking.</strong> Because Markov samples are correlated, the naive error underestimates the truth. <em>Reblocking</em> (Flyvbjerg–Petersen) averages the series into blocks of size $b$; the estimated error rises with $b$ and plateaus once blocks are uncorrelated:</p>
+<div class="eq">$\delta E(b)=\dfrac{\sigma_b}{\sqrt{N_b-1}}\xrightarrow{b\ \text{large}}\ \text{true error}.$</div>
+<p><strong>Resampling.</strong> <em>Jackknife</em> (leave-one-block-out) and <em>bootstrap</em> (resample with replacement) propagate errors correctly through nonlinear functions of averages (variances, ratios, extrapolations).</p>
+<p>Best practice: report value, statistical error, and a clear statement of each extrapolation ($\delta\tau\to0$, $N_w\to\infty$, basis $\to$ complete) with its residual systematic uncertainty.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch28" style="border-left:3px solid var(--p6)">
+        <div class="ch-head"><span class="chno">CHAPTER 28</span><span class="tag">Practice</span></div>
+        <h3>High-Performance &amp; Parallel QMC</h3>
+        <div class="ch-body">
+<p>QMC is famously <strong>"embarrassingly parallel"</strong>: walkers are largely independent, so $P$ processors give nearly $P\times$ throughput. This makes QMC a natural fit for GPUs and the largest supercomputers.</p>
+<p><strong>Scaling concerns in real codes:</strong></p>
+<ul>
+<li><strong>Load balancing</strong> — branching makes walker counts uneven across ranks; periodic redistribution keeps cores busy.</li>
+<li><strong>Memory &amp; orbitals</strong> — B-spline (blip) representations of orbitals trade memory for fast $O(1)$ evaluation.</li>
+<li><strong>Fast updates</strong> — Sherman–Morrison / matrix-determinant-lemma updates give determinant ratios in $O(N^2)$ after single-electron moves.</li>
+<li><strong>Mixed precision &amp; GPU kernels</strong> — modern neural-QMC codes run in JAX/PyTorch on accelerators.</li>
+</ul>
+<p><strong>Production packages:</strong> <em>QMCPACK</em> (open-source, GPU, solids &amp; molecules), <em>CASINO</em> (continuum VMC/DMC), <em>QWalk</em>, <em>TurboRVB</em> (VMC/lattice), and <em>ALF</em>/<em>ALPS</em> for lattice AFQMC/SSE. Reproducibility (seeds, equilibration, extrapolation protocols) matters as much as raw speed.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch29" style="border-left:3px solid var(--p6)">
+        <div class="ch-head"><span class="chno">CHAPTER 29</span><span class="tag">Frontier</span></div>
+        <h3>Machine-Learning Wavefunctions (Neural-Network QMC)</h3>
+        <div class="ch-body">
+<p>Since 2017, neural networks have become the most expressive trial wavefunctions ever used. A deep network parameterizes $\Psi_\theta(R)$ with millions of weights, trained by VMC energy minimization (natural gradient / KFAC).</p>
+<p><strong>Key requirement:</strong> fermionic antisymmetry. Architectures enforce it with generalized (permutation-equivariant) Slater determinants:</p>
+<div class="eq">$\Psi_\theta(R)=\sum_k \det\!\big[\phi^k_i(\mathbf r_j;\,\{\mathbf r\})\big],$</div>
+<p>where each orbital depends on <em>all</em> electrons through an equivariant network (built-in backflow).</p>
+<p><strong>Landmark models:</strong></p>
+<ul>
+<li><strong>NQS</strong> (Carleo &amp; Troyer, <em>Science</em> 2017) — RBM states for lattice spins.</li>
+<li><strong>FermiNet</strong> (Pfau et al., 2020) and <strong>PauliNet</strong> (Hermann et al., 2020) — near-exact molecular energies in the continuum, no fixed nodes.</li>
+<li><strong>Psiformer</strong> (2023) — transformer/self-attention ansatz scaling to larger molecules.</li>
+</ul>
+<p>Open challenges: cost per step (network Laplacians), scaling to solids and 100+ electrons, excited states, and transferability across geometries (amortized training). This is the most active accuracy frontier in QMC — see Chapter 33.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch30" style="border-left:3px solid var(--p6)">
+        <div class="ch-head"><span class="chno">CHAPTER 30</span><span class="tag">Frontier</span></div>
+        <h3>QMC Meets Quantum Computing</h3>
+        <div class="ch-body">
+<p>QMC and quantum computers are complementary, not rivals.</p>
+<p><strong>QMC as a benchmark.</strong> Because QMC gives near-exact energies for many systems classically, it validates results from noisy quantum hardware and calibrates claims of quantum advantage.</p>
+<p><strong>Hybrid quantum-classical QMC.</strong> The headline result (Huggins, Lee, et al., <em>Nature</em> 2022) uses a quantum computer to provide a better <em>trial state / overlap</em> inside AFQMC, statistically <strong>de-biasing</strong> the phaseless constraint beyond what classical trial states allow:</p>
+<div class="eq">$\langle \Psi_Q|\phi_w\rangle \ \text{estimated on hardware} \;\Rightarrow\; \text{tighter constraint, smaller bias.}$</div>
+<p><strong>Open questions:</strong> the shot/measurement overhead of estimating overlaps, robustness to NISQ noise, and whether a provable, scalable advantage survives at large system sizes.</p>
+<p>The likely near-term role: quantum devices supply hard-to-compute ingredients (trial states, overlaps) while classical QMC does the heavy statistical lifting — bridging today's hardware to tomorrow's fault-tolerant machines.</p>
+</div>
+      </article>
+  </section>
+
+  <section class="part" id="part7">
+    <div class="part-head">
+      <div class="part-num" style="background:var(--p7)">VII</div>
+      <div><h2>Improving the QMC Algorithm</h2><div class="sub">Open problems &amp; research frontiers, grounded in Q1-journal literature</div></div>
+    </div>
+    
+      <article class="chapter" id="ch31" style="border-left:3px solid var(--p7)">
+        <div class="ch-head"><span class="chno">CHAPTER 31</span><span class="tag">Research</span></div>
+        <h3>Where QMC Still Falls Short</h3>
+        <div class="ch-body">
+<p>Despite its accuracy, QMC has four structural limitations that bound what it can do. Naming them precisely tells us where to invest research effort:</p>
+<ol>
+<li><strong>The fermion sign problem</strong> — variance grows exponentially with system size and inverse temperature for general fermionic / frustrated systems (NP-hard, Troyer–Wiese 2005).</li>
+<li><strong>Trial-wavefunction / nodal bias</strong> — fixed-node DMC is only as accurate as the nodes of $\Psi_T$; AFQMC only as good as its constraint trial state.</li>
+<li><strong>Statistical efficiency</strong> — the unavoidable $1/\sqrt N$ tax, inflated further by long autocorrelation times.</li>
+<li><strong>Wall-clock &amp; scaling cost</strong> — optimization and the $\delta\tau\to0$, $N_w\to\infty$, basis-set extrapolations multiply the expense.</li>
+</ol>
+<p>Chapters 32–36 address each in turn, citing the Q1 literature. The overarching modern theme: reframe these as <em>optimization</em> and <em>representation</em> problems, and bring machine learning and quantum hardware to bear.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch32" style="border-left:3px solid var(--p7)">
+        <div class="ch-head"><span class="chno">CHAPTER 32</span><span class="tag">Research</span></div>
+        <h3>Attacking the Sign Problem</h3>
+        <div class="ch-body">
+<p>The sign problem can't be solved universally, but it can be <em>mitigated</em> for important Hamiltonian classes and the constraints that tame it can be made tighter.</p>
+<ul>
+<li><strong>Basis / gauge optimization.</strong> The sign problem is representation-dependent — a local basis rotation can reduce or eliminate it. Hangleiter et al. (<em>Sci. Adv.</em> 6, eabb8341, 2020) cast "easing" the sign problem as an explicit optimization over local transformations.</li>
+<li><strong>Phaseless / constrained-path AFQMC.</strong> Zhang &amp; Krakauer (<em>PRL</em> 90, 136401, 2003) control the walker phase; the frontier is replacing the mean-field constraint trial state with multi-determinant or neural states to shrink the bias (Motta &amp; Zhang review, <em>WIREs Comput. Mol. Sci.</em> 2018).</li>
+<li><strong>Adaptive / self-learning constraints</strong> that learn an effective sign-free model on the fly.</li>
+<li><strong>Quantum-assisted de-biasing</strong> (Chapter 35).</li>
+</ul>
+<div class="eq">Practical rule: before fighting the sign numerically, ask whether a change of basis removes it.</div>
+</div>
+      </article>
+      <article class="chapter" id="ch33" style="border-left:3px solid var(--p7)">
+        <div class="ch-head"><span class="chno">CHAPTER 33</span><span class="tag">Research</span></div>
+        <h3>Better Wavefunctions = Better Nodes</h3>
+        <div class="ch-body">
+<p>In fixed-node DMC the <em>only</em> remaining error is the node, so improving $\Psi_T$ is the single highest-impact lever — and where the field has moved fastest since 2017.</p>
+<p><strong>Neural-network ansätze.</strong> Carleo &amp; Troyer (<em>Science</em> 355, 602, 2017) launched neural quantum states; FermiNet (Pfau et al., <em>Phys. Rev. Research</em> 2, 033429, 2020) and PauliNet (Hermann et al., <em>Nat. Chem.</em> 12, 891, 2020) reach near-exact molecular energies; Psiformer (von Glehn et al., 2023) scales attention-based ansätze to larger systems.</p>
+<p><strong>Classical upgrades that still pay.</strong> Backflow transformations and multi-determinant expansions systematically deform nodes; energy-minimization via the linear method (Umrigar et al., <em>PRL</em> 98, 110201, 2007) optimizes them robustly.</p>
+<p><strong>Open targets:</strong> neural ansätze for <em>solids</em> and 100+ electrons, cheaper network Laplacians, excited states, and transferable/amortized models across geometries (DeepErwin, Scherbela et al., <em>Nat. Comput. Sci.</em> 2022).</p>
+</div>
+      </article>
+      <article class="chapter" id="ch34" style="border-left:3px solid var(--p7)">
+        <div class="ch-head"><span class="chno">CHAPTER 34</span><span class="tag">Research</span></div>
+        <h3>Statistical Efficiency</h3>
+        <div class="ch-body">
+<p>Even with perfect nodes we pay the $1/\sqrt N$ tax; this chapter lowers the prefactor and the autocorrelation time $\tau_{\text{ac}}$.</p>
+<ul>
+<li><strong>Better optimizers.</strong> Stochastic Reconfiguration / natural gradient (Sorella, <em>PRB</em> 64, 024512, 2001) and the linear method converge in far fewer, far-less-noisy iterations than plain SGD — essential for million-parameter neural ansätze (where KFAC makes natural gradient affordable).</li>
+<li><strong>Variance reduction.</strong> Zero-variance / zero-bias estimators (Assaraf &amp; Caffarel, <em>PRL</em> 83, 4682, 1999) and improved estimators for forces and densities.</li>
+<li><strong>Correlated sampling</strong> for energy <em>differences</em> (reaction energies, forces), whose variance is far smaller than that of absolute energies.</li>
+<li><strong>Decorrelation.</strong> Smarter proposals (all-electron updates, Langevin/HMC-style moves) shorten $\tau_{\text{ac}}$ and raise the effective sample size $N/(2\tau_{\text{ac}})$.</li>
+</ul>
+<div class="eq">"Improving QMC" often means improving the <em>optimizer and estimators</em>, not the sampler.</div>
+</div>
+      </article>
+      <article class="chapter" id="ch35" style="border-left:3px solid var(--p7)">
+        <div class="ch-head"><span class="chno">CHAPTER 35</span><span class="tag">Research</span></div>
+        <h3>Cost, Scaling &amp; the Quantum Frontier</h3>
+        <div class="ch-body">
+<p>Making accurate QMC <em>affordable</em> proceeds on two complementary fronts — classical scaling and quantum assistance.</p>
+<p><strong>Classical scaling.</strong></p>
+<ul>
+<li><strong>Accelerators:</strong> GPU/HPC ports (QMCPACK, Kim et al., <em>J. Phys.: Condens. Matter</em> 30, 195901, 2018) and JAX/PyTorch neural-QMC.</li>
+<li><strong>Reduced-scaling AFQMC</strong> via low-rank / tensor-hypercontraction factorizations of the two-electron integrals, pushing larger basis sets.</li>
+<li><strong>Amortization / transfer learning</strong> so each new geometry is cheap (DeepErwin, 2022).</li>
+</ul>
+<p><strong>Quantum frontier.</strong> QC-QMC (Huggins, Lee, et al., <em>Nature</em> 603, 416, 2022) uses a quantum computer to supply trial-state overlaps that statistically <em>unbias</em> the classical constraint, in principle removing nodal bias beyond classical reach. Open issues: measurement (shot) overhead, NISQ noise robustness, and scalability of any provable advantage.</p>
+</div>
+      </article>
+      <article class="chapter" id="ch36" style="border-left:3px solid var(--p7)">
+        <div class="ch-head"><span class="chno">CHAPTER 36</span><span class="tag">Practice</span></div>
+        <h3>A Practitioner's Improvement Checklist</h3>
+        <div class="ch-body">
+<p>When asked "how do we improve <em>our</em> QMC pipeline?", work top-down:</p>
+<ol>
+<li><strong>Diagnose the dominant error</strong> — statistical (run longer / reduce variance), nodal (improve $\Psi_T$), timestep/population (DMC controls), or sign (representation/constraint)?</li>
+<li><strong>Upgrade the ansatz before the sampler</strong> — Jastrow/backflow → multi-determinant → neural network, as budget allows.</li>
+<li><strong>Switch to natural-gradient optimization</strong> (SR / linear method / KFAC) if optimization is the bottleneck.</li>
+<li><strong>Use correlated sampling</strong> for any energy <em>difference</em> you care about.</li>
+<li><strong>Profile and parallelize</strong> walkers across GPUs; consider low-rank integral factorizations for AFQMC.</li>
+<li><strong>Re-examine the representation</strong> for sign-problem-limited systems before brute-forcing more samples.</li>
+<li><strong>Scope a quantum-assisted step</strong> only after classical levers (1–6) are exhausted.</li>
+</ol>
+<div class="eq">Most real-world QMC gains come from a better ansatz and a better optimizer — in that order.</div>
+</div>
+      </article>
+  </section>
+</div>
+<footer>Quantum Monte Carlo — 7 Parts · 36 Chapters. Equations render via MathJax. Citations point to primary Q1 literature; verify volume/page/year against the publisher of record before formal use.</footer>
+</main>
+</div>
+</body>
+</html>
