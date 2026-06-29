@@ -1,0 +1,73 @@
+{
+  "job_id": "d8vdboumvj5c73ehi86g",
+  "backend": "ibm_kingston",
+  "submit_time": "2026-06-27 01:11:23",
+  "grover_powers": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "shots": 4000,
+  "circuit_info": [
+    {
+      "grover_power": 0,
+      "original_depth": 3,
+      "transpiled_depth": 67,
+      "transpiled_gates": 90
+    },
+    {
+      "grover_power": 1,
+      "original_depth": 11,
+      "transpiled_depth": 429,
+      "transpiled_gates": 627
+    },
+    {
+      "grover_power": 2,
+      "original_depth": 19,
+      "transpiled_depth": 822,
+      "transpiled_gates": 1248
+    },
+    {
+      "grover_power": 3,
+      "original_depth": 27,
+      "transpiled_depth": 1158,
+      "transpiled_gates": 1739
+    },
+    {
+      "grover_power": 4,
+      "original_depth": 35,
+      "transpiled_depth": 1551,
+      "transpiled_gates": 2357
+    },
+    {
+      "grover_power": 5,
+      "original_depth": 43,
+      "transpiled_depth": 1900,
+      "transpiled_gates": 2898
+    },
+    {
+      "grover_power": 6,
+      "original_depth": 51,
+      "transpiled_depth": 2256,
+      "transpiled_gates": 3471
+    },
+    {
+      "grover_power": 7,
+      "original_depth": 59,
+      "transpiled_depth": 2624,
+      "transpiled_gates": 4038
+    },
+    {
+      "grover_power": 8,
+      "original_depth": 67,
+      "transpiled_depth": 3015,
+      "transpiled_gates": 4579
+    }
+  ]
+}

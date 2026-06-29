@@ -1,0 +1,96 @@
+{
+  "method": "classical_monte_carlo",
+  "true_probability": 0.125,
+  "convergence_study": [
+    {
+      "n_samples": 50,
+      "mean_estimate": 0.1244,
+      "std_estimate": 0.047124,
+      "mean_abs_error": 0.0405,
+      "mean_rel_error_pct": 32.4,
+      "theoretical_std": 0.046771,
+      "n_trials": 100
+    },
+    {
+      "n_samples": 100,
+      "mean_estimate": 0.1239,
+      "std_estimate": 0.03237,
+      "mean_abs_error": 0.025,
+      "mean_rel_error_pct": 20.0,
+      "theoretical_std": 0.033072,
+      "n_trials": 100
+    },
+    {
+      "n_samples": 200,
+      "mean_estimate": 0.1251,
+      "std_estimate": 0.024166,
+      "mean_abs_error": 0.0195,
+      "mean_rel_error_pct": 15.6,
+      "theoretical_std": 0.023385,
+      "n_trials": 100
+    },
+    {
+      "n_samples": 500,
+      "mean_estimate": 0.12534,
+      "std_estimate": 0.012797,
+      "mean_abs_error": 0.01052,
+      "mean_rel_error_pct": 8.42,
+      "theoretical_std": 0.01479,
+      "n_trials": 100
+    },
+    {
+      "n_samples": 1000,
+      "mean_estimate": 0.1243,
+      "std_estimate": 0.011021,
+      "mean_abs_error": 0.00882,
+      "mean_rel_error_pct": 7.06,
+      "theoretical_std": 0.010458,
+      "n_trials": 100
+    },
+    {
+      "n_samples": 2000,
+      "mean_estimate": 0.12607,
+      "std_estimate": 0.006942,
+      "mean_abs_error": 0.00548,
+      "mean_rel_error_pct": 4.38,
+      "theoretical_std": 0.007395,
+      "n_trials": 100
+    },
+    {
+      "n_samples": 5000,
+      "mean_estimate": 0.124714,
+      "std_estimate": 0.004081,
+      "mean_abs_error": 0.00325,
+      "mean_rel_error_pct": 2.6,
+      "theoretical_std": 0.004677,
+      "n_trials": 100
+    },
+    {
+      "n_samples": 10000,
+      "mean_estimate": 0.124942,
+      "std_estimate": 0.0029,
+      "mean_abs_error": 0.002296,
+      "mean_rel_error_pct": 1.84,
+      "theoretical_std": 0.003307,
+      "n_trials": 100
+    },
+    {
+      "n_samples": 50000,
+      "mean_estimate": 0.12473,
+      "std_estimate": 0.001392,
+      "mean_abs_error": 0.001106,
+      "mean_rel_error_pct": 0.88,
+      "theoretical_std": 0.001479,
+      "n_trials": 100
+    },
+    {
+      "n_samples": 100000,
+      "mean_estimate": 0.124827,
+      "std_estimate": 0.001075,
+      "mean_abs_error": 0.000868,
+      "mean_rel_error_pct": 0.69,
+      "theoretical_std": 0.001046,
+      "n_trials": 100
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "single_run": {
+    "method": "quantum_simulator",
+    "simulator": "qiskit_aer",
+    "grover_powers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "shots_per_circuit": 4000,
+    "measurements": [
+      {
+        "m": 0,
+        "ones": 476,
+        "zeros": 3524,
+        "total": 4000,
+        "p_measured": 0.119,
+        "p_expected": 0.125,
+        "deviation": 0.006,
+        "circuit_depth": 3
+      },
+      {
+        "m": 1,
+        "ones": 3164,
+        "zeros": 836,
+        "total": 4000,
+        "p_measured": 0.791,
+        "p_expected": 0.78125,
+        "deviation": 0.00975,
+        "circuit_depth": 11
+      },
+      {
+        "m": 2,
+        "ones": 3789,
+        "zeros": 211,
+        "total": 4000,
+        "p_measured": 0.94725,
+        "p_expected": 0.945312,
+        "deviation": 0.001938,
+        "circuit_depth": 19
+      },
+      {
+        "m": 3,
+        "ones": 1369,
+        "zeros": 2631,
+        "total": 4000,
+        "p_measured": 0.34225,
+        "p_expected": 0.330078,
+        "deviation": 0.012172,
+        "circuit_depth": 27
+      },
+      {
+        "m": 4,
+        "ones": 50,
+        "zeros": 3950,
+        "total": 4000,
+        "p_measured": 0.0125,
+        "p_expected": 0.012207,
+        "deviation": 0.000293,
+        "circuit_depth": 35
+      },
+      {
+        "m": 5,
+        "ones": 2216,
+        "zeros": 1784,
+        "total": 4000,
+        "p_measured": 0.554,
+        "p_expected": 0.547974,
+        "deviation": 0.006026,
+        "circuit_depth": 43
+      },
+      {
+        "m": 6,
+        "ones": 4000,
+        "zeros": 0,
+        "total": 4000,
+        "p_measured": 1.0,
+        "p_expected": 0.999786,
+        "deviation": 0.000214,
+        "circuit_depth": 51
+      },
+      {
+        "m": 7,
+        "ones": 2266,
+        "zeros": 1734,
+        "total": 4000,
+        "p_measured": 0.5665,
+        "p_expected": 0.576973,
+        "deviation": 0.010473,
+        "circuit_depth": 59
+      },
+      {
+        "m": 8,
+        "ones": 90,
+        "zeros": 3910,
+        "total": 4000,
+        "p_measured": 0.0225,
+        "p_expected": 0.019457,
+        "deviation": 0.003043,
+        "circuit_depth": 67
+      }
+    ],
+    "mle_estimate": {
+      "theta_hat": 0.361434,
+      "theta_true": 0.361367,
+      "amplitude_hat": 0.125044,
+      "amplitude_true": 0.125,
+      "abs_error": 4.4e-05,
+      "relative_error_pct": 0.04
+    },
+    "total_oracle_calls": 324000,
+    "total_circuits": 9,
+    "time_seconds": 3.0191
+  },
+  "statistical_analysis": {
+    "n_trials": 10,
+    "estimates": [
+      0.12494,
+      0.125083,
+      0.124829,
+      0.124749,
+      0.125049,
+      0.125321,
+      0.124841,
+      0.124988,
+      0.12479,
+      0.124561
+    ],
+    "mean_estimate": 0.124915,
+    "std_estimate": 0.0002,
+    "mean_abs_error": 0.000175,
+    "mean_rel_error_pct": 0.14
+  }
+}

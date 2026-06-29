@@ -1,0 +1,133 @@
+{
+  "method": "quantum_hardware",
+  "job_id": "d8vdboumvj5c73ehi86g",
+  "backend": "ibm_kingston",
+  "measurements": [
+    {
+      "m": 0,
+      "ones": 508,
+      "zeros": 3492,
+      "total": 4000,
+      "p_measured": 0.127,
+      "p_expected": 0.125,
+      "deviation": 0.002,
+      "raw_counts": {
+        "0": 3492,
+        "1": 508
+      }
+    },
+    {
+      "m": 1,
+      "ones": 1800,
+      "zeros": 2200,
+      "total": 4000,
+      "p_measured": 0.45,
+      "p_expected": 0.78125,
+      "deviation": 0.33125,
+      "raw_counts": {
+        "0": 2200,
+        "1": 1800
+      }
+    },
+    {
+      "m": 2,
+      "ones": 2185,
+      "zeros": 1815,
+      "total": 4000,
+      "p_measured": 0.54625,
+      "p_expected": 0.945312,
+      "deviation": 0.399062,
+      "raw_counts": {
+        "1": 2185,
+        "0": 1815
+      }
+    },
+    {
+      "m": 3,
+      "ones": 1467,
+      "zeros": 2533,
+      "total": 4000,
+      "p_measured": 0.36675,
+      "p_expected": 0.330078,
+      "deviation": 0.036672,
+      "raw_counts": {
+        "1": 1467,
+        "0": 2533
+      }
+    },
+    {
+      "m": 4,
+      "ones": 1488,
+      "zeros": 2512,
+      "total": 4000,
+      "p_measured": 0.372,
+      "p_expected": 0.012207,
+      "deviation": 0.359793,
+      "raw_counts": {
+        "0": 2512,
+        "1": 1488
+      }
+    },
+    {
+      "m": 5,
+      "ones": 1637,
+      "zeros": 2363,
+      "total": 4000,
+      "p_measured": 0.40925,
+      "p_expected": 0.547974,
+      "deviation": 0.138724,
+      "raw_counts": {
+        "1": 1637,
+        "0": 2363
+      }
+    },
+    {
+      "m": 6,
+      "ones": 1800,
+      "zeros": 2200,
+      "total": 4000,
+      "p_measured": 0.45,
+      "p_expected": 0.999786,
+      "deviation": 0.549786,
+      "raw_counts": {
+        "0": 2200,
+        "1": 1800
+      }
+    },
+    {
+      "m": 7,
+      "ones": 1803,
+      "zeros": 2197,
+      "total": 4000,
+      "p_measured": 0.45075,
+      "p_expected": 0.576973,
+      "deviation": 0.126223,
+      "raw_counts": {
+        "1": 1803,
+        "0": 2197
+      }
+    },
+    {
+      "m": 8,
+      "ones": 1846,
+      "zeros": 2154,
+      "total": 4000,
+      "p_measured": 0.4615,
+      "p_expected": 0.019457,
+      "deviation": 0.442043,
+      "raw_counts": {
+        "1": 1846,
+        "0": 2154
+      }
+    }
+  ],
+  "mle_estimate": {
+    "theta_hat": 0.785625,
+    "theta_true": 0.361367,
+    "amplitude_hat": 0.500227,
+    "amplitude_true": 0.125,
+    "abs_error": 0.375227,
+    "relative_error_pct": 300.18
+  },
+  "total_oracle_calls": 324000
+}
