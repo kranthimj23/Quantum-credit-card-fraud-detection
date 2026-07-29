@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UPI Switch from Beginner to Architect — 20-Chapter Course</title>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({startOnLoad:true, theme:'dark', themeVariables:{fontSize:'14px'}});
+</script>
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--text:#e6edf3;--muted:#9da7b3;--accent:#3b82f6;--border:#30363d;
+    --p1:#3b82f6;--p2:#22c55e;--p3:#a371f7;--p4:#f59e0b;--p5:#ef4444;--p6:#06b6d4;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--accent);text-decoration:none;}
+  .layout{display:grid;grid-template-columns:320px 1fr;max-width:1400px;margin:0 auto;}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:24px 16px;
+    border-right:1px solid var(--border);background:var(--panel);font-size:13.5px;}
+  .toc-title{font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--muted);margin-bottom:14px;}
+  .toc-part{margin:14px 0;padding-left:10px;}
+  .toc-part>a{font-weight:700;color:var(--text);display:block;margin-bottom:4px;}
+  .toc-part ul{list-style:none;margin:0;padding:0 0 0 4px;}
+  .toc-part li{margin:1px 0;}
+  .toc-part li a{color:var(--muted);display:block;padding:2px 6px;border-radius:6px;}
+  .toc-part li a:hover{color:var(--text);background:#21262d;}
+  main{min-width:0;}
+  header.hero{background:radial-gradient(1100px 380px at 20% -10%,#14532d 0%,transparent 60%),linear-gradient(135deg,#0b1220,#101826);
+    border-bottom:1px solid var(--border);padding:56px 48px 44px;}
+  header.hero h1{margin:0 0 10px;font-size:36px;letter-spacing:-.5px;}
+  header.hero p{margin:0;max-width:780px;color:var(--muted);font-size:18px;}
+  .badges{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;}
+  .badge{background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--muted);}
+  .content{padding:8px 48px 90px;}
+  .part{margin-top:46px;scroll-margin-top:20px;}
+  .part-head{display:flex;align-items:center;gap:16px;margin:0 0 8px;}
+  .part-num{width:50px;height:50px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:19px;color:#fff;flex:none;}
+  .part-head h2{margin:0;font-size:25px;}
+  .part-head .sub{color:var(--muted);font-size:14px;margin-top:2px;}
+  .chapter{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 26px;margin:18px 0;scroll-margin-top:20px;}
+  .chno{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--muted);}
+  .chapter h3{margin:8px 0 12px;font-size:21px;}
+  .ch-body p{margin:12px 0;}
+  .ch-body ul,.ch-body ol{margin:12px 0;padding-left:24px;}
+  .ch-body li{margin:5px 0;}
+  .callout{background:#0b1119;border:1px solid var(--border);border-left:3px solid var(--p2);border-radius:8px;padding:12px 16px;margin:14px 0;font-size:14.5px;}
+  .callout b{color:var(--p2);}
+  .warn{border-left-color:var(--p5);}  .warn b{color:var(--p5);}
+  .example{border-left-color:var(--p4);} .example b{color:var(--p4);}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px;}
+  th,td{border:1px solid var(--border);padding:7px 11px;text-align:left;}
+  th{background:#0b1119;color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;}
+  code{background:#0b1119;border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-size:13.5px;color:#79c0ff;}
+  pre{background:#0b1119;border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow:auto;font-size:13px;line-height:1.55;}
+  pre code{background:none;border:none;padding:0;}
+  .mermaid{background:#0b1119;border:1px solid var(--border);border-radius:10px;padding:14px;margin:14px 0;display:flex;justify-content:center;}
+  .outcome{margin-top:16px;background:#101c14;border:1px solid #1f4d2e;border-radius:8px;padding:10px 14px;font-size:14px;}
+  .outcome b{color:var(--p2);}
+  @media(max-width:980px){.layout{grid-template-columns:1fr;} aside{position:static;height:auto;}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="toc-title">UPI Switch — Course Contents</div>
+  <div class="toc-part"><a href="#part1">Phase 1 · Foundations</a><ul>
+    <li><a href="#ch1">1. UPI Ecosystem &amp; Participants</a></li>
+    <li><a href="#ch2">2. VPAs, PSPs, TPAPs &amp; Handles</a></li>
+    <li><a href="#ch3">3. Transaction Types &amp; Rails</a></li>
+    <li><a href="#ch4">4. End-to-End Message Flow</a></li></ul></div>
+  <div class="toc-part"><a href="#part2">Phase 2 · The Protocol</a><ul>
+    <li><a href="#ch5">5. UPI API Catalogue</a></li>
+    <li><a href="#ch6">6. Security, PKI &amp; Common Library</a></li>
+    <li><a href="#ch7">7. Onboarding &amp; Non-Financial Flows</a></li>
+    <li><a href="#ch8">8. Errors, Timeouts &amp; Response Codes</a></li></ul></div>
+  <div class="toc-part"><a href="#part3">Phase 3 · Switch Internals</a><ul>
+    <li><a href="#ch9">9. Issuer Switch — Debit Leg</a></li>
+    <li><a href="#ch10">10. Issuer Switch — Credit Leg &amp; HSM</a></li>
+    <li><a href="#ch11">11. Acquirer / PSP Switch</a></li>
+    <li><a href="#ch12">12. Performance &amp; Availability</a></li></ul></div>
+  <div class="toc-part"><a href="#part4">Phase 4 · NPCI Integration</a><ul>
+    <li><a href="#ch13">13. Connectivity &amp; Environments</a></li>
+    <li><a href="#ch14">14. Certification &amp; Go-Live</a></li></ul></div>
+  <div class="toc-part"><a href="#part5">Phase 5 · Risk &amp; Money Movement</a><ul>
+    <li><a href="#ch15">15. Fraud &amp; Risk Engines</a></li>
+    <li><a href="#ch16">16. Settlement</a></li>
+    <li><a href="#ch17">17. Reconciliation &amp; Disputes</a></li></ul></div>
+  <div class="toc-part"><a href="#part6">Phase 6 · Architect Level</a><ul>
+    <li><a href="#ch18">18. Reference Architecture</a></li>
+    <li><a href="#ch19">19. Build vs Buy &amp; Strategy</a></li>
+    <li><a href="#ch20">20. Capstone — Design Your Switch</a></li></ul></div>
+</aside>
+<main>
+<header class="hero">
+  <h1>UPI Switch: from Beginner to Architect</h1>
+  <p>A 20-chapter course that takes you from "what is UPI?" all the way to designing and building a
+     production-grade, bank-owned UPI switch — with call-flow diagrams, real-world examples, state machines,
+     and a capstone design exercise.</p>
+  <div class="badges">
+    <span class="badge">20 chapters · 6 phases</span>
+    <span class="badge">Sequence diagrams for every flow</span>
+    <span class="badge">Issuer + Acquirer + PSP internals</span>
+    <span class="badge">NPCI certification playbook</span>
+  </div>
+</header>
+<div class="content">
+
+<!-- ============ PHASE 1 ============ -->
+<section class="part" id="part1">
+  <div class="part-head"><div class="part-num" style="background:var(--p1)">P1</div>
+    <div><h2>Phase 1 — Foundations</h2><div class="sub">What UPI is, who the players are, and how money conceptually moves.</div></div></div>
+
+  <article class="chapter" id="ch1">
+    <div class="chno">CHAPTER 1</div><h3>The UPI Ecosystem and Its Participants</h3>
+    <div class="ch-body">
+      <p><b>UPI (Unified Payments Interface)</b> is a real-time, account-to-account payment system operated by
+      <b>NPCI</b> (National Payments Corporation of India). Unlike cards, there is no card number and no
+      scheme like Visa in the middle — NPCI itself is the central switch that routes messages between banks.</p>
+      <p>The participants you must know cold:</p>
+      <ul>
+        <li><b>NPCI</b> — the central router, rule-maker, and settlement operator. Every UPI message passes through it.</li>
+        <li><b>Issuer / Remitter bank</b> — the payer's bank; it debits the customer's account. Its <b>issuer switch</b> is the system this course teaches you to build.</li>
+        <li><b>Beneficiary / Acquirer bank</b> — the payee's bank; it credits the receiving account (or merchant).</li>
+        <li><b>PSP bank</b> (Payment Service Provider) — the bank that connects a customer-facing app to NPCI and owns the VPA handle.</li>
+        <li><b>TPAP</b> (Third-Party Application Provider) — apps like GPay, PhonePe, Paytm. They are <i>not</i> banks; they ride on a sponsor PSP bank.</li>
+        <li><b>Customer &amp; Merchant</b> — the end parties.</li>
+      </ul>
+      <div class="mermaid">
+flowchart LR
+  C[Customer<br/>UPI app] --> T[TPAP<br/>e.g. GPay]
+  T --> P[PSP Bank<br/>payer side]
+  P --> N[NPCI<br/>central switch]
+  N --> I[Issuer Bank<br/>issuer switch + CBS]
+  N --> B[Beneficiary Bank<br/>credit leg]
+  B --> M[Merchant / Payee]
+      </div>
+      <p>The <b>4-party model</b> (customer, payer PSP=issuer, NPCI, beneficiary) becomes a <b>5-party model</b>
+      when the app is a TPAP riding on a separate PSP bank — which is the common case today. A single real payment
+      can involve: TPAP → PSP bank → NPCI → issuer bank → NPCI → beneficiary bank.</p>
+      <div class="callout example"><b>Real-world example:</b> You pay a chaiwala with GPay. GPay (TPAP) sends the request via
+      its sponsor PSP (e.g. Axis). NPCI routes a debit to your bank (issuer switch verifies your UPI PIN and debits you),
+      then routes a credit to the chaiwala's bank. Total elapsed: ~2–3 seconds across 6 systems.</div>
+      <p><b>Regulatory frame:</b> RBI regulates under the PSS Act; NPCI publishes the UPI Procedural Guidelines,
+      Operating Circulars, and API specifications that your switch must comply with. Banks join UPI by signing
+      NPCI's agreement and passing certification (Chapter 14).</p>
+      <div class="outcome"><b>Outcome:</b> Draw the full ecosystem diagram from memory, including where a bank-owned
+      UPI switch sits and every message hop for a TPAP-initiated payment.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch2">
+    <div class="chno">CHAPTER 2</div><h3>VPAs, PSPs, TPAPs, and Handles</h3>
+    <div class="ch-body">
+      <p>A <b>VPA (Virtual Payment Address)</b> like <code>alice@okhdfcbank</code> is an alias that hides the real
+      account number. Its anatomy:</p>
+      <table><tr><th>Part</th><th>Example</th><th>Meaning</th></tr>
+        <tr><td>Local part</td><td><code>alice</code></td><td>Chosen by user/app; unique within the handle</td></tr>
+        <tr><td>Handle</td><td><code>@okhdfcbank</code></td><td>Registered by a PSP bank with NPCI; identifies which PSP resolves this VPA</td></tr></table>
+      <p><b>Resolution:</b> NPCI keeps a mapper of handle → PSP bank. When someone pays <code>alice@okhdfcbank</code>,
+      NPCI routes an address-resolution request to that PSP, which returns the underlying account + IFSC (masked
+      from the payer). The payer never learns the account number.</p>
+      <div class="mermaid">
+sequenceDiagram
+  participant PayerApp
+  participant NPCI
+  participant PSP as PSP owning @handle
+  PayerApp->>NPCI: Resolve alice@okhdfcbank (ReqValAdd)
+  NPCI->>PSP: Route by handle
+  PSP-->>NPCI: Name = "Alice K", account exists
+  NPCI-->>PayerApp: Verified payee name shown before PIN
+      </div>
+      <p><b>PSP vs TPAP responsibilities:</b></p>
+      <table><tr><th>Responsibility</th><th>TPAP (app)</th><th>PSP bank</th></tr>
+        <tr><td>UI/UX, customer support front line</td><td>Yes</td><td>—</td></tr>
+        <tr><td>Connectivity to NPCI, message signing</td><td>—</td><td>Yes</td></tr>
+        <tr><td>VPA handle ownership, mapper updates</td><td>—</td><td>Yes</td></tr>
+        <tr><td>Regulatory accountability to NPCI/RBI</td><td>Shared</td><td>Primary</td></tr></table>
+      <p>Also know: <b>mobile-number mapping</b> (pay to a phone number resolved via NPCI mapper),
+      <b>numeric UPI IDs</b>, <b>UPI Number portability</b>, and that one customer can hold many VPAs across many PSPs
+      pointing at the same account.</p>
+      <div class="outcome"><b>Outcome:</b> Explain exactly which systems touch a VPA lookup, and why the payee's
+      registered name is shown to the payer before PIN entry (fraud mitigation).</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch3">
+    <div class="chno">CHAPTER 3</div><h3>UPI Transaction Types and Rails</h3>
+    <div class="ch-body">
+      <p>Every UPI payment is either a <b>Pay (push)</b> — payer initiates — or a <b>Collect (pull)</b> — payee
+      requests and payer approves. On top of these two primitives, UPI builds many rails:</p>
+      <table><tr><th>Rail</th><th>Type</th><th>Typical use</th><th>Notes</th></tr>
+        <tr><td>P2P Pay</td><td>Push</td><td>Send money to a friend</td><td>Default flow; VPA/mobile/QR</td></tr>
+        <tr><td>P2M Pay (QR / Intent)</td><td>Push</td><td>Merchant payments</td><td>Static QR (fixed VPA) vs dynamic QR (amount+ref embedded); app-to-app intent on mobile</td></tr>
+        <tr><td>Collect</td><td>Pull</td><td>Bill requests</td><td>Heavily restricted now due to fraud; limits apply</td></tr>
+        <tr><td>Mandates (UPI Autopay)</td><td>Pull, pre-authorized</td><td>Subscriptions, SIPs</td><td>One-time PIN at creation; executions are PIN-less within limits</td></tr>
+        <tr><td>UPI Lite</td><td>Push, on-device</td><td>Small offline-ish payments</td><td>Balance held in device wallet; no PIN per txn</td></tr>
+        <tr><td>Credit line on UPI</td><td>Push</td><td>Pay from pre-sanctioned credit</td><td>Issuer exposes a credit account over UPI</td></tr>
+        <tr><td>International UPI</td><td>Push</td><td>UPI abroad (e.g. Singapore PayNow link)</td><td>Cross-border corridor via NPCI International</td></tr></table>
+      <p><b>Initiation methods</b> matter for your acquirer design: QR scan, deep link / intent
+      (<code>upi://pay?pa=...&amp;am=...</code>), in-app VPA entry, and NFC (UPI Tap). A dynamic merchant QR encodes
+      payee VPA, amount, merchant ref and a signature.</p>
+      <p><b>Limits and codes:</b> per-transaction caps (generally ₹1 lakh; higher for specific MCCs like
+      hospitals/education/IPO), MCC (merchant category codes) on P2M, and zero-MDR policy for UPI P2M —
+      which shapes the business case of an acquiring switch.</p>
+      <div class="callout example"><b>Example:</b> A Netflix subscription = UPI Autopay mandate: created once with PIN,
+      then executed monthly by the merchant's PSP as a pre-approved debit, notified to the customer 24h in advance.</div>
+      <div class="outcome"><b>Outcome:</b> Classify any real-world UPI payment into its rail, initiation method,
+      and push/pull type — and know which limits apply.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch4">
+    <div class="chno">CHAPTER 4</div><h3>End-to-End Transaction Message Flow</h3>
+    <div class="ch-body">
+      <p>This is the single most important diagram in UPI. A P2P Pay via a TPAP, hop by hop:</p>
+      <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant App as Payer App (TPAP)
+  participant PSP as Payer PSP Switch
+  participant NPCI
+  participant ISS as Issuer Switch + CBS
+  participant BEN as Beneficiary Bank
+  App->>PSP: Initiate pay (amount, payee VPA, PIN credential block)
+  PSP->>NPCI: ReqPay (signed XML)
+  NPCI->>ISS: ReqPay — DEBIT leg
+  ISS->>ISS: Verify PIN (HSM), limits, balance
+  ISS->>ISS: Debit account in CBS
+  ISS-->>NPCI: RespPay (debit SUCCESS)
+  NPCI->>BEN: ReqPay — CREDIT leg
+  BEN->>BEN: Validate + credit account
+  BEN-->>NPCI: RespPay (credit SUCCESS)
+  NPCI-->>PSP: RespPay (final status)
+  PSP-->>App: Payment success + RRN
+      </div>
+      <p>Key properties of this flow:</p>
+      <ul>
+        <li><b>Debit-first:</b> the payer is debited before the credit is attempted. If credit fails, money must be
+        reversed or the credit retried — this is where recon (Ch. 17) earns its keep.</li>
+        <li><b>Asynchronous request/callback:</b> every <code>ReqPay</code> gets an HTTP 200 ACK immediately;
+        the real answer arrives later as a separate <code>RespPay</code> callback. Your switch must correlate them.</li>
+        <li><b>Deemed approval:</b> if the beneficiary doesn't answer in time, NPCI may treat the credit as
+        "deemed" success — the beneficiary bank must honour it and fix its books later.</li>
+        <li><b>The RRN</b> (retrieval reference number) is the customer-visible ID that ties all legs together.</li>
+      </ul>
+      <div class="callout"><b>Why customers see "pending":</b> the app timed out waiting for the final RespPay.
+      The money may still be moving. Status is resolved by <code>ReqChkTxn</code> or next-day recon — never by guessing.</div>
+      <div class="outcome"><b>Outcome:</b> Draw the complete 12-step call flow from memory with all hops labelled,
+      and explain what happens if any single hop times out.</div>
+    </div>
+  </article>
+</section>
+<!-- ============ PHASE 2 ============ -->
+<section class="part" id="part2">
+  <div class="part-head"><div class="part-num" style="background:var(--p2)">P2</div>
+    <div><h2>Phase 2 — The Protocol</h2><div class="sub">The actual UPI APIs, message formats, and security envelope.</div></div></div>
+
+  <article class="chapter" id="ch5">
+    <div class="chno">CHAPTER 5</div><h3>UPI API Catalogue and Message Structures</h3>
+    <div class="ch-body">
+      <p>UPI is <b>XML over HTTPS</b> with digital signatures. Every message has the same skeleton:</p>
+      <pre><code>&lt;upi:ReqPay xmlns:upi="http://npci.org/upi/schema/"&gt;
+  &lt;Head ver="2.0" ts="..." orgId="..." msgId="MSG123"/&gt;
+  &lt;Txn id="TXN456" note="Chai" refId="..." refUrl="..." ts="..." type="PAY"/&gt;
+  &lt;Payer addr="alice@okhdfc" name="Alice" seqNum="1" type="PERSON" code="0000"&gt;
+    &lt;Info&gt; ... identity / rating ... &lt;/Info&gt;
+    &lt;Device&gt; ... app, os, geocode, ip ... &lt;/Device&gt;
+    &lt;Ac addrType="ACCOUNT"&gt; ... IFSC, acnum ... &lt;/Ac&gt;
+    &lt;Creds&gt;&lt;Cred type="PIN" subType="MPIN"&gt;&lt;Data&gt;encrypted block&lt;/Data&gt;&lt;/Cred&gt;&lt;/Creds&gt;
+    &lt;Amount value="20.00" curr="INR"/&gt;
+  &lt;/Payer&gt;
+  &lt;Payees&gt;&lt;Payee addr="chai@ybl" .../&gt;&lt;/Payees&gt;
+  &lt;Signature&gt; XML-DSig over the whole message &lt;/Signature&gt;
+&lt;/upi:ReqPay&gt;</code></pre>
+      <p>The core APIs your switch will implement or consume:</p>
+      <table><tr><th>API</th><th>Purpose</th><th>Who handles it in your bank</th></tr>
+        <tr><td><code>ReqPay / RespPay</code></td><td>The financial transaction (debit and credit legs)</td><td>Issuer + beneficiary switch</td></tr>
+        <tr><td><code>ReqAuthDetails</code></td><td>NPCI asks payer PSP for payer details/credentials (collect flow)</td><td>PSP switch</td></tr>
+        <tr><td><code>ReqChkTxn</code></td><td>Query final status of a transaction</td><td>All parties</td></tr>
+        <tr><td><code>ReqBalEnq</code></td><td>Balance enquiry (PIN-protected)</td><td>Issuer switch</td></tr>
+        <tr><td><code>ReqValAdd</code></td><td>Validate/resolve a payee address</td><td>Beneficiary PSP</td></tr>
+        <tr><td><code>ReqListAccount</code></td><td>List customer accounts by mobile number during onboarding</td><td>Issuer switch</td></tr>
+        <tr><td><code>ReqRegMob</code></td><td>Register/verify mobile ↔ account binding</td><td>Issuer switch</td></tr>
+        <tr><td><code>ReqOtp / ReqSetCre</code></td><td>OTP request and UPI-PIN set/reset</td><td>Issuer switch</td></tr>
+        <tr><td><code>ReqMandate</code></td><td>Create/modify/execute Autopay mandates</td><td>Issuer + PSP</td></tr>
+        <tr><td><code>ReqHbt / ReqListKeys</code></td><td>Heartbeat, NPCI public key list</td><td>All switches</td></tr></table>
+      <p><b>Correlation identifiers</b> — burn these in:
+      <code>msgId</code> (one per message), <code>txnId</code> (one per transaction, shared by all its messages),
+      and <b>RRN</b> (customer/settlement reference). Dedupe on <code>txnId</code>; log all three on every hop.</p>
+      <div class="outcome"><b>Outcome:</b> Read a raw ReqPay XML and identify every block's purpose, and name which
+      API each participant handles.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch6">
+    <div class="chno">CHAPTER 6</div><h3>Security — PKI, Signing, and the NPCI Common Library</h3>
+    <div class="ch-body">
+      <p>Two independent security layers protect UPI:</p>
+      <p><b>Layer 1 — Message security (switch-to-switch):</b> every XML message is signed with the sending
+      institution's private key (XML-DSig) and verified against certificates exchanged with NPCI. Transport is
+      mutual-TLS over NPCInet. Keys rotate on a schedule; <code>ReqListKeys</code> fetches NPCI's current public keys.</p>
+      <p><b>Layer 2 — Credential security (customer-to-issuer):</b> the UPI PIN is captured only inside NPCI's
+      <b>Common Library (CL)</b> — a signed SDK embedded in every UPI app. The CL encrypts the PIN with NPCI's public
+      key into a <b>credential block</b>. No TPAP, PSP, or NPCI node can read it; only the <b>issuer's HSM</b>
+      (via NPCI re-encryption) can verify it.</p>
+      <div class="mermaid">
+sequenceDiagram
+  participant CL as Common Library (phone)
+  participant PSP
+  participant NPCI
+  participant HSM as Issuer HSM
+  CL->>CL: Capture PIN on NPCI-drawn pad
+  CL->>PSP: Encrypted credential block (opaque)
+  PSP->>NPCI: ReqPay with credential block
+  NPCI->>HSM: Translated PIN block (issuer key)
+  HSM-->>NPCI: PIN verified: yes/no
+      </div>
+      <p><b>Device binding</b> establishes trust before any of this: the app sends an outbound SMS from the SIM,
+      the PSP verifies the mobile number, and a device fingerprint is registered. The triple
+      <i>(mobile number, device, app)</i> becomes the first authentication factor; the UPI PIN is the second.</p>
+      <div class="callout warn"><b>Architect's rule:</b> your switch must treat credential blocks as opaque blobs —
+      never log them, never persist them beyond the transaction, and keep all PIN operations inside the HSM boundary.
+      This is audited during certification.</div>
+      <div class="outcome"><b>Outcome:</b> Trace how a UPI PIN travels encrypted from phone to issuer HSM without any
+      intermediary being able to read it, and list every key pair involved.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch7">
+    <div class="chno">CHAPTER 7</div><h3>Onboarding and Non-Financial Flows</h3>
+    <div class="ch-body">
+      <p>Before the first rupee moves, four flows must succeed. As the issuer, you answer all of them:</p>
+      <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant App
+  participant PSP
+  participant NPCI
+  participant ISS as Issuer Switch
+  Note over App,PSP: 1. Device binding (outbound SMS, device fingerprint)
+  App->>PSP: Verified mobile number
+  Note over App,ISS: 2. Account discovery
+  App->>NPCI: ReqListAccount(mobile) via PSP
+  NPCI->>ISS: ReqListAccount
+  ISS-->>NPCI: Masked accounts for that mobile
+  Note over App,ISS: 3. UPI PIN set
+  App->>NPCI: ReqOtp → OTP to customer
+  App->>NPCI: ReqSetCre(OTP + card last-6/expiry or Aadhaar + new PIN block)
+  NPCI->>ISS: Verify factors, set PIN in HSM
+  Note over App,ISS: 4. Ready — VPA created, first ReqBalEnq works
+      </div>
+      <ul>
+        <li><b>ReqListAccount</b>: your switch queries CBS by mobile number; return masked account numbers and IFSC.
+        Accuracy here decides onboarding success rates.</li>
+        <li><b>ReqSetCre</b>: verifies something-you-have (debit card details or Aadhaar OTP) before setting the PIN.
+        The new PIN arrives as a credential block; the HSM stores/derives the verification value.</li>
+        <li><b>ReqValAdd</b>: answered by the <i>beneficiary</i> PSP whenever anyone validates a VPA you host.</li>
+        <li><b>ReqBalEnq</b>: PIN-protected balance read — a great first end-to-end test of your whole stack.</li>
+        <li><b>ReqHbt</b>: NPCI heartbeats you; missing them flags your switch as down and NPCI may stop routing to you.</li>
+      </ul>
+      <div class="outcome"><b>Outcome:</b> Implement a mock registration flow (list-account → OTP → set-PIN →
+      balance-enquiry) against a stub NPCI endpoint.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch8">
+    <div class="chno">CHAPTER 8</div><h3>Error Handling, Timeouts, and Response Codes</h3>
+    <div class="ch-body">
+      <p>A UPI switch is judged less by its happy path than by its failure handling. The response-code taxonomy:</p>
+      <table><tr><th>Class</th><th>Examples</th><th>Meaning</th><th>Retry?</th></tr>
+        <tr><td>Success</td><td><code>00</code></td><td>Approved</td><td>—</td></tr>
+        <tr><td>Business decline</td><td><code>Z*</code>-style: insufficient funds, wrong PIN, limit exceeded, dormant account</td><td>Customer/account problem</td><td>No (customer action needed)</td></tr>
+        <tr><td>Technical decline</td><td><code>U*</code>-style: switch unavailable, CBS timeout, signature failure</td><td>System problem</td><td>Yes, or reversal</td></tr>
+        <tr><td>Deemed</td><td>Credit deemed approved on beneficiary timeout</td><td>NPCI assumed success</td><td>Recon must confirm</td></tr></table>
+      <p><b>Timeout discipline:</b> each API has a response-time budget (financial legs are seconds, not minutes).
+      Your switch needs per-hop timers, and must answer NPCI within budget even when your CBS is slow —
+      often by responding "technical decline" rather than staying silent.</p>
+      <p><b>The money-state decision table</b> — for every failure point, know where the money is:</p>
+      <table><tr><th>Failure point</th><th>Debit happened?</th><th>Credit happened?</th><th>Resolution</th></tr>
+        <tr><td>Issuer declines (bad PIN)</td><td>No</td><td>No</td><td>Clean fail, notify payer</td></tr>
+        <tr><td>Debit OK, credit declined</td><td>Yes</td><td>No</td><td>Auto-reversal to payer (RET) or credit retry</td></tr>
+        <tr><td>Debit OK, credit timeout</td><td>Yes</td><td>Unknown</td><td>ReqChkTxn; deemed rules; recon (TCC/RET)</td></tr>
+        <tr><td>Issuer timeout after CBS debit</td><td>Yes</td><td>No</td><td>Issuer must detect via recon and reverse</td></tr></table>
+      <p><b>Idempotency is non-negotiable:</b> NPCI retries messages. Dedupe on <code>txnId</code> + message type;
+      the second delivery must return the same answer without double-debiting. Design your transaction store around
+      this from day one.</p>
+      <div class="callout warn"><b>Classic bug:</b> debiting in CBS, then crashing before sending RespPay. NPCI times
+      out, payer sees "failed", but money left the account. Only a debit-vs-response recon catches this — build that
+      report before you go live, not after the first complaint.</div>
+      <div class="outcome"><b>Outcome:</b> Build the full decision table: for each failure point in the flow, what
+      state the money is in, who detects it, and who reverses it.</div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ PHASE 3 ============ -->
+<section class="part" id="part3">
+  <div class="part-head"><div class="part-num" style="background:var(--p3)">P3</div>
+    <div><h2>Phase 3 — Switch Internals</h2><div class="sub">What an issuer / acquirer / PSP switch actually does inside.</div></div></div>
+
+  <article class="chapter" id="ch9">
+    <div class="chno">CHAPTER 9</div><h3>Issuer Switch Internals — the Debit Leg</h3>
+    <div class="ch-body">
+      <p>When NPCI delivers a <code>ReqPay</code> debit to your issuer switch, this pipeline runs in well under a second:</p>
+      <ol>
+        <li><b>Ingress:</b> mutual-TLS termination, XML parse, schema validation, signature verification against NPCI certs.</li>
+        <li><b>Dedupe:</b> is this <code>txnId</code> already known? If yes, replay the stored response.</li>
+        <li><b>Business validation:</b> account exists, active, not frozen; per-txn / daily limits; velocity rules.</li>
+        <li><b>PIN verification:</b> hand the credential block to the HSM; get yes/no. Count failures (PIN retry limits).</li>
+        <li><b>Risk check:</b> inline fraud scoring (Chapter 15) with a strict latency budget.</li>
+        <li><b>CBS debit:</b> post the debit — either direct debit or hold-then-confirm, depending on your CBS.</li>
+        <li><b>Respond:</b> build, sign, and send <code>RespPay</code>; persist the final state.</li>
+      </ol>
+      <div class="mermaid">
+stateDiagram-v2
+  [*] --> RECEIVED
+  RECEIVED --> VALIDATED: schema+sig OK
+  RECEIVED --> REJECTED: bad sig / dup
+  VALIDATED --> PIN_VERIFIED: HSM yes
+  VALIDATED --> DECLINED: HSM no / limits
+  PIN_VERIFIED --> RISK_CLEARED: score OK
+  PIN_VERIFIED --> DECLINED: risk block
+  RISK_CLEARED --> DEBITED: CBS success
+  RISK_CLEARED --> DECLINED: CBS decline
+  RISK_CLEARED --> TIMED_OUT: CBS timeout
+  DEBITED --> RESPONDED: RespPay sent
+  TIMED_OUT --> RECON_QUEUE: verify + reverse
+  DECLINED --> RESPONDED
+      </div>
+      <p><b>CBS integration</b> is your hardest interface: legacy cores speak ISO 8583 or proprietary APIs, have
+      batch windows, and their timeout is <i>not</i> "no". Model <code>TIMED_OUT</code> as its own state that recon
+      resolves — never map a timeout to a decline blindly.</p>
+      <div class="callout"><b>Design principle:</b> every state transition is an immutable, timestamped event.
+      When (not if) a dispute arrives 3 weeks later, you replay the event log to prove exactly what happened.</div>
+      <div class="outcome"><b>Outcome:</b> Design the issuer-side state machine with all failure transitions and the
+      exact response code emitted from each terminal state.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch10">
+    <div class="chno">CHAPTER 10</div><h3>Issuer Switch — Credit Leg, Non-Financial, and the HSM</h3>
+    <div class="ch-body">
+      <p><b>As beneficiary bank</b> your switch processes the credit leg: validate the payee account (exists, active,
+      creditable — NRE/PPF rules apply), post the credit to CBS, and respond fast — remember deemed approval punishes
+      slowness by making you liable anyway. Credits can also arrive as <b>reversals</b> (payer refund) and
+      <b>credit adjustments</b> from recon.</p>
+      <p><b>Mandate execution:</b> for Autopay debits, no PIN arrives — the authorization is the mandate itself.
+      Your switch verifies mandate state (active, within amount/frequency), then debits. Mandate lifecycle
+      (create / modify / pause / revoke / execute) is a state machine you own.</p>
+      <p><b>HSM deep dive</b> — every cryptographic secret lives inside a FIPS-certified Hardware Security Module:</p>
+      <table><tr><th>HSM operation</th><th>When</th></tr>
+        <tr><td>PIN block translation &amp; verification (PVV/offset)</td><td>Every debit, balance enquiry</td></tr>
+        <tr><td>Set/derive PIN verification value</td><td>ReqSetCre (PIN set/reset)</td></tr>
+        <tr><td>Card verification (CVD) check</td><td>PIN set via debit-card factor</td></tr>
+        <tr><td>Key exchange: ZMK/ZPK hierarchy with NPCI</td><td>Key ceremonies, rotation</td></tr>
+        <tr><td>Message signing keys (may live in HSM)</td><td>Every signed XML</td></tr></table>
+      <p>Understand the key hierarchy: a <b>ZMK</b> (zone master key) exchanged with NPCI under dual control encrypts
+      the <b>ZPK</b> (zone PIN key) that protects PIN blocks in transit; internal <b>LMKs</b> protect everything at rest.
+      Plan HSM capacity: each debit costs 1–3 HSM calls, and HSMs saturate before CPUs do.</p>
+      <div class="outcome"><b>Outcome:</b> List every HSM call made during one payment, one PIN-set, and one mandate
+      execution — and explain why mandate execution makes none for PIN verification.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch11">
+    <div class="chno">CHAPTER 11</div><h3>Acquirer / PSP Switch Internals</h3>
+    <div class="ch-body">
+      <p>The PSP/acquirer side faces apps and merchants rather than NPCI-initiated debits. Its jobs:</p>
+      <ul>
+        <li><b>TPAP-facing APIs:</b> session/device binding, VPA management, pay/collect initiation, transaction
+        history, mandate management. This API surface is <i>yours to design</i> — NPCI only standardizes the
+        NPCI-facing side.</li>
+        <li><b>Payment initiation:</b> build the signed <code>ReqPay</code> from the app's request + credential block;
+        manage the async callback and push the final status to the app (webhook / push notification).</li>
+        <li><b>Merchant acquiring:</b> onboarding (KYC, MCC assignment, VPA issuance), static/dynamic QR generation,
+        intent link generation, settlement to merchant accounts, refunds (a refund is a new, reversed ReqPay).</li>
+        <li><b>Collect handling:</b> when NPCI sends <code>ReqAuthDetails</code> for a collect against your customer,
+        you notify the app, gather approval + PIN, and respond.</li>
+      </ul>
+      <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant M as Merchant POS
+  participant ACQ as Your Acquirer/PSP Switch
+  participant NPCI
+  participant Payer as Payer's Bank
+  M->>ACQ: Create dynamic QR (amount ₹450, ref #8812)
+  ACQ-->>M: QR payload (signed intent string)
+  Note over M: Customer scans, approves with PIN in their app
+  Payer->>NPCI: Debit leg completes
+  NPCI->>ACQ: ReqPay credit for merchant VPA
+  ACQ->>ACQ: Credit merchant pool/account, match ref #8812
+  ACQ-->>NPCI: RespPay success
+  ACQ-->>M: Webhook: payment received #8812
+      </div>
+      <p><b>Business layer:</b> zero-MDR on UPI P2M means acquiring is monetized via float, VAS (soundbox, analytics),
+      and interchange on specific rails. Know the money flows even as an engineer — they drive what you must build
+      (e.g. instant merchant settlement vs T+1).</p>
+      <div class="outcome"><b>Outcome:</b> Design the full API surface a TPAP like PhonePe would need from your PSP
+      switch, plus the merchant onboarding and webhook model for an acquiring product.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch12">
+    <div class="chno">CHAPTER 12</div><h3>Performance, Availability, and Switch Architecture Patterns</h3>
+    <div class="ch-body">
+      <p>UPI does 15+ billion transactions a month nationally; a mid-size bank's issuer switch sees thousands of TPS
+      at peak (New Year midnight, IPL finals, salary days). NPCI enforces response-time SLAs and publishes
+      bank-wise technical-decline league tables — being at the bottom is a reputational and regulatory problem.</p>
+      <p><b>Architecture patterns that work:</b></p>
+      <ul>
+        <li><b>Stateless processing nodes</b> behind a load balancer; all state in a fast transaction store. Any node
+        can process any callback (the RespPay rarely hits the node that sent ReqPay).</li>
+        <li><b>Async pipelines with back-pressure:</b> ingress queue → worker pool → CBS adapter pool. Shed load by
+        fast-declining when queues exceed budget, rather than timing out silently.</li>
+        <li><b>Bulkheads per dependency:</b> isolate CBS, HSM, and risk-engine thread/connection pools so one slow
+        dependency can't stall the whole switch. Circuit-break a sick CBS and decline cleanly.</li>
+        <li><b>Active-active across two DCs</b> with synchronous-enough replication of the transaction store;
+        NPCI connectivity from both. DR drills are NPCI-mandated, not optional.</li>
+        <li><b>Hot paths in memory:</b> limits counters, dedupe cache, and mandate state in a replicated in-memory
+        store (with durable write-behind) — the database is for durability, not for the per-transaction hot path.</li>
+      </ul>
+      <p><b>A worked capacity plan (2,000 TPS peak, p99 &lt; 1s):</b> 2,000 TPS × 3 HSM ops → HSM cluster sized for
+      6,000 ops/s with N+1; CBS adapter pool sized by CBS's real p99 (say 300 ms → 600 concurrent connections);
+      transaction store sustaining 10k writes/s (each txn = several state events); NPCI links sized for
+      2× peak with headroom for retries.</p>
+      <div class="callout warn"><b>Reality check:</b> your switch is usually not the bottleneck — the CBS is. Most
+      of your availability engineering is about protecting NPCI SLAs from CBS weather.</div>
+      <div class="outcome"><b>Outcome:</b> Produce a capacity plan for 2,000 TPS peak with sub-second p99, sized
+      component by component.</div>
+    </div>
+  </article>
+</section>
+<!-- ============ PHASE 4 ============ -->
+<section class="part" id="part4">
+  <div class="part-head"><div class="part-num" style="background:var(--p4)">P4</div>
+    <div><h2>Phase 4 — NPCI Integration</h2><div class="sub">How to actually connect to NPCI and get certified.</div></div></div>
+
+  <article class="chapter" id="ch13">
+    <div class="chno">CHAPTER 13</div><h3>NPCI Connectivity and Environments</h3>
+    <div class="ch-body">
+      <p>You don't reach NPCI over the public internet. Connectivity is via <b>NPCInet</b> — dedicated leased lines /
+      MPLS from both of your data centers to both NPCI sites, with IP whitelisting and mutual TLS on top.</p>
+      <p><b>The environments ladder:</b></p>
+      <table><tr><th>Environment</th><th>Purpose</th><th>Notes</th></tr>
+        <tr><td>NPCI Simulator (local)</td><td>Develop against message specs offline</td><td>Build/buy a simulator early — it accelerates everything</td></tr>
+        <tr><td>UAT</td><td>Integration testing with NPCI's test switch</td><td>Test keys, test banks, scripted counterparties</td></tr>
+        <tr><td>Certification</td><td>NPCI-witnessed test execution</td><td>Formal evidence collection (Ch. 14)</td></tr>
+        <tr><td>Production — pilot</td><td>Limited customers / limits</td><td>Gradual ramp with NPCI approval</td></tr>
+        <tr><td>Production — full</td><td>Live traffic</td><td>Ongoing SLA monitoring by NPCI</td></tr></table>
+      <p><b>Key and certificate lifecycle:</b> signing certificates are exchanged with NPCI per environment;
+      ZMK exchange for the HSM happens as a formal <b>key ceremony</b> with dual custodians and paper trails.
+      Track expiry dates ruthlessly — an expired signing cert is a total outage.</p>
+      <p><b>Pre-UAT infrastructure checklist:</b></p>
+      <ul>
+        <li>Leased lines from both DCs, routing/firewall rules, NPCI IP whitelisting done both ways</li>
+        <li>Mutual-TLS certs issued and exchanged; signing key pair generated and registered</li>
+        <li>HSM installed, ZMK ceremony completed, ZPK exchanged</li>
+        <li>Org ID / participant codes issued by NPCI; UAT VPA handle registered</li>
+        <li>Heartbeat (ReqHbt) answered; ReqListKeys fetch working</li>
+        <li>Time sync (NTP) — signature timestamps drift-fail otherwise</li>
+      </ul>
+      <div class="outcome"><b>Outcome:</b> Produce the complete checklist of infrastructure artifacts needed before
+      your first UAT message, with owners and lead times (leased lines take months — order first).</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch14">
+    <div class="chno">CHAPTER 14</div><h3>NPCI Certification and Go-Live</h3>
+    <div class="ch-body">
+      <p>Certification is a project, not a formality — typically weeks of scripted test execution with NPCI
+      observing and collecting evidence. Test-case categories:</p>
+      <ul>
+        <li><b>Functional:</b> every API you claim (pay, collect, mandates, PIN set, balance, status check) across
+        account types and amount boundaries.</li>
+        <li><b>Negative:</b> wrong PIN, insufficient funds, frozen accounts, malformed messages, bad signatures.</li>
+        <li><b>Timeout &amp; exception:</b> forced timeouts at each hop; verifying your TCC/RET and reversal behavior.
+        This is where weak switches fail.</li>
+        <li><b>Security:</b> credential-block handling, log inspection (no PINs/blocks in logs), key rotation drills.</li>
+        <li><b>Performance/DR:</b> sustained TPS runs and DC failover drills for production readiness.</li>
+      </ul>
+      <div class="mermaid">
+flowchart LR
+  A[Dev vs Simulator] --> B[UAT with NPCI]
+  B --> C[Certification runs<br/>evidence pack]
+  C --> D[NPCI approval + RBI intimation]
+  D --> E[Pilot: limited customers,<br/>capped limits]
+  E --> F[Ramp-up gates]
+  F --> G[Full production]
+      </div>
+      <p><b>Go-live strategy:</b> start issuer-only with staff accounts, then a capped pilot, then ramp. Keep a
+      war-room for the first weeks: watch technical-decline rate, deemed transactions, and recon breaks daily.</p>
+      <p><b>It never ends:</b> NPCI issues circulars mandating new features (new rails, limit changes, API versions)
+      with deadlines. Budget a permanent compliance backlog — a UPI switch is a product, not a project.</p>
+      <div class="outcome"><b>Outcome:</b> Build a certification project plan: roles (bank, vendor, NPCI), timeline,
+      environment bookings, and the evidence pack structure.</div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ PHASE 5 ============ -->
+<section class="part" id="part5">
+  <div class="part-head"><div class="part-num" style="background:var(--p5)">P5</div>
+    <div><h2>Phase 5 — Risk &amp; Money Movement</h2><div class="sub">The parts that make it a real banking system, not a demo.</div></div></div>
+
+  <article class="chapter" id="ch15">
+    <div class="chno">CHAPTER 15</div><h3>Fraud and Risk Engines</h3>
+    <div class="ch-body">
+      <p>UPI fraud is dominated by <b>social engineering</b> (victim authorizes the payment) rather than credential
+      theft — which shapes what a risk engine can and cannot do. Your engine sits <i>inline</i> on the debit path
+      with a hard latency budget (≈50 ms) and answers: allow, decline, or step-up.</p>
+      <p><b>Rule families that earn their keep:</b></p>
+      <ul>
+        <li><b>Velocity:</b> count/amount per account, device, VPA, and payee over sliding windows (1m/1h/24h).</li>
+        <li><b>New-payee friction:</b> lower limits or cooling periods for first payment to a new VPA.</li>
+        <li><b>Device &amp; binding signals:</b> new device, recent SIM change, recent PIN reset + large payment = classic account-takeover pattern.</li>
+        <li><b>Payee reputation:</b> NPCI negative lists, internal mule-account scores, payee's incoming-funds fan-in.</li>
+        <li><b>Geo/behavioral:</b> impossible travel, odd-hours patterns, amount z-scores vs customer history.</li>
+      </ul>
+      <div class="mermaid">
+flowchart LR
+  R[ReqPay debit] --> F[Feature fetch<br/>counters, device, payee rep]
+  F --> RU[Rules engine<br/>hard blocks + limits]
+  RU --> ML[ML score<br/>gradient-boosted / online model]
+  ML --> D{Decision}
+  D -->|allow| CBS[Continue to CBS debit]
+  D -->|decline| RC[Decline w/ risk code]
+  D -->|review| Q[Post-txn review queue]
+      </div>
+      <p><b>Engineering notes:</b> features must be precomputed or cached (counters in memory, reputation refreshed
+      async) — you cannot do joins at transaction time. Every decision is logged with feature values for model
+      retraining and dispute defense. NPCI also mandates fraud reporting (to CPFIR) and consumes/publishes negative lists.</p>
+      <div class="callout example"><b>Example rule:</b> "PIN reset in last 24h AND new payee AND amount &gt; ₹20,000
+      → step-up or decline." This one rule blocks a large share of account-takeover losses.</div>
+      <div class="outcome"><b>Outcome:</b> Design an inline risk engine that scores in &lt;50 ms without blocking the
+      payment path, including its feature store and decision-logging design.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch16">
+    <div class="chno">CHAPTER 16</div><h3>Settlement</h3>
+    <div class="ch-body">
+      <p>UPI moves <i>messages</i> in real time but <i>inter-bank money</i> in batches: <b>Deferred Net Settlement (DNS)</b>.
+      Customers are debited/credited instantly by their own banks; the banks square up with each other several times
+      a day through NPCI.</p>
+      <div class="mermaid">
+flowchart LR
+  subgraph Realtime[Real time]
+    A[Payer debited at Bank A] --- B[Payee credited at Bank B]
+  end
+  subgraph Cycle[Per settlement cycle]
+    N[NPCI computes net position<br/>per bank] --> S[NTSL settlement file]
+    S --> RBI[Net debit/credit to banks'<br/>settlement accounts at RBI]
+  end
+  Realtime -.transaction logs.-> N
+      </div>
+      <ul>
+        <li><b>Cycles:</b> multiple per day; each transaction belongs to exactly one cycle based on its timestamp/cutover.</li>
+        <li><b>NTSL (Net Settlement) files:</b> NPCI's statement of your net position per cycle — the input to your GL posting.</li>
+        <li><b>Cut-over handling:</b> transactions straddling a cycle boundary are the classic source of recon breaks; your switch must tag each txn with its cycle deterministically.</li>
+        <li><b>GL posting inside the bank:</b> customer leg hits the customer account in real time against a UPI settlement/suspense GL; the NPCI cycle then clears the suspense against the RBI settlement account. Suspense must return to ~zero every cycle — a non-zero residue is a recon break by definition.</li>
+        <li><b>Fees:</b> interchange (where applicable), PSP fees, and NPCI switching fees ride on separate fee files/GLs.</li>
+      </ul>
+      <div class="callout"><b>Follow one rupee:</b> debit customer → credit UPI suspense GL → cycle NTSL nets it →
+      RBI settlement account moves → suspense cleared. If you can narrate this cold, settlement holds no surprises.</div>
+      <div class="outcome"><b>Outcome:</b> Trace one rupee from customer debit through NTSL to GL entries, and design
+      how your switch tags every transaction with its settlement cycle.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch17">
+    <div class="chno">CHAPTER 17</div><h3>Reconciliation and Dispute Management</h3>
+    <div class="ch-body">
+      <p>Recon is the immune system of a UPI switch. Every day you perform <b>three-way matching</b> keyed on RRN:</p>
+      <div class="mermaid">
+flowchart TD
+  SW[Switch txn log] --> M{Match on RRN<br/>+ amount + direction}
+  CBS[CBS postings] --> M
+  NPCI[NPCI raw/settlement files] --> M
+  M -->|all agree| OK[Matched — done]
+  M -->|mismatch| EX[Exception queues]
+  EX --> TCC[TCC — credit confirmed late]
+  EX --> RET[RET — return/reversal to payer]
+  EX --> ADJ[Debit/credit adjustments]
+      </div>
+      <p><b>The exception vocabulary:</b></p>
+      <table><tr><th>Instrument</th><th>Meaning</th><th>Raised by</th></tr>
+        <tr><td>TCC</td><td>"Credit was actually given" — confirms a doubtful credit</td><td>Beneficiary bank</td></tr>
+        <tr><td>RET</td><td>Return — credit could not be applied; money goes back</td><td>Beneficiary bank</td></tr>
+        <tr><td>Credit adjustment</td><td>Post-facto credit to settle a break</td><td>Either side via NPCI</td></tr>
+        <tr><td>Debit adjustment / chargeback</td><td>Disputed debit clawed back per rules and timelines</td><td>Issuer</td></tr></table>
+      <p><b>Disputes:</b> <b>UDIR</b> (UPI's online dispute resolution) lets customers raise complaints in-app; your
+      switch must expose complaint APIs, auto-resolve what recon can prove, and respect strict turn-around times.
+      Timelines are NPCI-mandated — missed TATs become penalties and RBI-reportable complaints.</p>
+      <div class="callout warn"><b>Design rule:</b> recon is a first-class subsystem — its own pipeline, dashboards,
+      and exception-aging alarms — not a nightly script someone wrote in a hurry. Aged breaks are money you owe or
+      money you've lost; both compound.</div>
+      <div class="outcome"><b>Outcome:</b> Design the recon batch pipeline (file ingestion → matching → exception
+      queues → adjustment posting) and the dispute workflow with TAT tracking.</div>
+    </div>
+  </article>
+</section>
+
+<!-- ============ PHASE 6 ============ -->
+<section class="part" id="part6">
+  <div class="part-head"><div class="part-num" style="background:var(--p6)">P6</div>
+    <div><h2>Phase 6 — Architect Level</h2><div class="sub">Put it all together into a build-ready blueprint.</div></div></div>
+
+  <article class="chapter" id="ch18">
+    <div class="chno">CHAPTER 18</div><h3>Reference Architecture of a Production UPI Switch</h3>
+    <div class="ch-body">
+      <p>Everything from Chapters 1–17 assembles into this component map:</p>
+      <div class="mermaid">
+flowchart TB
+  subgraph Edge
+    GW[NPCI Gateway<br/>mTLS, sig verify, schema]
+    AGW[App/TPAP API Gateway]
+  end
+  subgraph Core
+    RT[Message Router +<br/>Orchestrator per-API state machines]
+    DD[Dedupe / Idempotency store]
+    RISK[Risk Engine<br/>rules + ML, feature store]
+    CRY[Crypto Service<br/>HSM pool, signing]
+    MAND[Mandate Manager]
+  end
+  subgraph Adapters
+    CBSA[CBS Adapter<br/>circuit breakers, pools]
+    NOT[Notification Service<br/>webhooks, push, SMS]
+  end
+  subgraph Data
+    TS[(Transaction Store<br/>event-sourced)]
+    REC[Recon Engine<br/>3-way match, exceptions]
+    OPS[Ops Console + Dashboards]
+  end
+  GW --> RT
+  AGW --> RT
+  RT --> DD
+  RT --> RISK
+  RT --> CRY
+  RT --> MAND
+  RT --> CBSA
+  RT --> TS
+  RT --> NOT
+  TS --> REC
+  REC --> OPS
+  TS --> OPS
+      </div>
+      <p><b>Data design:</b> an append-only, event-sourced transaction store is the natural fit — every state
+      transition (Ch. 9) is an event; current state is a projection. Retain per RBI/NPCI audit norms (years, not
+      months), with credential blocks never stored and PII encrypted at rest.</p>
+      <p><b>Observability:</b> per-hop tracing keyed by txnId/RRN; dashboards for response-code mix, technical-decline
+      rate (your NPCI league-table metric), deemed count, CBS latency, HSM utilization, recon-break aging.
+      Alert on <i>rates</i> and <i>budgets</i>, not single failures.</p>
+      <div class="outcome"><b>Outcome:</b> A full component + deployment diagram (two DCs, active-active) you could
+      hand to an engineering team, with the responsibility of every box written down.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch19">
+    <div class="chno">CHAPTER 19</div><h3>Build vs Buy, and Implementation Strategy</h3>
+    <div class="ch-body">
+      <p>Most banks license a switch (established vendors offer certified UPI stacks); some build. The honest
+      decision matrix:</p>
+      <table><tr><th>Criterion</th><th>Buy/License</th><th>Build in-house</th></tr>
+        <tr><td>Time to market</td><td>Months</td><td>18–24+ months incl. certification</td></tr>
+        <tr><td>NPCI circular compliance</td><td>Vendor's treadmill</td><td>Your permanent team</td></tr>
+        <tr><td>Differentiation (risk, UX, cost/txn at scale)</td><td>Limited</td><td>Full control</td></tr>
+        <tr><td>Talent needed</td><td>Integration + ops</td><td>Payments protocol + HSM + high-TPS engineering</td></tr>
+        <tr><td>Economics</td><td>Per-txn/license fees</td><td>High fixed, low marginal — wins at very high volume</td></tr></table>
+      <p><b>If you build, sequence it:</b></p>
+      <ol>
+        <li><b>Months 1–3:</b> simulator + issuer non-financial flows (heartbeat, list-account, PIN set, balance).</li>
+        <li><b>Months 4–8:</b> issuer financial debit/credit legs, HSM integration, transaction store, recon v1.</li>
+        <li><b>Months 6–10 (parallel):</b> risk engine v1, ops console, settlement/GL integration.</li>
+        <li><b>Months 9–12:</b> UAT with NPCI, certification prep, DR drills, performance hardening.</li>
+        <li><b>Months 12–15:</b> certification, pilot, ramp. PSP/acquiring side as phase 2.</li>
+      </ol>
+      <p><b>Team topology:</b> a core switch team (protocol + orchestration), a CBS-adapter team, a risk team, an
+      SRE/ops team, and a compliance/certification owner. Testing strategy: NPCI simulator in CI, chaos drills on
+      CBS/HSM dependencies, and replay testing from production message logs.</p>
+      <div class="outcome"><b>Outcome:</b> A 12–15 month implementation roadmap with milestones, certification gates,
+      and a defensible build-vs-buy recommendation for your bank's volumes.</div>
+    </div>
+  </article>
+
+  <article class="chapter" id="ch20">
+    <div class="chno">CHAPTER 20</div><h3>Capstone — Design Your Bank's UPI Switch</h3>
+    <div class="ch-body">
+      <p>The final exercise: produce a <b>build-ready design document</b> for your bank. Given inputs — your CBS
+      (vendor, API style, real p99 latency), expected volumes (launch and 3-year), and product goals (issuer-only vs
+      full PSP + acquiring) — deliver:</p>
+      <ol>
+        <li><b>Context &amp; scope:</b> ecosystem diagram with your components highlighted (Ch. 1–4).</li>
+        <li><b>API conformance matrix:</b> every NPCI API you implement, mapped to internal owners (Ch. 5, 7).</li>
+        <li><b>Security architecture:</b> key hierarchy, HSM sizing, credential-block handling policy (Ch. 6, 10).</li>
+        <li><b>State machines:</b> debit, credit, mandate, PIN-set — with every failure transition and response code (Ch. 8–10).</li>
+        <li><b>Component &amp; deployment architecture:</b> two-DC active-active, capacity plan for your peak TPS (Ch. 12, 18).</li>
+        <li><b>Risk design:</b> rule set v1, feature store, latency budget, review workflow (Ch. 15).</li>
+        <li><b>Settlement &amp; recon design:</b> cycle tagging, GL scheme, 3-way recon pipeline, exception queues, UDIR integration (Ch. 16–17).</li>
+        <li><b>NPCI integration plan:</b> connectivity checklist, environment ladder, certification project plan (Ch. 13–14).</li>
+        <li><b>Delivery plan:</b> phased roadmap, team topology, build-vs-buy justification (Ch. 19).</li>
+      </ol>
+      <p><b>Self-review checklist:</b> Can every "pending" transaction be resolved deterministically? Does every
+      failure point have an owner and a reversal path? Can you lose a DC during peak without breaching NPCI SLAs?
+      Would your logs win a dispute from 3 weeks ago? If yes to all four — you think like a UPI switch architect.</p>
+      <div class="outcome"><b>Outcome:</b> The complete design document — the deliverable of the entire course, and
+      the artifact you'd take into an architecture review board.</div>
+    </div>
+  </article>
+</section>
+
+<footer style="margin-top:60px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--border);padding-top:20px;">
+  <p><b>How to study:</b> redraw every call flow yourself before moving on · keep a running mock switch (stub NPCI,
+  fake CBS, fake HSM) from Chapter 7 onward · read primary sources (NPCI procedural guidelines, API specs, RBI
+  circulars) · at each phase boundary, explain the flows to someone else without notes.</p>
+</footer>
+
+</div>
+</main>
+</div>
+</body>
+</html>
