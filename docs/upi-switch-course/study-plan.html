@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UPI Issuer Switch — 16-Week Knowledge Source Study Plan</title>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({startOnLoad:true, theme:'dark', themeVariables:{fontSize:'14px'}});
+</script>
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--text:#e6edf3;--muted:#9da7b3;--accent:#3b82f6;--border:#30363d;
+    --p1:#3b82f6;--p2:#22c55e;--p3:#a371f7;--p4:#f59e0b;--p5:#ef4444;--p6:#06b6d4;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--accent);text-decoration:none;}
+  .layout{display:grid;grid-template-columns:320px 1fr;max-width:1400px;margin:0 auto;}
+  aside{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:24px 16px;
+    border-right:1px solid var(--border);background:var(--panel);font-size:13.5px;}
+  .toc-title{font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--muted);margin-bottom:14px;}
+  aside ul{list-style:none;margin:0;padding:0 0 0 10px;}
+  aside li{margin:2px 0;}
+  aside li a{color:var(--muted);display:block;padding:3px 8px;border-radius:6px;}
+  aside li a:hover{color:var(--text);background:#21262d;}
+  .backlink{display:block;margin-bottom:16px;font-weight:600;}
+  main{min-width:0;}
+  header.hero{background:radial-gradient(1100px 380px at 20% -10%,#7c2d12 0%,transparent 60%),linear-gradient(135deg,#0b1220,#101826);
+    border-bottom:1px solid var(--border);padding:56px 48px 44px;}
+  header.hero h1{margin:0 0 10px;font-size:34px;letter-spacing:-.5px;}
+  header.hero p{margin:0;max-width:780px;color:var(--muted);font-size:18px;}
+  .badges{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;}
+  .badge{background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--muted);}
+  .content{padding:8px 48px 90px;}
+  .phase{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 26px;margin:22px 0;scroll-margin-top:20px;}
+  .wk{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--p4);}
+  .phase h2{margin:8px 0 12px;font-size:22px;}
+  .phase p{margin:12px 0;}
+  .phase ul,.phase ol{margin:12px 0;padding-left:24px;}
+  .phase li{margin:4px 0;}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 22px;margin:12px 0;padding-left:24px;}
+  .cols li{margin:2px 0;}
+  .callout{background:#0b1119;border:1px solid var(--border);border-left:3px solid var(--p2);border-radius:8px;padding:12px 16px;margin:14px 0;font-size:14.5px;}
+  .callout b{color:var(--p2);}
+  .warn{border-left-color:var(--p5);} .warn b{color:var(--p5);}
+  .out{border-left-color:var(--p4);} .out b{color:var(--p4);}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px;}
+  th,td{border:1px solid var(--border);padding:7px 11px;text-align:left;}
+  th{background:#0b1119;color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;}
+  code{background:#0b1119;border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-size:13.5px;color:#79c0ff;}
+  pre{background:#0b1119;border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow:auto;font-size:13px;line-height:1.55;}
+  pre code{background:none;border:none;padding:0;}
+  .mermaid{background:#0b1119;border:1px solid var(--border);border-radius:10px;padding:14px;margin:14px 0;display:flex;justify-content:center;}
+  .prio-p0{color:#ef4444;font-weight:700;} .prio-p1{color:#f59e0b;font-weight:700;}
+  .prio-p2{color:#eab308;font-weight:700;} .prio-p3{color:#22c55e;font-weight:700;}
+  @media(max-width:980px){.layout{grid-template-columns:1fr;} aside{position:static;height:auto;}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <a class="backlink" href="index.html">&larr; Back to the 20-Chapter Course</a>
+  <div class="toc-title">Study Plan Contents</div>
+  <ul>
+    <li><a href="#ph0">Phase 0 · Knowledge Map (Wk 1)</a></li>
+    <li><a href="#ph1">Phase 1 · Banking Fundamentals (Wk 2–3)</a></li>
+    <li><a href="#ph2">Phase 2 · UPI Ecosystem (Wk 4–5)</a></li>
+    <li><a href="#ph3">Phase 3 · NPCI Knowledge Base (Wk 6–7)</a></li>
+    <li><a href="#ph4">Phase 4 · RBI Regulatory (Wk 8)</a></li>
+    <li><a href="#ph5">Phase 5 · Payment-Security Standards (Wk 9)</a></li>
+    <li><a href="#ph6">Phase 6 · Cybersecurity Architecture (Wk 10)</a></li>
+    <li><a href="#ph7">Phase 7 · Software Architecture (Wk 11–12)</a></li>
+    <li><a href="#ph8">Phase 8 · UPI Switch Architecture (Wk 13)</a></li>
+    <li><a href="#ph9">Phase 9 · Network + Infrastructure (Wk 14)</a></li>
+    <li><a href="#ph10">Phase 10 · Reliability + SRE (Wk 15)</a></li>
+    <li><a href="#ph11">Phase 11 · SDLC + DevSecOps (Wk 16)</a></li>
+    <li><a href="#chain">The Knowledge-to-Delivery Chain</a></li>
+    <li><a href="#prio">Recommended Priorities</a></li>
+    <li><a href="#rule">The Traceability Rule</a></li>
+  </ul>
+</aside>
+<main>
+<header class="hero">
+  <h1>UPI Issuer Switch — Knowledge Source Study Plan</h1>
+  <p>A 16-week program (~8–10 hours/week) that builds the full knowledge base for a bank UPI Issuer Switch:
+     banking fundamentals, NPCI and RBI sources, security standards, distributed-systems engineering,
+     infrastructure, SRE, and the delivery pipeline — with a traceability chain tying it all together.</p>
+  <div class="badges">
+    <span class="badge">16 weeks · 12 phases</span>
+    <span class="badge">8–10 hours/week</span>
+    <span class="badge">Regulatory traceability matrix</span>
+    <span class="badge">Companion to the 20-chapter course</span>
+  </div>
+</header>
+<div class="content">
+
+<section class="phase" id="ph0">
+  <div class="wk">WEEK 1</div><h2>Phase 0 — Build the Knowledge Map</h2>
+  <p>Before reading specifications, understand the ecosystem. Study these concepts as vocabulary, not depth:</p>
+  <ul class="cols">
+    <li>Indian banking ecosystem</li><li>RBI</li><li>NPCI</li><li>Banks</li><li>Issuer</li><li>Acquirer</li>
+    <li>PSP</li><li>TPAP</li><li>Customer</li><li>Merchant</li><li>CBS</li><li>Payment Switch</li>
+    <li>Settlement</li><li>Reconciliation</li><li>Dispute</li><li>Fraud / Risk</li><li>Authentication</li><li>Authorization</li>
+  </ul>
+  <div class="callout out"><b>Output — create the Indian Digital Payments Ontology:</b></div>
+  <div class="mermaid">
+flowchart TD
+  O[Indian Digital Payments Ontology] --> RBI[RBI]
+  O --> NPCI[NPCI] --> UPI[UPI]
+  O --> BK[Banks] --> ISS[Issuer]
+  BK --> ACQ[Acquirer]
+  O --> PSP[PSP / TPAP]
+  O --> CUST[Customer]
+  O --> MER[Merchant]
+  O --> CBS[CBS]
+  O --> SW[Payment Switch]
+  O --> SET[Settlement]
+  O --> REC[Reconciliation]
+  O --> DIS[Dispute]
+  O --> FR[Fraud / Risk]
+  </div>
+  <div class="callout warn"><b>Rule:</b> do not start architecture yet.</div>
+</section>
+
+<section class="phase" id="ph1">
+  <div class="wk">WEEKS 2–3</div><h2>Phase 1 — Indian Banking Fundamentals</h2>
+  <p>Understand:</p>
+  <ul class="cols">
+    <li>Banking accounts</li><li>CASA</li><li>Customer identification</li><li>CBS</li><li>Ledger</li>
+    <li>Debit</li><li>Credit</li><li>Holds</li><li>Available balance</li><li>Transaction posting</li>
+    <li>Reversal</li><li>Refund</li><li>Settlement</li><li>Reconciliation</li><li>GL</li>
+    <li>Nostro / Vostro basics</li><li>Transaction reference numbers</li><li>Audit trail</li>
+  </ul>
+  <div class="callout"><b>The important question you must be able to answer:</b>
+  "When a customer pays ₹1,000 through UPI, what exactly happens inside the bank?"</div>
+  <p>Trace:</p>
+  <div class="mermaid">
+flowchart TD
+  C[Customer] --> A[Mobile App] --> P[PSP] --> N[NPCI] --> S[Bank UPI Issuer Switch]
+  S --> R[Risk / Fraud] --> CB[CBS] --> D[Debit Customer] --> RS[Response] --> N2[NPCI] --> B[Beneficiary Bank]
+  </div>
+  <p>Then learn what happens when:</p>
+  <ul>
+    <li>CBS is unavailable</li>
+    <li>UPI switch is unavailable</li>
+    <li>NPCI is unavailable</li>
+    <li>debit succeeds but response fails</li>
+    <li>response succeeds but debit status is unknown</li>
+    <li>duplicate request arrives</li>
+    <li>reversal arrives</li>
+  </ul>
+  <div class="callout out"><b>Output:</b> this phase builds your banking transaction ontology.</div>
+</section>
+
+<section class="phase" id="ph2">
+  <div class="wk">WEEKS 4–5</div><h2>Phase 2 — UPI Ecosystem</h2>
+  <p>Now move into UPI. Study the participants:</p>
+  <div class="mermaid">
+flowchart TD
+  N[NPCI] --> PSP[PSP]
+  N --> BK[Bank]
+  N --> TP[TPAP]
+  PSP --> UC[UPI Customer]
+  BK --> UC
+  TP --> UC
+  UC --> M[Merchant]
+  </div>
+  <p>Understand:</p>
+  <ul class="cols">
+    <li>Issuer</li><li>Acquirer</li><li>PSP</li><li>TPAP</li><li>NPCI</li><li>Remitter</li>
+    <li>Beneficiary</li><li>Merchant</li><li>VPA</li><li>QR</li><li>UPI ID</li><li>UPI transaction</li>
+    <li>RRN</li><li>UTR</li><li>Transaction ID</li><li>Response codes</li><li>Status</li>
+    <li>Reversal</li><li>Refund</li><li>Dispute</li>
+  </ul>
+  <p>Study transaction types — at minimum:</p>
+  <ul class="cols">
+    <li>Pay</li><li>Collect</li><li>Intent</li><li>QR</li><li>Mandate</li><li>Recurring transactions</li>
+    <li>Refund</li><li>Reversal</li><li>Transaction status</li><li>Balance enquiry</li>
+    <li>Account validation</li><li>VPA-related flows</li>
+  </ul>
+  <div class="callout warn"><b>Important:</b> use the current NPCI specifications/circulars available to your bank
+  rather than relying on blogs or old UPI documentation.</div>
+</section>
+
+<section class="phase" id="ph3">
+  <div class="wk">WEEKS 6–7</div><h2>Phase 3 — NPCI Knowledge Base</h2>
+  <p><b>This is the most important phase.</b> Create an NPCI Knowledge Repository, organized like:</p>
+  <pre><code>NPCI/
+│
+├── UPI/
+│   ├── Procedural Guidelines
+│   ├── Technical Specifications
+│   ├── API Specifications
+│   ├── Message Formats
+│   ├── Response Codes
+│   ├── Transaction Flows
+│   ├── Certification
+│   ├── Operational Guidelines
+│   └── Circulars
+│
+├── Security/
+├── Settlement/
+├── Reconciliation/
+└── Dispute/</code></pre>
+  <p>For every NPCI document create:</p>
+  <table>
+    <tr><th>Field</th><th>Meaning</th></tr>
+    <tr><td>Document</td><td>Name</td></tr>
+    <tr><td>Version</td><td>Version</td></tr>
+    <tr><td>Effective Date</td><td>Applicability</td></tr>
+    <tr><td>Requirement</td><td>What NPCI requires</td></tr>
+    <tr><td>System Impact</td><td>What we must build</td></tr>
+    <tr><td>Service</td><td>Which service</td></tr>
+    <tr><td>API</td><td>Which API</td></tr>
+    <tr><td>Database</td><td>Data affected</td></tr>
+    <tr><td>Security</td><td>Security impact</td></tr>
+    <tr><td>Testing</td><td>Test requirement</td></tr>
+    <tr><td>Operations</td><td>Operational impact</td></tr>
+  </table>
+  <div class="callout out"><b>Output:</b> this becomes your <b>UPI Switch Regulatory Traceability Matrix</b>.</div>
+</section>
+
+<section class="phase" id="ph4">
+  <div class="wk">WEEK 8</div><h2>Phase 4 — RBI Regulatory Knowledge</h2>
+  <p>Focus on:</p>
+  <ul class="cols">
+    <li>Payment system regulation</li><li>Digital payment security</li><li>Cybersecurity</li>
+    <li>Outsourcing</li><li>IT governance</li><li>Operational resilience</li>
+    <li>Data protection / storage requirements</li><li>Incident management</li><li>Audit</li>
+    <li>Business continuity</li><li>Disaster recovery</li><li>Risk management</li>
+  </ul>
+  <div class="callout"><b>Do not simply read RBI documents.</b> For every regulation ask:
+  "What does this mean for my UPI Switch?"</div>
+  <div class="mermaid">
+flowchart TD
+  A[RBI Requirement] --> B[Business Requirement] --> C[System Requirement] --> D[Architecture Control] --> E[Implementation] --> F[Test Case] --> G[Evidence]
+  </div>
+  <p>That transformation is extremely important for a bank project.</p>
+</section>
+
+<section class="phase" id="ph5">
+  <div class="wk">WEEK 9</div><h2>Phase 5 — Payment-Security Standards</h2>
+  <p>Study <b>PCI DSS</b>. Understand:</p>
+  <ul class="cols">
+    <li>Scope</li><li>Cardholder data environment</li><li>Network security</li><li>Access control</li>
+    <li>Encryption</li><li>Logging</li><li>Vulnerability management</li><li>Secure development</li>
+    <li>Monitoring</li><li>Incident response</li>
+  </ul>
+  <div class="callout warn"><b>Version note:</b> PCI SSC's current document library lists PCI DSS v4.0.1 —
+  use that rather than older v4.0 material.</div>
+  <p>Also study:</p>
+  <ul class="cols">
+    <li>PCI PIN concepts where applicable</li><li>HSM concepts</li><li>Key management</li>
+    <li>Cryptography</li><li>TLS</li><li>Certificate lifecycle</li><li>Secrets management</li>
+  </ul>
+</section>
+
+<section class="phase" id="ph6">
+  <div class="wk">WEEK 10</div><h2>Phase 6 — Cybersecurity Architecture</h2>
+  <p>Study <b>NIST CSF 2.0</b> and its six functions:</p>
+  <div class="mermaid">
+flowchart LR
+  G[Govern] --> I[Identify] --> P[Protect] --> D[Detect] --> R[Respond] --> RC[Recover]
+  </div>
+  <div class="callout"><b>Note:</b> NIST describes CSF 2.0 as a risk-management framework applicable across sectors
+  and organizations, rather than a prescriptive technology architecture.</div>
+  <p>Then study:</p>
+  <ul class="cols">
+    <li>NIST SP 800 series</li><li>OWASP</li><li>Secure SDLC</li><li>Threat modeling</li><li>Zero Trust</li>
+    <li>Supply-chain security</li><li>Vulnerability management</li><li>Secrets</li><li>IAM</li><li>PKI</li><li>HSM</li>
+  </ul>
+  <div class="callout out"><b>Output:</b> the <b>UPI Switch Security Control Matrix</b>.</div>
+</section>
+
+<section class="phase" id="ph7">
+  <div class="wk">WEEKS 11–12</div><h2>Phase 7 — Software Architecture</h2>
+  <p>Now learn the engineering needed to implement the switch.</p>
+  <p><b>Distributed systems:</b></p>
+  <ul class="cols">
+    <li>Distributed Systems</li><li>Microservices</li><li>Event-driven architecture</li>
+    <li>Synchronous vs asynchronous processing</li><li>Idempotency</li><li>Distributed transactions</li>
+    <li>Exactly-once vs at-least-once</li><li>Retry</li><li>Timeout</li><li>Circuit breaker</li>
+    <li>Backpressure</li><li>Message ordering</li><li>Deduplication</li><li>State machines</li><li>Messaging</li>
+  </ul>
+  <p><b>Messaging (Kafka):</b></p>
+  <ul class="cols">
+    <li>Kafka</li><li>Partitioning</li><li>Consumer groups</li><li>Ordering</li><li>Replication</li><li>Delivery semantics</li>
+  </ul>
+  <p><b>Databases:</b></p>
+  <ul class="cols">
+    <li>PostgreSQL / Oracle concepts</li><li>ACID</li><li>Transactions</li><li>Indexing</li>
+    <li>Partitioning</li><li>Replication</li><li>Connection pooling</li><li>Read/write scaling</li>
+  </ul>
+  <p><b>Caching:</b></p>
+  <ul class="cols">
+    <li>Redis</li><li>Distributed cache</li><li>Cache consistency</li><li>TTL</li>
+  </ul>
+</section>
+
+<section class="phase" id="ph8">
+  <div class="wk">WEEK 13</div><h2>Phase 8 — UPI Switch Architecture</h2>
+  <p>Now combine banking + NPCI + distributed systems. Design:</p>
+  <div class="mermaid">
+flowchart TD
+  N[NPCI] --> NL[Network Layer] --> LB[Load Balancer] --> GW[API Gateway]
+  GW --> TM[Transaction Manager]
+  GW --> TR[Transaction Router]
+  TM --> RE[Risk Engine]
+  TR --> RE
+  RE --> AV[Account Validation] --> CBS[CBS] --> DB[(Transaction DB)] --> K[Event / Kafka] --> RC[Reconciliation] --> RP[Reporting]
+  </div>
+  <p>Then decompose into actual services. For every service define:</p>
+  <ul class="cols">
+    <li>Responsibility</li><li>API</li><li>Input</li><li>Output</li><li>Database</li><li>Kafka topics</li>
+    <li>Dependencies</li><li>Timeout</li><li>Retry</li><li>Failure behaviour</li><li>SLO</li>
+    <li>Security</li><li>Monitoring</li>
+  </ul>
+</section>
+
+<section class="phase" id="ph9">
+  <div class="wk">WEEK 14</div><h2>Phase 9 — Network + Infrastructure</h2>
+  <p><b>Network:</b></p>
+  <ul class="cols">
+    <li>Internet zone</li><li>DMZ</li><li>Application zone</li><li>Database zone</li><li>Management zone</li>
+    <li>Security zone</li><li>NPCI connectivity</li><li>Firewall</li><li>Load balancer</li><li>WAF</li>
+    <li>IDS / IPS</li><li>DNS</li><li>NTP</li><li>Proxy</li>
+  </ul>
+  <p><b>Infrastructure:</b></p>
+  <ul class="cols">
+    <li>Linux</li><li>Kubernetes</li><li>Containers</li><li>VM</li><li>Bare metal</li>
+    <li>GPU — only if needed</li><li>Storage</li><li>Backup</li><li>Replication</li><li>HA</li>
+  </ul>
+  <p>Design:</p>
+  <div class="mermaid">
+flowchart TD
+  N[NPCI] --> C[Connectivity] --> F[Firewall] --> D[DMZ] --> LB[Load Balancer] --> U[UPI Cluster]
+  U --> DB[(DB)]
+  U --> K[Kafka]
+  U --> CA[Cache]
+  DB --> S[Storage]
+  </div>
+</section>
+
+<section class="phase" id="ph10">
+  <div class="wk">WEEK 15</div><h2>Phase 10 — Reliability + SRE</h2>
+  <p>Particularly important for your role. Study:</p>
+  <ul class="cols">
+    <li>HA</li><li>Active-Active</li><li>Active-Passive</li><li>RTO</li><li>RPO</li><li>SLI</li><li>SLO</li>
+    <li>SLA</li><li>Error budget</li><li>Capacity planning</li><li>Autoscaling</li><li>Fault tolerance</li>
+    <li>Circuit breakers</li><li>Graceful degradation</li><li>Chaos engineering</li><li>DR</li>
+    <li>Backup</li><li>Restore</li>
+  </ul>
+  <div class="callout"><b>Then answer:</b> "Can my UPI Switch survive failure of every individual component?"</div>
+  <p>Build a <b>Failure Mode Matrix</b>:</p>
+  <table>
+    <tr><th>Component</th><th>Failure</th><th>Expected Behaviour</th></tr>
+    <tr><td>Redis</td><td>Down</td><td>fallback</td></tr>
+    <tr><td>Kafka</td><td>Down</td><td>controlled degradation</td></tr>
+    <tr><td>CBS</td><td>Down</td><td>transaction handling</td></tr>
+    <tr><td>DB</td><td>Down</td><td>failover</td></tr>
+    <tr><td>NPCI link</td><td>Down</td><td>retry / recovery</td></tr>
+    <tr><td>Pod</td><td>Down</td><td>Kubernetes restart</td></tr>
+    <tr><td>Node</td><td>Down</td><td>reschedule</td></tr>
+    <tr><td>DC</td><td>Down</td><td>DR</td></tr>
+    <tr><td>Region</td><td>Down</td><td>DR strategy</td></tr>
+  </table>
+</section>
+
+<section class="phase" id="ph11">
+  <div class="wk">WEEK 16</div><h2>Phase 11 — SDLC + DevSecOps</h2>
+  <p>Finally learn how to actually deliver the system. Study the pipeline:</p>
+  <div class="mermaid">
+flowchart TD
+  A[Requirement] --> B[Architecture] --> C[Epic] --> D[Feature] --> E[User Story] --> F[Development]
+  F --> G[Code Review] --> H[CI] --> I[Unit Test] --> J[SAST] --> K[SCA] --> L[Container Scan]
+  L --> M[SIT] --> N[Performance] --> O[Security] --> P[UAT] --> Q[Pre-Prod] --> R[Production]
+  R --> S[Monitoring] --> T[SRE]
+  </div>
+  <p>Study:</p>
+  <ul class="cols">
+    <li>Git</li><li>Git branching</li><li>CI/CD</li><li>Jenkins / GitHub Actions</li><li>Docker</li>
+    <li>Kubernetes</li><li>Helm</li><li>Terraform</li><li>Ansible</li><li>Vault</li>
+    <li>Artifact repositories</li><li>SAST</li><li>DAST</li><li>SCA</li><li>Container security</li>
+    <li>SBOM</li><li>Deployment strategies</li><li>Blue/green</li><li>Canary</li><li>Rolling deployment</li>
+  </ul>
+</section>
+
+<section class="phase" id="chain">
+  <h2>The Most Important Part: Don't Study in Isolation</h2>
+  <p>Your study should follow this chain — the knowledge-to-delivery pipeline for the whole program:</p>
+  <div class="mermaid">
+flowchart TD
+  REG[REGULATION] --> RBI[RBI]
+  REG --> NPCI[NPCI]
+  RBI --> REQ[REQUIREMENT]
+  NPCI --> REQ
+  REQ --> MRD[MRD] --> BRD[BRD] --> FRD[FRD] --> NFR[NFR] --> ARCH[ARCHITECTURE]
+  ARCH --> SEC[Security]
+  ARCH --> NET[Network]
+  ARCH --> SW[Software]
+  SEC --> HLD[HLD]
+  NET --> HLD
+  SW --> HLD
+  HLD --> LLD[LLD] --> EP[EPICS] --> ST[STORIES] --> DEV[DEVELOPMENT] --> TST[TESTING] --> DEP[DEPLOYMENT] --> PROD[PRODUCTION] --> SRE[SRE] --> MNT[MAINTENANCE]
+  </div>
+</section>
+
+<section class="phase" id="prio">
+  <h2>Recommended Priority</h2>
+  <p>Don't spend equal time on everything:</p>
+  <table>
+    <tr><th>Priority</th><th>Knowledge</th><th>Importance</th></tr>
+    <tr><td class="prio-p0">P0</td><td>UPI / NPCI</td><td>Very High</td></tr>
+    <tr><td class="prio-p0">P0</td><td>Banking transaction processing</td><td>Very High</td></tr>
+    <tr><td class="prio-p0">P0</td><td>Issuer Switch architecture</td><td>Very High</td></tr>
+    <tr><td class="prio-p0">P0</td><td>Reliability / HA / DR</td><td>Very High</td></tr>
+    <tr><td class="prio-p0">P0</td><td>Security</td><td>Very High</td></tr>
+    <tr><td class="prio-p0">P0</td><td>CBS integration</td><td>Very High</td></tr>
+    <tr><td class="prio-p1">P1</td><td>RBI governance</td><td>High</td></tr>
+    <tr><td class="prio-p1">P1</td><td>Distributed systems</td><td>High</td></tr>
+    <tr><td class="prio-p1">P1</td><td>Network architecture</td><td>High</td></tr>
+    <tr><td class="prio-p1">P1</td><td>Performance engineering</td><td>High</td></tr>
+    <tr><td class="prio-p1">P1</td><td>Reconciliation</td><td>High</td></tr>
+    <tr><td class="prio-p2">P2</td><td>Kubernetes</td><td>Medium/High</td></tr>
+    <tr><td class="prio-p2">P2</td><td>Kafka</td><td>Medium/High</td></tr>
+    <tr><td class="prio-p2">P2</td><td>DevSecOps</td><td>Medium/High</td></tr>
+    <tr><td class="prio-p2">P2</td><td>Database architecture</td><td>Medium/High</td></tr>
+    <tr><td class="prio-p3">P3</td><td>Generic cloud concepts</td><td>Supporting</td></tr>
+    <tr><td class="prio-p3">P3</td><td>AI/ML</td><td>Future capability</td></tr>
+  </table>
+</section>
+
+<section class="phase" id="rule">
+  <h2>One Important Change: the Traceability Rule</h2>
+  <p>Replace any "Knowledge Sources" section with this rule:</p>
+  <div class="callout warn"><b>Rule:</b> Do not merely summarize external standards. Build a traceability chain from
+  each authoritative requirement to the UPI Switch requirement, architecture decision, implementation component,
+  test case, operational control, and audit evidence.</div>
+  <p>That changes the exercise from a study program into an actual banking-system architecture program. For example:</p>
+  <div class="mermaid">
+flowchart LR
+  A[RBI/NPCI requirement] --> B[BRD] --> C[FRD] --> D[NFR] --> E[HLD] --> F[LLD] --> G[User Story] --> H[Code] --> I[Test] --> J[Deployment] --> K[Monitoring] --> L[Audit Evidence]
+  </div>
+  <p>That is the backbone for the entire bank UPI Issuer Switch program.</p>
+</section>
+
+<footer style="margin-top:60px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--border);padding-top:20px;">
+  <p>Companion to the <a href="index.html">UPI Switch from Beginner to Architect — 20-Chapter Course</a>.</p>
+</footer>
+</div>
+</main>
+</div>
+</body>
+</html>
