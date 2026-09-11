@@ -1,0 +1,1745 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A playful, interactive course explaining large language models from first principles to advanced systems.">
+  <title>Inside an LLM — An Interactive Adventure</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>window.MathJax = { tex: { inlineMath: [["\\(", "\\)"]] }, svg: { fontCache: "global" } };</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" defer></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f4f7ff;
+      --muted: #a6b2cf;
+      --faint: #6f7d9e;
+      --bg: #070b18;
+      --bg-soft: #0c1225;
+      --panel: rgba(17, 25, 50, .78);
+      --panel-solid: #111932;
+      --line: rgba(170, 190, 255, .15);
+      --cyan: #4de4ff;
+      --blue: #6c8cff;
+      --violet: #ad7cff;
+      --pink: #ff75b8;
+      --coral: #ff8b73;
+      --yellow: #ffd166;
+      --green: #5ee6a8;
+      --danger: #ff7188;
+      --shadow: 0 24px 70px rgba(0, 0, 0, .35);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(82, 83, 255, .16), transparent 28rem),
+        radial-gradient(circle at 90% 28%, rgba(255, 80, 160, .1), transparent 30rem),
+        var(--bg);
+      color: var(--ink);
+      font: 16px/1.7 "Manrope", system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+    img { max-width: 100%; }
+    ::selection { color: #07101d; background: var(--cyan); }
+    :focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+
+    .progress-rail {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 100;
+      height: 4px;
+      background: rgba(255, 255, 255, .05);
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
+      box-shadow: 0 0 18px rgba(77, 228, 255, .65);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 4px;
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 68px;
+      padding: 12px clamp(18px, 4vw, 60px);
+      border-bottom: 1px solid var(--line);
+      background: rgba(7, 11, 24, .78);
+      backdrop-filter: blur(20px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      font-weight: 800;
+      letter-spacing: -.03em;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, var(--cyan), var(--violet));
+      color: #07101d;
+      box-shadow: 0 10px 30px rgba(94, 152, 255, .25);
+    }
+
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .course-status {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .icon-btn, .ghost-btn, .primary-btn, .choice, .tab-btn, .token, .doc-card, .quiz-option {
+      border: 1px solid var(--line);
+      cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .icon-btn:hover, .ghost-btn:hover, .choice:hover, .tab-btn:hover, .token:hover, .doc-card:hover, .quiz-option:hover {
+      transform: translateY(-2px);
+      border-color: rgba(109, 221, 255, .55);
+    }
+
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .04);
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      width: min(1540px, 100%);
+      margin: 0 auto;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 72px;
+      align-self: start;
+      height: calc(100vh - 72px);
+      padding: 28px 22px 40px;
+      border-right: 1px solid var(--line);
+      overflow-y: auto;
+    }
+
+    .sidebar-label {
+      margin: 0 10px 12px;
+      color: var(--faint);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .nav-link {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      align-items: center;
+      gap: 10px;
+      margin: 4px 0;
+      padding: 10px;
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .nav-link:hover, .nav-link.active { color: var(--ink); background: rgba(255, 255, 255, .055); }
+    .nav-link.active .nav-number { color: #07101d; background: var(--cyan); border-color: transparent; }
+
+    .nav-number {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      font: 500 11px "DM Mono", monospace;
+    }
+
+    .sidebar-card {
+      margin-top: 28px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(77, 228, 255, .08), rgba(173, 124, 255, .08));
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .sidebar-card strong { display: block; margin-bottom: 4px; color: var(--ink); }
+    main { min-width: 0; }
+
+    .hero {
+      position: relative;
+      min-height: 760px;
+      padding: clamp(70px, 8vw, 125px) clamp(24px, 6vw, 86px) 70px;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(90deg, rgba(7, 11, 24, .98) 0%, rgba(7, 11, 24, .76) 45%, rgba(7, 11, 24, .16) 100%),
+        linear-gradient(0deg, var(--bg) 0%, transparent 35%),
+        url("assets/llm-hero.webp") 64% 44% / cover no-repeat;
+      content: "";
+    }
+
+    .hero::after {
+      position: absolute;
+      z-index: -1;
+      inset: 10% auto auto 8%;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: rgba(56, 133, 255, .2);
+      filter: blur(110px);
+      content: "";
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 12px;
+      border: 1px solid rgba(77, 228, 255, .25);
+      border-radius: 999px;
+      background: rgba(7, 11, 24, .55);
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 0 0 rgba(77, 228, 255, .7);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      70% { box-shadow: 0 0 0 9px rgba(77, 228, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(77, 228, 255, 0); }
+    }
+
+    .hero h1 {
+      max-width: 830px;
+      margin: 24px 0 22px;
+      font-size: clamp(52px, 7.7vw, 112px);
+      line-height: .94;
+      letter-spacing: -.07em;
+    }
+
+    .gradient-text {
+      color: transparent;
+      background: linear-gradient(90deg, var(--cyan), #a2adff 48%, var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .hero-copy {
+      max-width: 650px;
+      color: #c1cbe2;
+      font-size: clamp(17px, 2vw, 21px);
+    }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+    .primary-btn, .ghost-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 50px;
+      padding: 0 20px;
+      border-radius: 15px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .primary-btn {
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--cyan), #7e9cff);
+      color: #07101d;
+      box-shadow: 0 14px 40px rgba(77, 228, 255, .2);
+    }
+
+    .primary-btn:hover { transform: translateY(-2px); box-shadow: 0 18px 50px rgba(77, 228, 255, .3); }
+    .ghost-btn { background: rgba(7, 11, 24, .55); }
+    .hero-stats { display: flex; flex-wrap: wrap; gap: 26px; margin-top: 62px; }
+    .hero-stat strong { display: block; font-size: 22px; letter-spacing: -.03em; }
+    .hero-stat span { color: var(--faint); font-size: 12px; text-transform: uppercase; letter-spacing: .1em; }
+
+    .content {
+      width: min(1100px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 20px 0 120px;
+    }
+
+    .chapter {
+      position: relative;
+      padding: 96px 0 25px;
+    }
+
+    .chapter-head {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+      gap: 22px;
+      margin-bottom: 34px;
+    }
+
+    .chapter-number {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(77, 228, 255, .12), rgba(173, 124, 255, .12));
+      color: var(--cyan);
+      font: 500 16px "DM Mono", monospace;
+    }
+
+    .level {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      margin-bottom: 7px;
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .level.advanced { color: var(--pink); }
+    .level.intermediate { color: var(--yellow); }
+    h2 { margin: 0; font-size: clamp(34px, 5vw, 58px); line-height: 1.08; letter-spacing: -.05em; }
+    h3 { margin: 0 0 12px; font-size: clamp(22px, 3vw, 31px); line-height: 1.2; letter-spacing: -.03em; }
+    h4 { margin: 0 0 8px; font-size: 17px; }
+    p { margin: 0 0 18px; }
+    .lead { max-width: 780px; color: var(--muted); font-size: 18px; }
+
+    .story-card, .demo, .concept-card, .math-card, .callout, .quiz-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .story-card {
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 22px;
+      margin: 30px 0;
+      padding: 28px;
+      border-radius: var(--radius);
+    }
+
+    .story-icon {
+      display: grid;
+      place-items: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 21px;
+      background: linear-gradient(145deg, rgba(255, 209, 102, .2), rgba(255, 117, 184, .15));
+      font-size: 35px;
+    }
+
+    .story-card p:last-child { margin-bottom: 0; }
+    .grid-2, .grid-3 { display: grid; gap: 18px; margin: 26px 0; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .concept-card {
+      padding: 24px;
+      border-radius: 20px;
+      box-shadow: none;
+    }
+
+    .concept-card .mini-icon { margin-bottom: 16px; font-size: 29px; }
+    .concept-card p { margin: 0; color: var(--muted); font-size: 14px; }
+    .concept-card strong { color: var(--ink); }
+
+    .demo {
+      position: relative;
+      margin: 32px 0;
+      padding: clamp(22px, 4vw, 38px);
+      border-radius: 28px;
+      overflow: hidden;
+    }
+
+    .demo::before {
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--violet), transparent);
+      content: "";
+    }
+
+    .demo-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .demo-label span:last-child { color: var(--faint); font-weight: 600; letter-spacing: .04em; }
+    .demo-instruction { color: var(--muted); }
+
+    .sentence {
+      margin: 24px 0;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #091020;
+      font: 500 clamp(19px, 3vw, 27px)/1.6 "DM Mono", monospace;
+    }
+
+    .blank {
+      display: inline-block;
+      min-width: 110px;
+      border-bottom: 2px solid var(--cyan);
+      color: var(--cyan);
+      text-align: center;
+    }
+
+    .choices { display: flex; flex-wrap: wrap; gap: 10px; }
+    .choice, .tab-btn {
+      padding: 10px 15px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .04);
+    }
+
+    .choice.correct { color: #07101d; background: var(--green); border-color: var(--green); }
+    .choice.wrong { background: rgba(255, 113, 136, .14); border-color: var(--danger); }
+    .feedback { min-height: 29px; margin: 16px 0 0; color: var(--muted); }
+
+    .input-wrap { display: flex; gap: 10px; }
+    .text-input, .prompt-input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #091020;
+      color: var(--ink);
+    }
+
+    .text-input { min-height: 50px; padding: 0 16px; }
+    .prompt-input { min-height: 142px; padding: 16px; resize: vertical; }
+    .token-stage { display: flex; flex-wrap: wrap; gap: 8px; min-height: 58px; margin: 20px 0 10px; }
+    .token {
+      padding: 8px 11px;
+      border-radius: 10px;
+      background: rgba(108, 140, 255, .13);
+      font: 500 13px "DM Mono", monospace;
+      cursor: default;
+    }
+
+    .token:nth-child(4n + 2) { background: rgba(77, 228, 255, .13); }
+    .token:nth-child(4n + 3) { background: rgba(255, 117, 184, .13); }
+    .token:nth-child(4n) { background: rgba(255, 209, 102, .13); }
+    .token-meta { color: var(--faint); font-size: 13px; }
+
+    .math-card {
+      margin: 28px 0;
+      padding: 25px;
+      border-radius: 20px;
+      border-left: 3px solid var(--violet);
+      box-shadow: none;
+    }
+
+    .math-card h4 { color: #d3bdff; }
+    .formula {
+      margin: 16px 0;
+      padding: 16px;
+      border-radius: 14px;
+      background: #080e1c;
+      color: #e3e8ff;
+      font: 500 clamp(15px, 2.3vw, 20px)/1.7 "DM Mono", monospace;
+      overflow-x: auto;
+    }
+
+    .math-card p:last-child { margin-bottom: 0; color: var(--muted); }
+    .analogy {
+      color: var(--yellow);
+      font-weight: 700;
+    }
+
+    .neuron-lab { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
+    .sliders label, .slider-row label { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin: 15px 0 5px; color: var(--muted); font-size: 13px; }
+    input[type="range"] { width: 100%; accent-color: var(--cyan); }
+
+    .neuron-visual {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 260px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: radial-gradient(circle, rgba(108, 140, 255, .14), transparent 60%), #091020;
+    }
+
+    .neuron-core {
+      display: grid;
+      place-items: center;
+      width: 105px;
+      height: 105px;
+      border: 2px solid var(--cyan);
+      border-radius: 50%;
+      background: rgba(77, 228, 255, .1);
+      box-shadow: 0 0 60px rgba(77, 228, 255, .22);
+      font: 500 21px "DM Mono", monospace;
+    }
+
+    .output-meter {
+      position: absolute;
+      inset: auto 18px 18px;
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .07);
+      overflow: hidden;
+    }
+
+    .output-meter div { height: 100%; width: 50%; background: linear-gradient(90deg, var(--violet), var(--cyan)); transition: width .3s; }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(7, auto);
+      justify-content: center;
+      align-items: center;
+      gap: clamp(4px, 1vw, 12px);
+      margin: 28px 0;
+    }
+
+    .flow-node {
+      display: grid;
+      place-items: center;
+      min-width: 70px;
+      min-height: 68px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: rgba(255, 255, 255, .04);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .flow-arrow { color: var(--faint); }
+    .attention-sentence { display: flex; flex-wrap: wrap; gap: 9px; margin: 25px 0; }
+    .attention-word {
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, .04);
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .attention-word.selected { color: #07101d; background: var(--yellow); border-color: transparent; }
+    .attention-word.related { border-color: var(--pink); background: rgba(255, 117, 184, var(--attention, .15)); }
+
+    .attention-bars { display: grid; gap: 10px; margin-top: 20px; }
+    .attention-bar { display: grid; grid-template-columns: 92px 1fr 44px; gap: 10px; align-items: center; color: var(--muted); font-size: 13px; }
+    .bar-track { height: 10px; border-radius: 999px; background: rgba(255, 255, 255, .07); overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--violet), var(--pink)); transition: width .35s; }
+
+    .training-stage { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(270px, .8fr); gap: 25px; align-items: center; }
+    #lossCanvas { width: 100%; height: 280px; border: 1px solid var(--line); border-radius: 20px; background: #091020; }
+    .training-readout {
+      padding: 23px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, .03);
+    }
+
+    .big-number { margin: 5px 0 14px; color: var(--cyan); font: 500 38px "DM Mono", monospace; }
+    .tiny { color: var(--faint); font-size: 12px; }
+    .prob-list { display: grid; gap: 12px; margin: 20px 0; }
+    .prob-row { display: grid; grid-template-columns: 90px 1fr 52px; gap: 12px; align-items: center; font: 500 13px "DM Mono", monospace; }
+    .prob-row .bar-fill { background: linear-gradient(90deg, var(--cyan), var(--blue)); }
+    .generated {
+      min-height: 95px;
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: #091020;
+      font: 500 15px/1.8 "DM Mono", monospace;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 18px;
+      margin-left: 4px;
+      vertical-align: middle;
+      background: var(--cyan);
+      animation: blink 1s steps(2) infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+    .prompt-builder { display: grid; grid-template-columns: .8fr 1.2fr; gap: 20px; }
+    .prompt-parts { display: grid; gap: 10px; }
+    .prompt-part {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .03);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .prompt-part.active { border-color: var(--green); color: var(--ink); background: rgba(94, 230, 168, .07); }
+    .prompt-part input { accent-color: var(--green); }
+    .copy-note { min-height: 24px; color: var(--green); font-size: 12px; }
+
+    .context-window {
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 4px;
+      min-height: 180px;
+      margin-top: 20px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #091020;
+    }
+
+    .context-cell {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      background: var(--blue);
+      opacity: .75;
+    }
+
+    .context-cell.faded { background: var(--faint); opacity: .18; }
+    .context-legend { display: flex; justify-content: space-between; gap: 20px; margin-top: 10px; color: var(--faint); font-size: 12px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+    .tab-btn.active { color: #07101d; background: var(--cyan); border-color: transparent; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: rise .3s ease; }
+
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+    .rag-layout { display: grid; grid-template-columns: .85fr 1.15fr; gap: 20px; }
+    .doc-list { display: grid; gap: 10px; }
+    .doc-card {
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .035);
+      text-align: left;
+    }
+
+    .doc-card strong { display: block; font-size: 13px; }
+    .doc-card span { color: var(--faint); font-size: 11px; }
+    .doc-card.retrieved { border-color: var(--green); background: rgba(94, 230, 168, .09); }
+    .rag-answer { min-height: 210px; padding: 18px; border: 1px solid var(--line); border-radius: 17px; background: #091020; color: var(--muted); }
+    .rag-answer strong { color: var(--green); }
+
+    .callout {
+      margin: 30px 0;
+      padding: 24px;
+      border-radius: 20px;
+      border-left: 3px solid var(--yellow);
+      box-shadow: none;
+    }
+
+    .callout.danger { border-left-color: var(--danger); }
+    .callout p:last-child { margin-bottom: 0; color: var(--muted); }
+    .comparison { width: 100%; border-collapse: collapse; margin: 25px 0; overflow: hidden; }
+    .comparison th, .comparison td { padding: 15px; border-bottom: 1px solid var(--line); text-align: left; }
+    .comparison th { color: var(--faint); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+    .comparison td { color: var(--muted); font-size: 14px; }
+    .comparison td:first-child { color: var(--ink); font-weight: 700; }
+
+    .quiz-card { margin: 28px 0; padding: 27px; border-radius: 23px; }
+    .quiz-count { color: var(--cyan); font: 500 12px "DM Mono", monospace; }
+    .quiz-question { margin: 8px 0 20px; font-size: 21px; font-weight: 800; }
+    .quiz-options { display: grid; gap: 10px; }
+    .quiz-option {
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .035);
+      text-align: left;
+    }
+
+    .quiz-option.correct { color: #07101d; background: var(--green); border-color: var(--green); }
+    .quiz-option.wrong { border-color: var(--danger); background: rgba(255, 113, 136, .12); }
+    .quiz-result { display: none; padding: 35px; border-radius: 25px; background: linear-gradient(145deg, rgba(77, 228, 255, .12), rgba(173, 124, 255, .12)); text-align: center; }
+    .quiz-result.show { display: block; }
+    .quiz-score { margin: 10px 0; font-size: 62px; font-weight: 800; letter-spacing: -.06em; }
+
+    .glossary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+    details {
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, .025);
+    }
+
+    summary { padding: 15px 17px; cursor: pointer; font-weight: 700; }
+    details p { margin: 0; padding: 0 17px 17px; color: var(--muted); font-size: 14px; }
+    footer { padding: 65px 25px 85px; border-top: 1px solid var(--line); text-align: center; }
+    footer strong { display: block; margin-bottom: 7px; font-size: 20px; }
+    footer span { color: var(--faint); font-size: 13px; }
+
+    .mobile-menu { display: none; }
+    .light {
+      color-scheme: light;
+      --ink: #13203b;
+      --muted: #53617d;
+      --faint: #76829a;
+      --bg: #f5f7ff;
+      --bg-soft: #edf1fb;
+      --panel: rgba(255, 255, 255, .82);
+      --panel-solid: #fff;
+      --line: rgba(37, 57, 100, .14);
+      --shadow: 0 22px 65px rgba(47, 61, 105, .13);
+    }
+
+    .light body {
+      background:
+        radial-gradient(circle at 15% 0%, rgba(82, 83, 255, .12), transparent 28rem),
+        radial-gradient(circle at 90% 28%, rgba(255, 80, 160, .08), transparent 30rem),
+        var(--bg);
+    }
+
+    .light .topbar { background: rgba(245, 247, 255, .8); }
+    .light .hero::before {
+      background:
+        linear-gradient(90deg, rgba(245, 247, 255, .97) 0%, rgba(245, 247, 255, .84) 42%, rgba(245, 247, 255, .08) 100%),
+        linear-gradient(0deg, var(--bg) 0%, transparent 32%),
+        url("assets/llm-hero.webp") 64% 44% / cover no-repeat;
+    }
+
+    .light .hero-copy { color: #42516f; }
+    .light .eyebrow, .light .ghost-btn { background: rgba(255, 255, 255, .7); }
+    .light .sentence, .light .text-input, .light .prompt-input, .light .formula,
+    .light .neuron-visual, .light #lossCanvas, .light .generated, .light .context-window, .light .rag-answer { background: #f2f5fd; }
+
+    @media (max-width: 1050px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        z-index: 95;
+        inset: 72px auto 0 0;
+        width: 285px;
+        height: calc(100vh - 72px);
+        background: var(--panel-solid);
+        transform: translateX(-105%);
+        transition: transform .25s ease;
+        box-shadow: var(--shadow);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .mobile-menu { display: grid; }
+      .hero { min-height: 690px; }
+    }
+
+    @media (max-width: 760px) {
+      .topbar { padding-inline: 14px; }
+      .brand span { display: none; }
+      .course-status { display: none; }
+      .hero { min-height: 760px; padding-top: 70px; }
+      .hero::before {
+        background:
+          linear-gradient(180deg, rgba(7, 11, 24, .38) 0%, rgba(7, 11, 24, .9) 57%, var(--bg) 93%),
+          url("assets/llm-hero.webp") 53% 7% / auto 53% no-repeat;
+      }
+      .light .hero::before {
+        background:
+          linear-gradient(180deg, rgba(245, 247, 255, .2) 0%, rgba(245, 247, 255, .91) 57%, var(--bg) 93%),
+          url("assets/llm-hero.webp") 53% 7% / auto 53% no-repeat;
+      }
+      .hero h1 { margin-top: 270px; }
+      .hero-stats { margin-top: 38px; gap: 18px; }
+      .chapter { padding-top: 72px; }
+      .chapter-head { grid-template-columns: 1fr; gap: 14px; }
+      .chapter-number { width: 48px; height: 48px; }
+      .grid-2, .grid-3, .neuron-lab, .training-stage, .prompt-builder, .rag-layout { grid-template-columns: 1fr; }
+      .story-card { grid-template-columns: 1fr; }
+      .story-icon { width: 58px; height: 58px; }
+      .flow { grid-template-columns: 1fr; }
+      .flow-arrow { transform: rotate(90deg); text-align: center; }
+      .glossary { grid-template-columns: 1fr; }
+      .input-wrap { flex-direction: column; }
+      .comparison { display: block; overflow-x: auto; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-rail"><div class="progress-fill" id="progressFill"></div></div>
+  <header class="topbar">
+    <a class="brand" href="#top"><span class="brand-mark">AI</span><span>Inside an LLM</span></a>
+    <div class="top-actions">
+      <span class="course-status"><strong id="coursePercent">0%</strong> explored</span>
+      <button class="icon-btn mobile-menu" id="menuButton" aria-label="Open course menu">☰</button>
+      <button class="icon-btn" id="themeButton" aria-label="Switch color theme">☀</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <p class="sidebar-label">Your learning path</p>
+      <nav>
+        <a class="nav-link active" href="#meet"><span class="nav-number">00</span><span>Meet the LLM</span></a>
+        <a class="nav-link" href="#tokens"><span class="nav-number">01</span><span>Tokens</span></a>
+        <a class="nav-link" href="#embeddings"><span class="nav-number">02</span><span>Embeddings</span></a>
+        <a class="nav-link" href="#neurons"><span class="nav-number">03</span><span>Neural networks</span></a>
+        <a class="nav-link" href="#transformer"><span class="nav-number">04</span><span>Transformers</span></a>
+        <a class="nav-link" href="#training"><span class="nav-number">05</span><span>Training</span></a>
+        <a class="nav-link" href="#generation"><span class="nav-number">06</span><span>Generation</span></a>
+        <a class="nav-link" href="#prompting"><span class="nav-number">07</span><span>Prompting</span></a>
+        <a class="nav-link" href="#advanced"><span class="nav-number">08</span><span>Advanced systems</span></a>
+        <a class="nav-link" href="#limits"><span class="nav-number">09</span><span>Limits & safety</span></a>
+        <a class="nav-link" href="#quiz"><span class="nav-number">10</span><span>Final challenge</span></a>
+      </nav>
+      <div class="sidebar-card">
+        <strong>No AI background needed</strong>
+        Go in order the first time. Every advanced idea is built from a simple one.
+      </div>
+    </aside>
+
+    <main id="top">
+      <section class="hero">
+        <span class="eyebrow"><span class="pulse"></span> Interactive visual course</span>
+        <h1>How does an <span class="gradient-text">LLM</span> actually work?</h1>
+        <p class="hero-copy">Start with a word-guessing game. End with transformers, gradient descent, RAG, alignment, mixture-of-experts, and the math connecting it all.</p>
+        <div class="hero-actions">
+          <a class="primary-btn" href="#meet">Start the adventure <span>↓</span></a>
+          <a class="ghost-btn" href="#advanced">Jump to advanced</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><strong>11</strong><span>visual chapters</span></div>
+          <div class="hero-stat"><strong>8</strong><span>interactive labs</span></div>
+          <div class="hero-stat"><strong>0 → ∞</strong><span>difficulty curve</span></div>
+        </div>
+      </section>
+
+      <div class="content">
+        <section class="chapter" id="meet">
+          <div class="chapter-head">
+            <div class="chapter-number">00</div>
+            <div>
+              <span class="level">Beginner · Big idea</span>
+              <h2>Meet the word-prediction machine</h2>
+            </div>
+          </div>
+          <p class="lead">LLM means <strong>Large Language Model</strong>. “Large” refers to its huge number of learned parameters and training examples. “Language model” means it estimates what text is likely to come next.</p>
+
+          <div class="story-card">
+            <div class="story-icon">🍕</div>
+            <div>
+              <h3>Imagine the world’s most dedicated reader</h3>
+              <p>Our character, <strong>Pixel</strong>, reads millions of books, articles, conversations, code examples, and recipes. But Pixel has one training game: cover the next piece of text and guess it.</p>
+              <p>After billions of guesses, Pixel learns grammar, style, facts, patterns, and even fragments of reasoning—not by storing a neat encyclopedia, but by adjusting billions of tiny numerical knobs.</p>
+            </div>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label"><span>Play · Next-token detective</span><span>30 seconds</span></div>
+            <h3>What probably comes next?</h3>
+            <p class="demo-instruction">Choose the most likely continuation. An LLM does a much larger version of this.</p>
+            <div class="sentence">The cat sat on the <span class="blank" id="nextBlank">?</span></div>
+            <div class="choices" id="nextChoices">
+              <button class="choice" data-word="mat">mat</button>
+              <button class="choice" data-word="democracy">democracy</button>
+              <button class="choice" data-word="quantum">quantum</button>
+              <button class="choice" data-word="sandwich">sandwich</button>
+            </div>
+            <p class="feedback" id="nextFeedback">Hint: meaning and common phrases both matter.</p>
+          </div>
+
+          <div class="grid-3">
+            <div class="concept-card"><div class="mini-icon">📚</div><h4>Pretraining</h4><p>Learn broad language patterns by predicting missing or next tokens.</p></div>
+            <div class="concept-card"><div class="mini-icon">🎛️</div><h4>Parameters</h4><p>Numerical settings changed during training. Modern models can have billions.</p></div>
+            <div class="concept-card"><div class="mini-icon">💬</div><h4>Inference</h4><p>Use the trained parameters to generate an answer one token at a time.</p></div>
+          </div>
+
+          <div class="callout">
+            <h4>Key mental model</h4>
+            <p>An LLM is not a database that looks up a complete answer. It repeatedly predicts a probability distribution for the next token, chooses one, appends it, and repeats.</p>
+          </div>
+        </section>
+
+        <section class="chapter" id="tokens">
+          <div class="chapter-head">
+            <div class="chapter-number">01</div>
+            <div>
+              <span class="level">Beginner · Representation</span>
+              <h2>Text becomes tokens</h2>
+            </div>
+          </div>
+          <p class="lead">Models do not see words directly. A <strong>tokenizer</strong> breaks text into reusable chunks—whole words, pieces of words, spaces, and punctuation—and assigns each chunk an integer ID.</p>
+
+          <div class="demo">
+            <div class="demo-label"><span>Lab · Tokenizer microscope</span><span>Type anything</span></div>
+            <h3>Watch a sentence become model food</h3>
+            <div class="input-wrap">
+              <input class="text-input" id="tokenInput" value="LLMs can write surprisingly playful stories!" aria-label="Text to tokenize">
+              <button class="primary-btn" id="tokenizeButton">Tokenize</button>
+            </div>
+            <div class="token-stage" id="tokenStage" aria-live="polite"></div>
+            <div class="token-meta" id="tokenMeta"></div>
+          </div>
+
+          <div class="grid-2">
+            <div class="concept-card">
+              <div class="mini-icon">🧩</div>
+              <h4>Why pieces, not just words?</h4>
+              <p>A vocabulary containing every possible word would be enormous. Pieces let the model handle names, typos, code, and new words such as <strong>“moonburger” → “moon” + “burger.”</strong></p>
+            </div>
+            <div class="concept-card">
+              <div class="mini-icon">🪟</div>
+              <h4>Context windows count tokens</h4>
+              <p>If a model supports 128,000 tokens, that is roughly 70,000–100,000 English words, depending on the text. Code and uncommon scripts tokenize differently.</p>
+            </div>
+          </div>
+
+          <div class="math-card">
+            <h4>Math bridge · From token to ID</h4>
+            <div class="formula">tokenizer("cats") → ["cat", "s"] → [9246, 82]</div>
+            <p>The integers are just labels. The model next turns each ID into a vector of learned numbers.</p>
+          </div>
+        </section>
+
+        <section class="chapter" id="embeddings">
+          <div class="chapter-head">
+            <div class="chapter-number">02</div>
+            <div>
+              <span class="level">Beginner → Intermediate · Vectors</span>
+              <h2>Meaning becomes geometry</h2>
+            </div>
+          </div>
+          <p class="lead">Each token ID maps to an <strong>embedding</strong>: a long list of numbers. During training, words used in similar ways develop vectors that point in similar directions.</p>
+
+          <div class="demo">
+            <div class="demo-label"><span>Explore · Meaning map</span><span>Click a word</span></div>
+            <h3>Which ideas live near each other?</h3>
+            <div class="tabs" id="embeddingTabs">
+              <button class="tab-btn active" data-word="king">king</button>
+              <button class="tab-btn" data-word="cat">cat</button>
+              <button class="tab-btn" data-word="pizza">pizza</button>
+              <button class="tab-btn" data-word="code">code</button>
+            </div>
+            <div class="grid-2">
+              <div class="neuron-visual" id="embeddingMap" aria-label="Conceptual two-dimensional embedding map"></div>
+              <div>
+                <h4>Conceptual similarity</h4>
+                <div class="attention-bars" id="similarityBars"></div>
+                <p class="tiny">Real embeddings have hundreds or thousands of dimensions. This 2D map is an intuition, not a literal view.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="math-card">
+            <h4>Math basics · Vectors and cosine similarity</h4>
+            <div class="formula">word → v = [0.21, −0.73, 0.42, …]</div>
+            <div class="formula">similarity(a,b) = (a · b) / (||a|| ||b||)</div>
+            <p>The dot product \(a · b\) is large when two vectors point in the same direction. Dividing by their lengths keeps the score between −1 and 1. Similar meaning often produces a score closer to 1.</p>
+          </div>
+
+          <div class="callout">
+            <h4>Famous intuition, with a warning</h4>
+            <p>Vector arithmetic sometimes captures relations like <span class="analogy">king − man + woman ≈ queen</span>. It is a useful picture, but real model representations are contextual, distributed, and far messier than one clean equation.</p>
+          </div>
+        </section>
+
+        <section class="chapter" id="neurons">
+          <div class="chapter-head">
+            <div class="chapter-number">03</div>
+            <div>
+              <span class="level intermediate">Intermediate · Neural networks</span>
+              <h2>Billions of tiny calculators</h2>
+            </div>
+          </div>
+          <p class="lead">A neural network repeatedly mixes numbers using weights, adds biases, and applies nonlinear functions. One unit is simple; huge layers of them can represent astonishingly complicated patterns.</p>
+
+          <div class="math-card">
+            <h4>Math basics · One artificial neuron</h4>
+            <div class="formula">z = w₁x₁ + w₂x₂ + b &nbsp;&nbsp;&nbsp; then &nbsp;&nbsp;&nbsp; output = activation(z)</div>
+            <p>Inputs \(x\) carry information. Weights \(w\) control importance. Bias \(b\) shifts the result. An activation function makes the system nonlinear; without it, many layers would collapse into one linear transformation.</p>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label"><span>Lab · Build a neuron</span><span>Move the sliders</span></div>
+            <div class="neuron-lab">
+              <div class="sliders">
+                <label><span>Input x₁</span><strong id="x1Value">0.7</strong></label>
+                <input type="range" id="x1" min="-1" max="1" step=".1" value=".7">
+                <label><span>Weight w₁</span><strong id="w1Value">1.2</strong></label>
+                <input type="range" id="w1" min="-2" max="2" step=".1" value="1.2">
+                <label><span>Input x₂</span><strong id="x2Value">-0.3</strong></label>
+                <input type="range" id="x2" min="-1" max="1" step=".1" value="-.3">
+                <label><span>Weight w₂</span><strong id="w2Value">0.8</strong></label>
+                <input type="range" id="w2" min="-2" max="2" step=".1" value=".8">
+                <label><span>Bias b</span><strong id="biasValue">0.2</strong></label>
+                <input type="range" id="bias" min="-2" max="2" step=".1" value=".2">
+              </div>
+              <div class="neuron-visual">
+                <div class="neuron-core" id="neuronOutput">0.69</div>
+                <div class="output-meter"><div id="neuronMeter"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="concept-card"><div class="mini-icon">➡️</div><h4>Forward pass</h4><p>Input flows through all layers to produce predictions.</p></div>
+            <div class="concept-card"><div class="mini-icon">🎯</div><h4>Loss</h4><p>A number measures how wrong the prediction was.</p></div>
+            <div class="concept-card"><div class="mini-icon">⬅️</div><h4>Backpropagation</h4><p>Calculus finds how each weight contributed to the error.</p></div>
+          </div>
+        </section>
+
+        <section class="chapter" id="transformer">
+          <div class="chapter-head">
+            <div class="chapter-number">04</div>
+            <div>
+              <span class="level intermediate">Intermediate · Core architecture</span>
+              <h2>The transformer and attention</h2>
+            </div>
+          </div>
+          <p class="lead">The 2017 transformer architecture changed language AI. Its key trick, <strong>self-attention</strong>, lets every token gather useful information from other tokens in the context.</p>
+
+          <div class="flow" aria-label="Transformer data flow">
+            <div class="flow-node">Token<br>IDs</div><div class="flow-arrow">→</div>
+            <div class="flow-node">Embeddings<br>+ position</div><div class="flow-arrow">→</div>
+            <div class="flow-node">Attention<br>+ MLP × N</div><div class="flow-arrow">→</div>
+            <div class="flow-node">Next-token<br>probabilities</div>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label"><span>Lab · Attention spotlight</span><span>Click each word</span></div>
+            <h3>“It” should look backward</h3>
+            <p class="demo-instruction">Click a token to see which earlier words it might attend to. Different attention heads learn different relationships.</p>
+            <div class="attention-sentence" id="attentionSentence"></div>
+            <div class="attention-bars" id="attentionBars"></div>
+          </div>
+
+          <div class="math-card">
+            <h4>Math bridge · Scaled dot-product attention</h4>
+            <div class="formula">Attention(Q,K,V) = softmax(QKᵀ / √dₖ) V</div>
+            <p><strong>Query Q:</strong> what am I looking for? <strong>Key K:</strong> what does each token offer? <strong>Value V:</strong> what information should be passed along? Dot products score matches; softmax turns scores into weights that sum to 1.</p>
+          </div>
+
+          <div class="grid-2">
+            <div class="concept-card"><div class="mini-icon">👥</div><h4>Multi-head attention</h4><p>Many attention heads run in parallel. One may track syntax, another names, another long-range dependencies.</p></div>
+            <div class="concept-card"><div class="mini-icon">📍</div><h4>Position information</h4><p>Because attention alone ignores order, models add positional information so “dog bites human” differs from “human bites dog.”</p></div>
+          </div>
+        </section>
+
+        <section class="chapter" id="training">
+          <div class="chapter-head">
+            <div class="chapter-number">05</div>
+            <div>
+              <span class="level intermediate">Intermediate · Learning</span>
+              <h2>How an LLM learns</h2>
+            </div>
+          </div>
+          <p class="lead">Training is an enormous loop: predict, measure error, calculate gradients, nudge parameters, repeat. The model slowly shifts probability toward the correct next token.</p>
+
+          <div class="demo">
+            <div class="demo-label"><span>Lab · Gradient descent hike</span><span>Find the valley</span></div>
+            <div class="training-stage">
+              <canvas id="lossCanvas" width="650" height="280" aria-label="Gradient descent loss curve"></canvas>
+              <div class="training-readout">
+                <span class="tiny">Current parameter</span>
+                <div class="big-number" id="parameterReadout">−4.00</div>
+                <span class="tiny">Current loss</span>
+                <div class="big-number" id="lossReadout">36.00</div>
+                <button class="primary-btn" id="gradientButton">Take a learning step</button>
+                <button class="ghost-btn" id="resetGradient">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="math-card">
+            <h4>Math basics · Cross-entropy loss</h4>
+            <div class="formula">loss = −log P(correct next token)</div>
+            <p>If the model gives the correct token probability 0.9, loss is small: \(-\log(0.9) ≈ 0.105\). If it gives probability 0.01, loss is large: \(-\log(0.01) ≈ 4.605\).</p>
+          </div>
+
+          <div class="math-card">
+            <h4>Math basics · Gradient descent</h4>
+            <div class="formula">new weight = old weight − learning_rate × gradient</div>
+            <p>The gradient is the slope of the loss. Subtracting it moves downhill. The learning rate controls step size: too tiny is slow; too large may jump past the valley.</p>
+          </div>
+
+          <table class="comparison">
+            <thead><tr><th>Stage</th><th>What happens</th><th>What the model gains</th></tr></thead>
+            <tbody>
+              <tr><td>Pretraining</td><td>Next-token learning on broad text</td><td>Language, world patterns, code, general capabilities</td></tr>
+              <tr><td>Instruction tuning</td><td>Train on prompt-and-helpful-answer examples</td><td>Following user requests</td></tr>
+              <tr><td>Preference alignment</td><td>Learn from ranked outputs or AI feedback</td><td>Helpfulness, safety, style</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="chapter" id="generation">
+          <div class="chapter-head">
+            <div class="chapter-number">06</div>
+            <div>
+              <span class="level intermediate">Intermediate · Inference</span>
+              <h2>From probabilities to prose</h2>
+            </div>
+          </div>
+          <p class="lead">The final layer produces a score, called a <strong>logit</strong>, for every token in the vocabulary. Softmax converts those scores into probabilities. A decoding strategy selects the next token.</p>
+
+          <div class="demo">
+            <div class="demo-label"><span>Lab · Creativity dial</span><span>Change temperature</span></div>
+            <div class="slider-row">
+              <label><span>Temperature</span><strong id="temperatureValue">0.8</strong></label>
+              <input type="range" id="temperature" min=".1" max="2" step=".1" value=".8">
+            </div>
+            <div class="prob-list" id="probList"></div>
+            <button class="primary-btn" id="generateButton">Generate a tiny tale</button>
+            <div class="generated" id="generatedText">Pixel opened the mysterious box and<span class="cursor"></span></div>
+          </div>
+
+          <div class="math-card">
+            <h4>Math bridge · Softmax with temperature</h4>
+            <div class="formula">P(tokenᵢ) = exp(logitᵢ / T) / Σⱼ exp(logitⱼ / T)</div>
+            <p>Lower \(T\) sharpens the distribution, making high-probability choices dominate. Higher \(T\) flattens it, allowing more surprising choices. Temperature does not add knowledge; it changes sampling.</p>
+          </div>
+
+          <div class="grid-3">
+            <div class="concept-card"><div class="mini-icon">🥇</div><h4>Greedy</h4><p>Always choose the top token. Stable, but can become repetitive.</p></div>
+            <div class="concept-card"><div class="mini-icon">🎲</div><h4>Sampling</h4><p>Randomly choose according to probability. More varied outputs.</p></div>
+            <div class="concept-card"><div class="mini-icon">🧺</div><h4>Top-p</h4><p>Sample only from the smallest likely set whose probability totals \(p\).</p></div>
+          </div>
+        </section>
+
+        <section class="chapter" id="prompting">
+          <div class="chapter-head">
+            <div class="chapter-number">07</div>
+            <div>
+              <span class="level intermediate">Practical · Prompt engineering</span>
+              <h2>Give the model a good map</h2>
+            </div>
+          </div>
+          <p class="lead">A prompt supplies temporary context. Clear goals, relevant background, constraints, examples, and an output format reduce ambiguity and make success easier to verify.</p>
+
+          <div class="demo">
+            <div class="demo-label"><span>Lab · Prompt sandwich</span><span>Build a reusable prompt</span></div>
+            <div class="prompt-builder">
+              <div class="prompt-parts" id="promptParts">
+                <label class="prompt-part active"><input type="checkbox" checked data-part="role"><span><strong>Role</strong><br>You are a friendly science teacher.</span></label>
+                <label class="prompt-part active"><input type="checkbox" checked data-part="task"><span><strong>Task</strong><br>Explain black holes to a 12-year-old.</span></label>
+                <label class="prompt-part active"><input type="checkbox" checked data-part="context"><span><strong>Context</strong><br>They know gravity but not relativity.</span></label>
+                <label class="prompt-part active"><input type="checkbox" checked data-part="constraints"><span><strong>Constraints</strong><br>Use one analogy; avoid equations.</span></label>
+                <label class="prompt-part active"><input type="checkbox" checked data-part="format"><span><strong>Format</strong><br>Three short sections and a quiz.</span></label>
+              </div>
+              <div>
+                <textarea class="prompt-input" id="promptOutput" readonly></textarea>
+                <div class="hero-actions">
+                  <button class="primary-btn" id="copyPrompt">Copy prompt</button>
+                  <button class="ghost-btn" id="weakPrompt">Show weak version</button>
+                </div>
+                <div class="copy-note" id="copyNote"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout">
+            <h4>Prompting is not magic wording</h4>
+            <p>Think specification, not spell. Ask for evidence, define the audience, provide source material, split complex work into steps, and verify important outputs independently.</p>
+          </div>
+        </section>
+
+        <section class="chapter" id="advanced">
+          <div class="chapter-head">
+            <div class="chapter-number">08</div>
+            <div>
+              <span class="level advanced">Advanced · Modern LLM systems</span>
+              <h2>Beyond the base model</h2>
+            </div>
+          </div>
+          <p class="lead">A production AI assistant is usually a system around an LLM: retrieval, tools, memory, guardrails, evaluators, and sometimes specialized model architectures.</p>
+
+          <div class="tabs" id="advancedTabs">
+            <button class="tab-btn active" data-tab="contextPanel">Context</button>
+            <button class="tab-btn" data-tab="ragPanel">RAG</button>
+            <button class="tab-btn" data-tab="tuningPanel">Fine-tuning</button>
+            <button class="tab-btn" data-tab="moePanel">MoE & scaling</button>
+          </div>
+
+          <div class="tab-panel active" id="contextPanel">
+            <div class="demo">
+              <div class="demo-label"><span>Explore · Context window</span><span>Temporary working memory</span></div>
+              <div class="slider-row">
+                <label><span>Conversation length</span><strong id="contextValue">42%</strong></label>
+                <input type="range" id="contextSlider" min="5" max="100" value="42">
+              </div>
+              <div class="context-window" id="contextWindow"></div>
+              <div class="context-legend"><span>Oldest tokens</span><span id="contextMessage">Plenty of room remains</span><span>Newest tokens</span></div>
+            </div>
+            <p>A context window is the text available during one inference. It is not the same as permanent learning: the model’s weights do not normally change when you chat.</p>
+          </div>
+
+          <div class="tab-panel" id="ragPanel">
+            <div class="demo">
+              <div class="demo-label"><span>Lab · Retrieval-augmented generation</span><span>Ground answers in documents</span></div>
+              <h3>Ask the tiny company library</h3>
+              <div class="rag-layout">
+                <div class="doc-list" id="docList">
+                  <button class="doc-card" data-doc="vacation"><strong>Vacation policy</strong><span>20 paid days per year</span></button>
+                  <button class="doc-card" data-doc="expenses"><strong>Expense guide</strong><span>Receipts and limits</span></button>
+                  <button class="doc-card" data-doc="security"><strong>Security handbook</strong><span>Devices and passwords</span></button>
+                  <button class="doc-card" data-doc="pets"><strong>Office pets</strong><span>Fridays only</span></button>
+                </div>
+                <div>
+                  <input class="text-input" id="ragQuery" value="Can I bring my dog on Tuesday?" aria-label="Question for document search">
+                  <button class="primary-btn" id="ragButton" style="margin-top:10px">Retrieve + answer</button>
+                  <div class="rag-answer" id="ragAnswer" style="margin-top:12px">The model is waiting for trusted context…</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tuningPanel">
+            <div class="grid-2">
+              <div class="concept-card"><div class="mini-icon">📌</div><h4>Prompting</h4><p>Put instructions and examples in the current context. Fast, no weight changes, but consumes context space.</p></div>
+              <div class="concept-card"><div class="mini-icon">🛠️</div><h4>Fine-tuning</h4><p>Continue training weights on curated examples to teach behavior, style, or a specialized task.</p></div>
+              <div class="concept-card"><div class="mini-icon">📚</div><h4>RAG</h4><p>Retrieve fresh external facts at answer time. Best when knowledge changes or citations matter.</p></div>
+              <div class="concept-card"><div class="mini-icon">🔌</div><h4>Tool use</h4><p>Let the model call calculators, databases, search, or software APIs instead of guessing.</p></div>
+            </div>
+            <div class="callout"><h4>Rule of thumb</h4><p>Fine-tune for behavior; retrieve for knowledge; use tools for exact actions and calculations.</p></div>
+          </div>
+
+          <div class="tab-panel" id="moePanel">
+            <div class="grid-3">
+              <div class="concept-card"><div class="mini-icon">🧠</div><h4>Scaling laws</h4><p>Performance often improves predictably with more compute, data, and parameters—until data quality and other bottlenecks dominate.</p></div>
+              <div class="concept-card"><div class="mini-icon">🚦</div><h4>Mixture of Experts</h4><p>A router activates only a subset of specialist feed-forward networks per token, increasing capacity without using every parameter each time.</p></div>
+              <div class="concept-card"><div class="mini-icon">📦</div><h4>Quantization</h4><p>Store weights with fewer bits, reducing memory and often speeding inference with a controlled accuracy tradeoff.</p></div>
+            </div>
+            <div class="math-card">
+              <h4>Advanced math · Parameter count intuition</h4>
+              <div class="formula">dense layer parameters ≈ input_dim × output_dim + bias</div>
+              <p>Transformer parameter counts grow mainly through large projection and feed-forward matrices repeated across many layers. “Parameters” measure capacity, not guaranteed intelligence or factuality.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="chapter" id="limits">
+          <div class="chapter-head">
+            <div class="chapter-number">09</div>
+            <div>
+              <span class="level advanced">Advanced · Responsible use</span>
+              <h2>Powerful pattern learner, imperfect oracle</h2>
+            </div>
+          </div>
+          <p class="lead">Fluent language can sound certain even when the underlying prediction is wrong. Understanding failure modes is part of understanding the technology.</p>
+
+          <div class="grid-2">
+            <div class="concept-card"><div class="mini-icon">🎭</div><h4>Hallucination</h4><p>The model generates plausible but unsupported claims because likelihood is not the same thing as truth.</p></div>
+            <div class="concept-card"><div class="mini-icon">🪞</div><h4>Bias</h4><p>Training data and feedback can encode social, cultural, and sampling biases.</p></div>
+            <div class="concept-card"><div class="mini-icon">🧮</div><h4>Weak exactness</h4><p>Language models may fail at long calculations, exact counting, or strict symbolic rules without tools.</p></div>
+            <div class="concept-card"><div class="mini-icon">🕰️</div><h4>Knowledge limits</h4><p>Weights reflect training data, not guaranteed current information. Retrieval can help, but sources still require judgment.</p></div>
+          </div>
+
+          <div class="callout danger">
+            <h4>Use a verification ladder</h4>
+            <p>For casual brainstorming, quick review may be enough. For code, run tests. For claims, inspect sources. For medical, legal, financial, security, or safety-critical decisions, involve qualified humans and authoritative evidence.</p>
+          </div>
+
+          <h3>What happens during one answer?</h3>
+          <div class="flow">
+            <div class="flow-node">Prompt</div><div class="flow-arrow">→</div>
+            <div class="flow-node">Tokenize</div><div class="flow-arrow">→</div>
+            <div class="flow-node">Transformer<br>layers</div><div class="flow-arrow">→</div>
+            <div class="flow-node">Sample<br>next token</div>
+          </div>
+          <p>Then the new token is appended and the transformer runs again. Modern systems optimize this loop using a <strong>KV cache</strong>, which stores earlier attention keys and values so they do not need to be recomputed from scratch.</p>
+        </section>
+
+        <section class="chapter" id="quiz">
+          <div class="chapter-head">
+            <div class="chapter-number">10</div>
+            <div>
+              <span class="level">Final challenge · Test your model</span>
+              <h2>Can you explain an LLM now?</h2>
+            </div>
+          </div>
+          <p class="lead">Five quick questions. Your score is stored only in this browser.</p>
+
+          <div id="quizArea">
+            <div class="quiz-card">
+              <span class="quiz-count" id="quizCount">QUESTION 1 / 5</span>
+              <div class="quiz-question" id="quizQuestion"></div>
+              <div class="quiz-options" id="quizOptions"></div>
+              <p class="feedback" id="quizFeedback"></p>
+              <button class="primary-btn" id="nextQuestion" style="display:none">Next question</button>
+            </div>
+          </div>
+          <div class="quiz-result" id="quizResult">
+            <span class="eyebrow">Course complete</span>
+            <div class="quiz-score" id="quizScore">5/5</div>
+            <h3 id="quizTitle">Transformer whisperer!</h3>
+            <p id="quizSummary">You have the core mental model.</p>
+            <button class="primary-btn" id="retryQuiz">Try again</button>
+          </div>
+
+          <h3 style="margin-top:60px">Pocket glossary</h3>
+          <div class="glossary">
+            <details><summary>Token</summary><p>A chunk of text represented by an integer ID.</p></details>
+            <details><summary>Embedding</summary><p>A learned vector representation that places useful properties into geometry.</p></details>
+            <details><summary>Parameter</summary><p>A numerical value learned during training, commonly a weight or bias.</p></details>
+            <details><summary>Transformer</summary><p>A neural architecture built around attention and feed-forward layers.</p></details>
+            <details><summary>Attention</summary><p>A method for mixing information between tokens according to learned relevance scores.</p></details>
+            <details><summary>Logit</summary><p>An unnormalized score produced before softmax converts scores to probabilities.</p></details>
+            <details><summary>Inference</summary><p>Running a trained model to produce predictions or text.</p></details>
+            <details><summary>RAG</summary><p>Retrieval-augmented generation: fetch relevant documents and add them to the prompt.</p></details>
+            <details><summary>Gradient</summary><p>A derivative showing how changing a parameter changes the loss.</p></details>
+            <details><summary>Hallucination</summary><p>A fluent output that is unsupported, fabricated, or incorrect.</p></details>
+          </div>
+        </section>
+      </div>
+
+      <footer>
+        <strong>You reached the end—but the models keep predicting.</strong>
+        <span>Built as a self-contained, interactive learning experience from fundamentals to modern LLM systems.</span>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+    const root = document.documentElement;
+    const themeButton = $("#themeButton");
+    const savedTheme = localStorage.getItem("llm-theme");
+    if (savedTheme === "light") root.classList.add("light");
+    themeButton.textContent = root.classList.contains("light") ? "☾" : "☀";
+    themeButton.addEventListener("click", () => {
+      root.classList.toggle("light");
+      const light = root.classList.contains("light");
+      themeButton.textContent = light ? "☾" : "☀";
+      localStorage.setItem("llm-theme", light ? "light" : "dark");
+      drawLoss();
+    });
+
+    const sidebar = $("#sidebar");
+    $("#menuButton").addEventListener("click", () => sidebar.classList.toggle("open"));
+    $$(".nav-link").forEach(link => link.addEventListener("click", () => sidebar.classList.remove("open")));
+
+    const sections = $$(".chapter");
+    const navLinks = $$(".nav-link");
+    function updateProgress() {
+      const scrollable = document.documentElement.scrollHeight - innerHeight;
+      const percent = scrollable > 0 ? Math.min(100, Math.round(scrollY / scrollable * 100)) : 0;
+      $("#progressFill").style.width = `${percent}%`;
+      $("#coursePercent").textContent = `${percent}%`;
+      localStorage.setItem("llm-course-progress", percent);
+
+      let active = sections[0].id;
+      sections.forEach(section => {
+        if (section.getBoundingClientRect().top <= 170) active = section.id;
+      });
+      navLinks.forEach(link => link.classList.toggle("active", link.getAttribute("href") === `#${active}`));
+    }
+    addEventListener("scroll", updateProgress, { passive: true });
+    updateProgress();
+
+    $("#nextChoices").addEventListener("click", event => {
+      const button = event.target.closest(".choice");
+      if (!button) return;
+      $$(".choice", $("#nextChoices")).forEach(item => item.classList.remove("correct", "wrong"));
+      const correct = button.dataset.word === "mat";
+      button.classList.add(correct ? "correct" : "wrong");
+      $("#nextBlank").textContent = button.dataset.word;
+      $("#nextFeedback").textContent = correct
+        ? "Exactly. “Mat” receives high probability because syntax, meaning, and a familiar phrase all support it."
+        : "Possible in a surreal story, but less probable. LLMs rank possibilities—they do not declare only one imaginable answer.";
+    });
+
+    function simpleTokenize(text) {
+      const raw = text.match(/[A-Za-z]+(?:'[A-Za-z]+)?|\d+(?:\.\d+)?|[^\sA-Za-z\d]/g) || [];
+      const common = new Set(["the", "and", "can", "write", "story", "stories", "model", "models", "language", "playful"]);
+      const pieces = [];
+      raw.forEach(part => {
+        if (!/^[A-Za-z]+$/.test(part) || part.length <= 6 || common.has(part.toLowerCase())) {
+          pieces.push(part);
+        } else {
+          const pivot = Math.max(3, Math.ceil(part.length * .58));
+          pieces.push(part.slice(0, pivot), `##${part.slice(pivot)}`);
+        }
+      });
+      return pieces;
+    }
+
+    function renderTokens() {
+      const text = $("#tokenInput").value.trim();
+      const tokens = simpleTokenize(text);
+      $("#tokenStage").innerHTML = tokens.length
+        ? tokens.map((token, index) => `<span class="token" title="Conceptual token ID: ${1000 + index * 137}">${token.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</span>`).join("")
+        : '<span class="token-meta">Type some text above.</span>';
+      const words = text ? text.split(/\s+/).length : 0;
+      $("#tokenMeta").textContent = `${tokens.length} conceptual tokens · ${words} whitespace-separated words · click a token to see its pretend ID`;
+    }
+    $("#tokenizeButton").addEventListener("click", renderTokens);
+    $("#tokenInput").addEventListener("keydown", event => { if (event.key === "Enter") renderTokens(); });
+    renderTokens();
+
+    const embeddingData = {
+      king: { queen: .92, prince: .84, crown: .76, cat: .18, pizza: .06 },
+      cat: { kitten: .94, dog: .81, tiger: .72, code: .08, crown: .04 },
+      pizza: { pasta: .82, cheese: .79, oven: .68, king: .06, compiler: .02 },
+      code: { program: .91, function: .86, compiler: .77, cat: .08, pizza: .03 }
+    };
+
+    function renderEmbedding(word) {
+      const points = [
+        ["king", 53, 28], ["queen", 68, 34], ["prince", 43, 42], ["crown", 61, 14],
+        ["cat", 23, 68], ["kitten", 15, 79], ["dog", 35, 76], ["tiger", 18, 53],
+        ["pizza", 74, 73], ["pasta", 87, 78], ["cheese", 68, 88], ["oven", 88, 60],
+        ["code", 45, 69], ["program", 50, 84], ["function", 57, 59], ["compiler", 38, 54]
+      ];
+      $("#embeddingMap").innerHTML = points.map(([label, x, y]) => {
+        const selected = label === word;
+        return `<span style="position:absolute;left:${x}%;top:${y}%;transform:translate(-50%,-50%);padding:${selected ? "9px 12px" : "5px 8px"};border:1px solid ${selected ? "var(--cyan)" : "var(--line)"};border-radius:999px;background:${selected ? "rgba(77,228,255,.17)" : "rgba(255,255,255,.04)"};color:${selected ? "var(--cyan)" : "var(--muted)"};font-size:${selected ? "13px" : "11px"};box-shadow:${selected ? "0 0 28px rgba(77,228,255,.25)" : "none"}">${label}</span>`;
+      }).join("");
+      $("#similarityBars").innerHTML = Object.entries(embeddingData[word]).map(([label, score]) => `
+        <div class="attention-bar"><span>${label}</span><div class="bar-track"><div class="bar-fill" style="width:${score * 100}%"></div></div><strong>${score.toFixed(2)}</strong></div>
+      `).join("");
+      $$("#embeddingTabs .tab-btn").forEach(button => button.classList.toggle("active", button.dataset.word === word));
+    }
+    $("#embeddingTabs").addEventListener("click", event => {
+      const button = event.target.closest(".tab-btn");
+      if (button) renderEmbedding(button.dataset.word);
+    });
+    renderEmbedding("king");
+
+    const neuronIds = ["x1", "w1", "x2", "w2", "bias"];
+    function updateNeuron() {
+      const values = Object.fromEntries(neuronIds.map(id => [id, Number($(`#${id}`).value)]));
+      neuronIds.forEach(id => $(`#${id}Value`).textContent = values[id].toFixed(1));
+      const z = values.x1 * values.w1 + values.x2 * values.w2 + values.bias;
+      const activated = 1 / (1 + Math.exp(-z));
+      $("#neuronOutput").textContent = activated.toFixed(2);
+      $("#neuronMeter").style.width = `${activated * 100}%`;
+      $("#neuronOutput").style.boxShadow = `0 0 ${25 + activated * 70}px rgba(77,228,255,${.08 + activated * .3})`;
+    }
+    neuronIds.forEach(id => $(`#${id}`).addEventListener("input", updateNeuron));
+    updateNeuron();
+
+    const attentionWords = ["The", "robot", "picked", "up", "the", "trophy", "because", "it", "was", "shiny"];
+    const attentionPatterns = {
+      0: { 0: 1 },
+      1: { 0: .35, 1: .65 },
+      2: { 1: .72, 2: .28 },
+      3: { 2: .58, 3: .42 },
+      4: { 3: .25, 4: .75 },
+      5: { 1: .18, 2: .14, 4: .24, 5: .44 },
+      6: { 2: .19, 5: .34, 6: .47 },
+      7: { 1: .29, 5: .57, 7: .14 },
+      8: { 5: .24, 7: .61, 8: .15 },
+      9: { 5: .68, 8: .11, 9: .21 }
+    };
+
+    function renderAttention(selected = 7) {
+      $("#attentionSentence").innerHTML = attentionWords.map((word, index) => `<button class="attention-word ${index === selected ? "selected" : ""}" data-index="${index}">${word}</button>`).join("");
+      const pattern = attentionPatterns[selected];
+      $$(".attention-word", $("#attentionSentence")).forEach((button, index) => {
+        if (pattern[index] && index !== selected) {
+          button.classList.add("related");
+          button.style.setProperty("--attention", `${.08 + pattern[index] * .42}`);
+        }
+      });
+      $("#attentionBars").innerHTML = Object.entries(pattern)
+        .sort((a, b) => b[1] - a[1])
+        .map(([index, score]) => `<div class="attention-bar"><span>${attentionWords[index]}</span><div class="bar-track"><div class="bar-fill" style="width:${score * 100}%"></div></div><strong>${Math.round(score * 100)}%</strong></div>`)
+        .join("");
+    }
+    $("#attentionSentence").addEventListener("click", event => {
+      const button = event.target.closest(".attention-word");
+      if (button) renderAttention(Number(button.dataset.index));
+    });
+    renderAttention();
+
+    const canvas = $("#lossCanvas");
+    const ctx = canvas.getContext("2d");
+    let parameter = -4;
+    function loss(x) { return (x - 2) ** 2; }
+    function drawLoss() {
+      const { width, height } = canvas;
+      const ink = getComputedStyle(root).getPropertyValue("--muted").trim();
+      const line = getComputedStyle(root).getPropertyValue("--line").trim();
+      ctx.clearRect(0, 0, width, height);
+      ctx.strokeStyle = line;
+      ctx.lineWidth = 1;
+      for (let x = 50; x < width; x += 75) {
+        ctx.beginPath(); ctx.moveTo(x, 20); ctx.lineTo(x, height - 35); ctx.stroke();
+      }
+      for (let y = 30; y < height; y += 50) {
+        ctx.beginPath(); ctx.moveTo(45, y); ctx.lineTo(width - 20, y); ctx.stroke();
+      }
+      ctx.strokeStyle = "#6c8cff";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      for (let px = 45; px <= width - 20; px++) {
+        const x = -5 + (px - 45) / (width - 65) * 10;
+        const py = height - 35 - Math.min(loss(x), 48) / 48 * (height - 60);
+        px === 45 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      const pointX = 45 + (parameter + 5) / 10 * (width - 65);
+      const pointY = height - 35 - Math.min(loss(parameter), 48) / 48 * (height - 60);
+      ctx.beginPath();
+      ctx.arc(pointX, pointY, 9, 0, Math.PI * 2);
+      ctx.fillStyle = "#4de4ff";
+      ctx.shadowColor = "#4de4ff";
+      ctx.shadowBlur = 20;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = ink;
+      ctx.font = "12px DM Mono";
+      ctx.fillText("lower loss →", width - 115, height - 12);
+      $("#parameterReadout").textContent = parameter.toFixed(2).replace("-", "−");
+      $("#lossReadout").textContent = loss(parameter).toFixed(2);
+    }
+    $("#gradientButton").addEventListener("click", () => {
+      const gradient = 2 * (parameter - 2);
+      parameter -= .16 * gradient;
+      if (Math.abs(parameter - 2) < .02) parameter = 2;
+      drawLoss();
+    });
+    $("#resetGradient").addEventListener("click", () => { parameter = -4; drawLoss(); });
+    drawLoss();
+
+    const baseLogits = { "found": 3.2, "discovered": 2.5, "laughed": 1.55, "teleported": .75, "sneezed": .4 };
+    function softmax(logits, temperature) {
+      const entries = Object.entries(logits).map(([token, value]) => [token, value / temperature]);
+      const max = Math.max(...entries.map(([, value]) => value));
+      const exp = entries.map(([token, value]) => [token, Math.exp(value - max)]);
+      const total = exp.reduce((sum, [, value]) => sum + value, 0);
+      return exp.map(([token, value]) => [token, value / total]);
+    }
+    function renderTemperature() {
+      const temperature = Number($("#temperature").value);
+      $("#temperatureValue").textContent = temperature.toFixed(1);
+      const probabilities = softmax(baseLogits, temperature);
+      $("#probList").innerHTML = probabilities.map(([token, probability]) => `
+        <div class="prob-row"><span>${token}</span><div class="bar-track"><div class="bar-fill" style="width:${probability * 100}%"></div></div><strong>${Math.round(probability * 100)}%</strong></div>
+      `).join("");
+    }
+    $("#temperature").addEventListener("input", renderTemperature);
+    renderTemperature();
+
+    const tales = {
+      found: ["found a tiny map to the moon.", "found a note signed by its future self.", "found exactly three very confused fireflies."],
+      discovered: ["discovered that it could sing in binary.", "discovered a doorway behind Tuesday.", "discovered the box was dreaming too."],
+      laughed: ["laughed when a polite dragon popped out.", "laughed so hard the stars rearranged.", "laughed—because the box contained another, smaller box."],
+      teleported: ["teleported into a library run by penguins.", "teleported five minutes into next Thursday.", "teleported to a planet made entirely of soup."],
+      sneezed: ["sneezed a cloud of glittering equations.", "sneezed, and every spoon in town began dancing.", "sneezed out a miniature thunderstorm."]
+    };
+    $("#generateButton").addEventListener("click", () => {
+      const probabilities = softmax(baseLogits, Number($("#temperature").value));
+      let random = Math.random();
+      let chosen = probabilities[0][0];
+      for (const [token, probability] of probabilities) {
+        random -= probability;
+        if (random <= 0) { chosen = token; break; }
+      }
+      const ending = tales[chosen][Math.floor(Math.random() * tales[chosen].length)];
+      $("#generatedText").innerHTML = `Pixel opened the mysterious box and ${ending}<span class="cursor"></span>`;
+    });
+
+    const promptText = {
+      role: "You are a friendly science teacher.",
+      task: "Explain black holes to a 12-year-old.",
+      context: "The student understands gravity but has not learned relativity.",
+      constraints: "Use one memorable analogy. Avoid equations and unexplained jargon.",
+      format: "Respond in three short titled sections, then give a one-question quiz."
+    };
+    function updatePrompt() {
+      const checked = $$("#promptParts input:checked").map(input => promptText[input.dataset.part]);
+      $("#promptOutput").value = checked.join("\n\n");
+      $$("#promptParts .prompt-part").forEach(label => label.classList.toggle("active", $("input", label).checked));
+    }
+    $("#promptParts").addEventListener("change", updatePrompt);
+    $("#weakPrompt").addEventListener("click", () => {
+      $$("#promptParts input").forEach(input => { input.checked = input.dataset.part === "task"; });
+      updatePrompt();
+      $("#copyNote").textContent = "Vague prompts leave more decisions to the model.";
+    });
+    $("#copyPrompt").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText($("#promptOutput").value);
+        $("#copyNote").textContent = "Copied. Try changing the audience or format!";
+      } catch {
+        $("#promptOutput").select();
+        $("#copyNote").textContent = "Selected—press Ctrl/Cmd + C to copy.";
+      }
+    });
+    updatePrompt();
+
+    $("#advancedTabs").addEventListener("click", event => {
+      const button = event.target.closest(".tab-btn");
+      if (!button) return;
+      $$("#advancedTabs .tab-btn").forEach(item => item.classList.toggle("active", item === button));
+      $$(".tab-panel").forEach(panel => panel.classList.toggle("active", panel.id === button.dataset.tab));
+    });
+
+    function renderContext() {
+      const value = Number($("#contextSlider").value);
+      $("#contextValue").textContent = `${value}%`;
+      const total = 140;
+      $("#contextWindow").innerHTML = Array.from({ length: total }, (_, index) => `<span class="context-cell ${index / total * 100 > value ? "faded" : ""}"></span>`).join("");
+      $("#contextMessage").textContent = value < 60 ? "Plenty of room remains" : value < 88 ? "Context is getting crowded" : "Old details may be truncated or compressed";
+    }
+    $("#contextSlider").addEventListener("input", renderContext);
+    renderContext();
+
+    const ragDocs = {
+      vacation: "Employees receive 20 paid vacation days each calendar year.",
+      expenses: "Meals under $50 need a receipt. Manager approval is required above $50.",
+      security: "Company devices require full-disk encryption and a password manager.",
+      pets: "Dogs may visit the office on Fridays between 9:00 and 17:00 with prior registration."
+    };
+    $("#ragButton").addEventListener("click", () => {
+      const query = $("#ragQuery").value.toLowerCase();
+      let doc = "pets";
+      if (/vacation|holiday|leave/.test(query)) doc = "vacation";
+      else if (/expense|receipt|meal|money/.test(query)) doc = "expenses";
+      else if (/password|device|security|laptop/.test(query)) doc = "security";
+      $$(".doc-card").forEach(card => card.classList.toggle("retrieved", card.dataset.doc === doc));
+      const answers = {
+        pets: "<strong>Answer grounded in “Office pets”:</strong><br>No. The policy allows dogs only on Fridays, with prior registration. Tuesday is not listed as an allowed day.",
+        vacation: "<strong>Answer grounded in “Vacation policy”:</strong><br>Employees receive 20 paid vacation days per calendar year.",
+        expenses: "<strong>Answer grounded in “Expense guide”:</strong><br>A receipt is needed for meals under $50, and manager approval is required above $50.",
+        security: "<strong>Answer grounded in “Security handbook”:</strong><br>Company devices require full-disk encryption and use of a password manager."
+      };
+      $("#ragAnswer").innerHTML = `${answers[doc]}<br><br><span class="tiny">Retrieved context: “${ragDocs[doc]}”</span>`;
+    });
+
+    const quizQuestions = [
+      {
+        question: "What is the simplest useful mental model of an LLM?",
+        options: ["A database of complete answers", "A next-token probability model", "A conscious digital person", "A search engine index"],
+        answer: 1,
+        explanation: "An LLM repeatedly predicts probabilities for the next token, selects one, and continues."
+      },
+      {
+        question: "Why does a transformer use attention?",
+        options: ["To compress image files", "To make every output random", "To gather relevant information from other tokens", "To permanently remember every chat"],
+        answer: 2,
+        explanation: "Attention gives tokens a learned way to mix relevant information from the context."
+      },
+      {
+        question: "What does gradient descent change?",
+        options: ["The model’s learned parameters", "The user’s keyboard", "The tokenizer language", "The laws of probability"],
+        answer: 0,
+        explanation: "Gradients indicate how weights should move to reduce loss."
+      },
+      {
+        question: "What usually happens when temperature increases?",
+        options: ["The model learns new facts", "Output becomes more varied", "The context window doubles", "All hallucinations disappear"],
+        answer: 1,
+        explanation: "Higher temperature flattens token probabilities, allowing less likely choices more often."
+      },
+      {
+        question: "When is RAG especially useful?",
+        options: ["When current, source-backed knowledge matters", "When changing font size", "When replacing all model training", "When exact retrieval is forbidden"],
+        answer: 0,
+        explanation: "RAG brings relevant external documents into the context at answer time."
+      }
+    ];
+    let quizIndex = 0;
+    let quizScore = 0;
+    let quizAnswered = false;
+
+    function renderQuiz() {
+      const item = quizQuestions[quizIndex];
+      quizAnswered = false;
+      $("#quizCount").textContent = `QUESTION ${quizIndex + 1} / ${quizQuestions.length}`;
+      $("#quizQuestion").textContent = item.question;
+      $("#quizOptions").innerHTML = item.options.map((option, index) => `<button class="quiz-option" data-index="${index}">${option}</button>`).join("");
+      $("#quizFeedback").textContent = "";
+      $("#nextQuestion").style.display = "none";
+      $("#nextQuestion").textContent = quizIndex === quizQuestions.length - 1 ? "See my score" : "Next question";
+    }
+
+    $("#quizOptions").addEventListener("click", event => {
+      const button = event.target.closest(".quiz-option");
+      if (!button || quizAnswered) return;
+      quizAnswered = true;
+      const selected = Number(button.dataset.index);
+      const item = quizQuestions[quizIndex];
+      if (selected === item.answer) quizScore++;
+      $$(".quiz-option").forEach((option, index) => {
+        if (index === item.answer) option.classList.add("correct");
+        else if (index === selected) option.classList.add("wrong");
+      });
+      $("#quizFeedback").textContent = item.explanation;
+      $("#nextQuestion").style.display = "inline-flex";
+    });
+
+    $("#nextQuestion").addEventListener("click", () => {
+      if (quizIndex < quizQuestions.length - 1) {
+        quizIndex++;
+        renderQuiz();
+      } else {
+        $("#quizArea").style.display = "none";
+        $("#quizResult").classList.add("show");
+        $("#quizScore").textContent = `${quizScore}/${quizQuestions.length}`;
+        $("#quizTitle").textContent = quizScore === 5 ? "Transformer whisperer!" : quizScore >= 3 ? "Strong mental model!" : "One more training epoch?";
+        $("#quizSummary").textContent = quizScore === 5 ? "You connected tokens, attention, training, and modern LLM systems." : "Review the highlighted chapters, then sample another attempt.";
+        localStorage.setItem("llm-quiz-score", quizScore);
+      }
+    });
+    $("#retryQuiz").addEventListener("click", () => {
+      quizIndex = 0;
+      quizScore = 0;
+      $("#quizArea").style.display = "block";
+      $("#quizResult").classList.remove("show");
+      renderQuiz();
+    });
+    renderQuiz();
+  </script>
+</body>
+</html>
