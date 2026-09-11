@@ -758,6 +758,8 @@
     .light .hero-copy { color: #42516f; }
     .light .eyebrow, .light .ghost-btn { background: rgba(255, 255, 255, .7); }
     .light .training-readout .big-number { color: #3155d9; }
+    .light .math-card h4 { color: #6540b5; }
+    .light .formula { color: #24345f; }
     .light .sentence, .light .text-input, .light .prompt-input, .light .formula,
     .light .neuron-visual, .light #lossCanvas, .light .generated, .light .context-window, .light .rag-answer { background: #f2f5fd; }
 
@@ -1215,10 +1217,10 @@
           <p class="lead">A production AI assistant is usually a system around an LLM: retrieval, tools, memory, guardrails, evaluators, and sometimes specialized model architectures.</p>
 
           <div class="tabs" id="advancedTabs" role="tablist" aria-label="Advanced LLM topics">
-            <button class="tab-btn active" id="contextTab" data-tab="contextPanel" role="tab" aria-controls="contextPanel" aria-selected="true">Context</button>
-            <button class="tab-btn" id="ragTab" data-tab="ragPanel" role="tab" aria-controls="ragPanel" aria-selected="false">RAG</button>
-            <button class="tab-btn" id="tuningTab" data-tab="tuningPanel" role="tab" aria-controls="tuningPanel" aria-selected="false">Fine-tuning</button>
-            <button class="tab-btn" id="moeTab" data-tab="moePanel" role="tab" aria-controls="moePanel" aria-selected="false">MoE & scaling</button>
+            <button class="tab-btn active" id="contextTab" data-tab="contextPanel" role="tab" aria-controls="contextPanel" aria-selected="true" tabindex="0">Context</button>
+            <button class="tab-btn" id="ragTab" data-tab="ragPanel" role="tab" aria-controls="ragPanel" aria-selected="false" tabindex="-1">RAG</button>
+            <button class="tab-btn" id="tuningTab" data-tab="tuningPanel" role="tab" aria-controls="tuningPanel" aria-selected="false" tabindex="-1">Fine-tuning</button>
+            <button class="tab-btn" id="moeTab" data-tab="moePanel" role="tab" aria-controls="moePanel" aria-selected="false" tabindex="-1">MoE & scaling</button>
           </div>
 
           <div class="tab-panel active" id="contextPanel" role="tabpanel" aria-labelledby="contextTab">
@@ -1486,8 +1488,8 @@
       const points = [
         ["king", 50, 20], ["queen", 72, 27], ["prince", 40, 34], ["crown", 66, 10],
         ["cat", 22, 64], ["kitten", 12, 82], ["dog", 35, 82], ["tiger", 12, 48],
-        ["pizza", 75, 70], ["pasta", 90, 82], ["cheese", 68, 91], ["oven", 91, 58],
-        ["code", 44, 66], ["program", 48, 90], ["function", 62, 52], ["compiler", 35, 48]
+        ["pizza", 75, 70], ["pasta", 90, 82], ["cheese", 74, 92], ["oven", 91, 58],
+        ["code", 44, 66], ["program", 44, 94], ["function", 62, 52], ["compiler", 35, 48]
       ];
       $("#embeddingMap").innerHTML = points.map(([label, x, y]) => {
         const selected = label === word;
@@ -1675,12 +1677,26 @@
         const selected = item === button;
         item.classList.toggle("active", selected);
         item.setAttribute("aria-selected", String(selected));
+        item.tabIndex = selected ? 0 : -1;
       });
       $$(".tab-panel").forEach(panel => {
         const selected = panel.id === button.dataset.tab;
         panel.classList.toggle("active", selected);
         panel.hidden = !selected;
       });
+    });
+    $("#advancedTabs").addEventListener("keydown", event => {
+      if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const tabs = $$("#advancedTabs .tab-btn");
+      const current = tabs.indexOf(document.activeElement);
+      let next = current;
+      if (event.key === "ArrowRight") next = (current + 1) % tabs.length;
+      if (event.key === "ArrowLeft") next = (current - 1 + tabs.length) % tabs.length;
+      if (event.key === "Home") next = 0;
+      if (event.key === "End") next = tabs.length - 1;
+      tabs[next].focus();
+      tabs[next].click();
     });
     $$(".tab-panel").forEach(panel => { panel.hidden = !panel.classList.contains("active"); });
 
