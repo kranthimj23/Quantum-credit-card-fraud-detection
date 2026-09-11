@@ -1673,8 +1673,13 @@
       if (doc === "pets") {
         const friday = /friday/.test(query);
         const otherDay = /monday|tuesday|wednesday|thursday|saturday|sunday/.test(query);
-        const registered = /register|registered|registration/.test(query);
-        if (friday) {
+        const registrationMissing = /without (?:prior )?(?:registration|registering)|no (?:prior )?registration|not registered|unregistered|haven['’]?t registered|have not registered/.test(query);
+        const registered = !registrationMissing && /registered|registration (?:is )?(?:done|complete|covered)|already registered/.test(query);
+        if (friday && otherDay) {
+          answers.pets = "<strong>Answer grounded in “Office pets”:</strong><br>Friday is permitted between 9:00 and 17:00 with prior registration; the other day mentioned is not permitted by this policy.";
+        } else if (friday && registrationMissing) {
+          answers.pets = "<strong>Answer grounded in “Office pets”:</strong><br>Not yet. Friday is an allowed day, but prior registration is required before bringing the dog.";
+        } else if (friday) {
           answers.pets = `<strong>Answer grounded in “Office pets”:</strong><br>Yes—dogs may visit on Fridays between 9:00 and 17:00${registered ? ", and your question indicates registration is covered." : ", but prior registration is required."}`;
         } else if (otherDay) {
           answers.pets = "<strong>Answer grounded in “Office pets”:</strong><br>No. The policy permits dogs only on Fridays between 9:00 and 17:00, with prior registration.";
