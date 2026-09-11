@@ -593,6 +593,7 @@
 
     .big-number { margin: 5px 0 14px; color: var(--cyan); font: 500 38px "DM Mono", monospace; }
     .tiny { color: var(--faint); font-size: 12px; }
+    .training-readout .tiny { color: var(--muted); }
     .prob-list { display: grid; gap: 12px; margin: 20px 0; }
     .prob-row { display: grid; grid-template-columns: 90px 1fr 52px; gap: 12px; align-items: center; font: 500 13px "DM Mono", monospace; }
     .prob-row .bar-fill { background: linear-gradient(90deg, var(--cyan), var(--blue)); }
@@ -756,6 +757,7 @@
 
     .light .hero-copy { color: #42516f; }
     .light .eyebrow, .light .ghost-btn { background: rgba(255, 255, 255, .7); }
+    .light .training-readout .big-number { color: #3155d9; }
     .light .sentence, .light .text-input, .light .prompt-input, .light .formula,
     .light .neuron-visual, .light #lossCanvas, .light .generated, .light .context-window, .light .rag-answer { background: #f2f5fd; }
 
@@ -769,17 +771,24 @@
         height: calc(100vh - 72px);
         background: var(--panel-solid);
         transform: translateX(-105%);
-        transition: transform .25s ease;
+        visibility: hidden;
+        pointer-events: none;
+        transition: transform .25s ease, visibility 0s linear .25s;
         box-shadow: var(--shadow);
       }
-      .sidebar.open { transform: translateX(0); }
+      .sidebar.open {
+        transform: translateX(0);
+        visibility: visible;
+        pointer-events: auto;
+        transition-delay: 0s;
+      }
       .mobile-menu { display: grid; }
       .hero { min-height: 690px; }
     }
 
     @media (max-width: 760px) {
       .topbar { padding-inline: 14px; }
-      .brand span { display: none; }
+      .brand > span:last-child { display: none; }
       .course-status { display: none; }
       .hero { min-height: 760px; padding-top: 70px; }
       .hero::before {
@@ -807,6 +816,11 @@
       .comparison { display: block; overflow-x: auto; }
     }
 
+    @media (max-width: 420px) {
+      #embeddingMap { min-height: 320px; }
+      #embeddingMap span { padding: 4px 6px !important; font-size: 10px !important; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     }
@@ -815,10 +829,10 @@
 <body>
   <div class="progress-rail"><div class="progress-fill" id="progressFill"></div></div>
   <header class="topbar">
-    <a class="brand" href="#top"><span class="brand-mark">AI</span><span>Inside an LLM</span></a>
+    <a class="brand" href="#top" aria-label="Inside an LLM — return to top"><span class="brand-mark">AI</span><span>Inside an LLM</span></a>
     <div class="top-actions">
       <span class="course-status"><strong id="coursePercent">0%</strong> explored</span>
-      <button class="icon-btn mobile-menu" id="menuButton" aria-label="Open course menu">☰</button>
+      <button class="icon-btn mobile-menu" id="menuButton" aria-label="Open course menu" aria-controls="sidebar" aria-expanded="false">☰</button>
       <button class="icon-btn" id="themeButton" aria-label="Switch color theme">☀</button>
     </div>
   </header>
@@ -1010,15 +1024,15 @@
             <div class="demo-label"><span>Lab · Build a neuron</span><span>Move the sliders</span></div>
             <div class="neuron-lab">
               <div class="sliders">
-                <label><span>Input x₁</span><strong id="x1Value">0.7</strong></label>
+                <label for="x1"><span>Input x₁</span><strong id="x1Value">0.7</strong></label>
                 <input type="range" id="x1" min="-1" max="1" step=".1" value=".7">
-                <label><span>Weight w₁</span><strong id="w1Value">1.2</strong></label>
+                <label for="w1"><span>Weight w₁</span><strong id="w1Value">1.2</strong></label>
                 <input type="range" id="w1" min="-2" max="2" step=".1" value="1.2">
-                <label><span>Input x₂</span><strong id="x2Value">-0.3</strong></label>
+                <label for="x2"><span>Input x₂</span><strong id="x2Value">-0.3</strong></label>
                 <input type="range" id="x2" min="-1" max="1" step=".1" value="-.3">
-                <label><span>Weight w₂</span><strong id="w2Value">0.8</strong></label>
+                <label for="w2"><span>Weight w₂</span><strong id="w2Value">0.8</strong></label>
                 <input type="range" id="w2" min="-2" max="2" step=".1" value=".8">
-                <label><span>Bias b</span><strong id="biasValue">0.2</strong></label>
+                <label for="bias"><span>Bias b</span><strong id="biasValue">0.2</strong></label>
                 <input type="range" id="bias" min="-2" max="2" step=".1" value=".2">
               </div>
               <div class="neuron-visual">
@@ -1132,7 +1146,7 @@
           <div class="demo">
             <div class="demo-label"><span>Lab · Creativity dial</span><span>Change temperature</span></div>
             <div class="slider-row">
-              <label><span>Temperature</span><strong id="temperatureValue">0.8</strong></label>
+              <label for="temperature"><span>Temperature</span><strong id="temperatureValue">0.8</strong></label>
               <input type="range" id="temperature" min=".1" max="2" step=".1" value=".8">
             </div>
             <div class="prob-list" id="probList"></div>
@@ -1174,7 +1188,7 @@
                 <label class="prompt-part active"><input type="checkbox" checked data-part="format"><span><strong>Format</strong><br>Three short sections and a quiz.</span></label>
               </div>
               <div>
-                <textarea class="prompt-input" id="promptOutput" readonly></textarea>
+                <textarea class="prompt-input" id="promptOutput" aria-label="Generated prompt" readonly></textarea>
                 <div class="hero-actions">
                   <button class="primary-btn" id="copyPrompt">Copy prompt</button>
                   <button class="ghost-btn" id="weakPrompt">Show weak version</button>
@@ -1200,18 +1214,18 @@
           </div>
           <p class="lead">A production AI assistant is usually a system around an LLM: retrieval, tools, memory, guardrails, evaluators, and sometimes specialized model architectures.</p>
 
-          <div class="tabs" id="advancedTabs">
-            <button class="tab-btn active" data-tab="contextPanel">Context</button>
-            <button class="tab-btn" data-tab="ragPanel">RAG</button>
-            <button class="tab-btn" data-tab="tuningPanel">Fine-tuning</button>
-            <button class="tab-btn" data-tab="moePanel">MoE & scaling</button>
+          <div class="tabs" id="advancedTabs" role="tablist" aria-label="Advanced LLM topics">
+            <button class="tab-btn active" id="contextTab" data-tab="contextPanel" role="tab" aria-controls="contextPanel" aria-selected="true">Context</button>
+            <button class="tab-btn" id="ragTab" data-tab="ragPanel" role="tab" aria-controls="ragPanel" aria-selected="false">RAG</button>
+            <button class="tab-btn" id="tuningTab" data-tab="tuningPanel" role="tab" aria-controls="tuningPanel" aria-selected="false">Fine-tuning</button>
+            <button class="tab-btn" id="moeTab" data-tab="moePanel" role="tab" aria-controls="moePanel" aria-selected="false">MoE & scaling</button>
           </div>
 
-          <div class="tab-panel active" id="contextPanel">
+          <div class="tab-panel active" id="contextPanel" role="tabpanel" aria-labelledby="contextTab">
             <div class="demo">
               <div class="demo-label"><span>Explore · Context window</span><span>Temporary working memory</span></div>
               <div class="slider-row">
-                <label><span>Conversation length</span><strong id="contextValue">42%</strong></label>
+                <label for="contextSlider"><span>Conversation length</span><strong id="contextValue">42%</strong></label>
                 <input type="range" id="contextSlider" min="5" max="100" value="42">
               </div>
               <div class="context-window" id="contextWindow"></div>
@@ -1220,7 +1234,7 @@
             <p>A context window is the text available during one inference. It is not the same as permanent learning: the model’s weights do not normally change when you chat.</p>
           </div>
 
-          <div class="tab-panel" id="ragPanel">
+          <div class="tab-panel" id="ragPanel" role="tabpanel" aria-labelledby="ragTab">
             <div class="demo">
               <div class="demo-label"><span>Lab · Retrieval-augmented generation</span><span>Ground answers in documents</span></div>
               <h3>Ask the tiny company library</h3>
@@ -1240,7 +1254,7 @@
             </div>
           </div>
 
-          <div class="tab-panel" id="tuningPanel">
+          <div class="tab-panel" id="tuningPanel" role="tabpanel" aria-labelledby="tuningTab">
             <div class="grid-2">
               <div class="concept-card"><div class="mini-icon">📌</div><h4>Prompting</h4><p>Put instructions and examples in the current context. Fast, no weight changes, but consumes context space.</p></div>
               <div class="concept-card"><div class="mini-icon">🛠️</div><h4>Fine-tuning</h4><p>Continue training weights on curated examples to teach behavior, style, or a specialized task.</p></div>
@@ -1250,7 +1264,7 @@
             <div class="callout"><h4>Rule of thumb</h4><p>Fine-tune for behavior; retrieve for knowledge; use tools for exact actions and calculations.</p></div>
           </div>
 
-          <div class="tab-panel" id="moePanel">
+          <div class="tab-panel" id="moePanel" role="tabpanel" aria-labelledby="moeTab">
             <div class="grid-3">
               <div class="concept-card"><div class="mini-icon">🧠</div><h4>Scaling laws</h4><p>Performance often improves predictably with more compute, data, and parameters—until data quality and other bottlenecks dominate.</p></div>
               <div class="concept-card"><div class="mini-icon">🚦</div><h4>Mixture of Experts</h4><p>A router activates only a subset of specialist feed-forward networks per token, increasing capacity without using every parameter each time.</p></div>
@@ -1364,8 +1378,32 @@
     });
 
     const sidebar = $("#sidebar");
-    $("#menuButton").addEventListener("click", () => sidebar.classList.toggle("open"));
-    $$(".nav-link").forEach(link => link.addEventListener("click", () => sidebar.classList.remove("open")));
+    const menuButton = $("#menuButton");
+    const mobileNavigation = matchMedia("(max-width: 1050px)");
+    function setMenu(open) {
+      sidebar.classList.toggle("open", open);
+      menuButton.setAttribute("aria-expanded", String(open));
+      menuButton.setAttribute("aria-label", open ? "Close course menu" : "Open course menu");
+      sidebar.inert = mobileNavigation.matches && !open;
+    }
+    function syncMenu() {
+      if (mobileNavigation.matches) setMenu(sidebar.classList.contains("open"));
+      else {
+        sidebar.classList.remove("open");
+        sidebar.inert = false;
+        menuButton.setAttribute("aria-expanded", "false");
+      }
+    }
+    menuButton.addEventListener("click", () => setMenu(!sidebar.classList.contains("open")));
+    $$(".nav-link").forEach(link => link.addEventListener("click", () => setMenu(false)));
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && sidebar.classList.contains("open")) {
+        setMenu(false);
+        menuButton.focus();
+      }
+    });
+    mobileNavigation.addEventListener("change", syncMenu);
+    syncMenu();
 
     const sections = $$(".chapter");
     const navLinks = $$(".nav-link");
@@ -1446,10 +1484,10 @@
 
     function renderEmbedding(word) {
       const points = [
-        ["king", 53, 28], ["queen", 68, 34], ["prince", 43, 42], ["crown", 61, 14],
-        ["cat", 23, 68], ["kitten", 15, 79], ["dog", 35, 76], ["tiger", 18, 53],
-        ["pizza", 74, 73], ["pasta", 87, 78], ["cheese", 68, 88], ["oven", 88, 60],
-        ["code", 45, 69], ["program", 50, 84], ["function", 57, 59], ["compiler", 38, 54]
+        ["king", 50, 20], ["queen", 72, 27], ["prince", 40, 34], ["crown", 66, 10],
+        ["cat", 22, 64], ["kitten", 12, 82], ["dog", 35, 82], ["tiger", 12, 48],
+        ["pizza", 75, 70], ["pasta", 90, 82], ["cheese", 68, 91], ["oven", 91, 58],
+        ["code", 44, 66], ["program", 48, 90], ["function", 62, 52], ["compiler", 35, 48]
       ];
       $("#embeddingMap").innerHTML = points.map(([label, x, y]) => {
         const selected = label === word;
@@ -1633,9 +1671,18 @@
     $("#advancedTabs").addEventListener("click", event => {
       const button = event.target.closest(".tab-btn");
       if (!button) return;
-      $$("#advancedTabs .tab-btn").forEach(item => item.classList.toggle("active", item === button));
-      $$(".tab-panel").forEach(panel => panel.classList.toggle("active", panel.id === button.dataset.tab));
+      $$("#advancedTabs .tab-btn").forEach(item => {
+        const selected = item === button;
+        item.classList.toggle("active", selected);
+        item.setAttribute("aria-selected", String(selected));
+      });
+      $$(".tab-panel").forEach(panel => {
+        const selected = panel.id === button.dataset.tab;
+        panel.classList.toggle("active", selected);
+        panel.hidden = !selected;
+      });
     });
+    $$(".tab-panel").forEach(panel => { panel.hidden = !panel.classList.contains("active"); });
 
     function renderContext() {
       const value = Number($("#contextSlider").value);
