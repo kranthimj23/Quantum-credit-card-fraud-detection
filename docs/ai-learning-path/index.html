@@ -1,0 +1,1244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A playful 4W+H learning path from AI foundations to production-grade agentic systems.">
+  <link rel="icon" href="data:,">
+  <title>AI → LLM → Agents — The 9-Level Learning Map</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07101d;
+      --bg-soft: #0c1829;
+      --panel: rgba(16, 30, 50, .86);
+      --panel-solid: #102039;
+      --text: #eef6ff;
+      --muted: #a7b7cc;
+      --line: rgba(173, 207, 255, .16);
+      --cyan: #4de4ff;
+      --blue: #74a4ff;
+      --violet: #b38cff;
+      --pink: #ff82bd;
+      --orange: #ffad66;
+      --yellow: #ffe17a;
+      --green: #63e6ad;
+      --red: #ff7e91;
+      --shadow: 0 24px 70px rgba(0, 0, 0, .34);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 12% 0, rgba(77, 228, 255, .13), transparent 28rem),
+        radial-gradient(circle at 95% 18%, rgba(179, 140, 255, .13), transparent 30rem),
+        var(--bg);
+      color: var(--text);
+      font: 16px/1.65 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+    ::selection { color: #06101b; background: var(--cyan); }
+
+    .progress {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 200;
+      height: 4px;
+      background: rgba(255, 255, 255, .05);
+    }
+
+    .progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
+      box-shadow: 0 0 16px rgba(77, 228, 255, .65);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 4px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 68px;
+      padding: 11px clamp(16px, 4vw, 54px);
+      border-bottom: 1px solid var(--line);
+      background: rgba(7, 16, 29, .86);
+      backdrop-filter: blur(20px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 13px;
+      background: linear-gradient(145deg, var(--cyan), var(--violet));
+      color: #07101d;
+      box-shadow: 0 10px 30px rgba(77, 228, 255, .2);
+    }
+
+    .top-actions { display: flex; align-items: center; gap: 9px; }
+    .status { color: var(--muted); font-size: 12px; }
+    .icon-btn, .primary-btn, .level-chip, .bookmark, .filter-btn, .quiz-option {
+      border: 1px solid var(--line);
+      cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+
+    .icon-btn:hover, .level-chip:hover, .bookmark:hover, .filter-btn:hover, .quiz-option:hover {
+      transform: translateY(-2px);
+      border-color: rgba(77, 228, 255, .55);
+    }
+
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .04);
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      width: min(1600px, 100%);
+      margin: 0 auto;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 72px;
+      align-self: start;
+      height: calc(100vh - 72px);
+      padding: 26px 20px 40px;
+      border-right: 1px solid var(--line);
+      overflow-y: auto;
+    }
+
+    .side-label {
+      margin: 0 9px 10px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .level-link {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: center;
+      margin: 4px 0;
+      padding: 10px;
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    .level-link:hover, .level-link.active { color: var(--text); background: rgba(255, 255, 255, .055); }
+    .level-number {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-weight: 900;
+    }
+
+    .side-card {
+      margin-top: 24px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: linear-gradient(145deg, rgba(77, 228, 255, .07), rgba(179, 140, 255, .08));
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    main { min-width: 0; }
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
+      gap: clamp(34px, 6vw, 90px);
+      align-items: center;
+      min-height: 680px;
+      padding: clamp(70px, 8vw, 118px) clamp(22px, 6vw, 82px);
+      overflow: hidden;
+    }
+
+    .hero::before {
+      position: absolute;
+      z-index: -1;
+      inset: 10% 8% auto auto;
+      width: 420px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(77, 228, 255, .18), transparent 66%);
+      filter: blur(10px);
+      content: "";
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 18px;
+      padding: 7px 12px;
+      border: 1px solid rgba(77, 228, 255, .25);
+      border-radius: 999px;
+      background: rgba(77, 228, 255, .07);
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 800px;
+      margin: 0;
+      font-size: clamp(44px, 7vw, 92px);
+      line-height: .98;
+      letter-spacing: -.065em;
+    }
+
+    .gradient-text {
+      color: transparent;
+      background: linear-gradient(90deg, var(--cyan), var(--blue), var(--violet), var(--pink));
+      background-clip: text;
+    }
+
+    .hero-copy > p {
+      max-width: 710px;
+      margin: 24px 0 30px;
+      color: var(--muted);
+      font-size: clamp(16px, 2vw, 20px);
+    }
+
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .primary-btn, .filter-btn {
+      padding: 11px 17px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .05);
+      text-decoration: none;
+    }
+
+    .primary-btn {
+      border: 0;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      color: #06101b;
+      font-weight: 900;
+      box-shadow: 0 14px 34px rgba(77, 228, 255, .18);
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 24px;
+      margin-top: 34px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .hero-stats strong { display: block; color: var(--text); font-size: 24px; }
+    .map-visual {
+      position: relative;
+      min-height: 510px;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 34px;
+      background: linear-gradient(160deg, rgba(18, 40, 66, .88), rgba(9, 20, 36, .7));
+      box-shadow: var(--shadow);
+      transform: rotate(2deg);
+    }
+
+    .map-visual::after {
+      position: absolute;
+      inset: 12px;
+      border: 1px dashed rgba(255, 255, 255, .08);
+      border-radius: 26px;
+      content: "";
+      pointer-events: none;
+    }
+
+    .map-title { margin: 0 0 22px; color: var(--muted); font-size: 11px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+    .stair { display: grid; gap: 8px; align-content: end; height: 420px; }
+    .step {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 8px 13px;
+      border: 1px solid color-mix(in srgb, var(--step) 38%, transparent);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--step) 12%, transparent);
+      font-size: 12px;
+      font-weight: 800;
+      transform: translateX(calc((9 - var(--i)) * 9px));
+    }
+
+    .step span { margin-left: auto; color: var(--step); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+    .toolbar {
+      position: sticky;
+      top: 72px;
+      z-index: 80;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      gap: 12px;
+      padding: 14px clamp(20px, 5vw, 72px);
+      border-block: 1px solid var(--line);
+      background: rgba(7, 16, 29, .9);
+      backdrop-filter: blur(16px);
+    }
+
+    .search-wrap { position: relative; }
+    .search-wrap span { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+    #search {
+      width: 100%;
+      min-height: 44px;
+      padding: 9px 14px 9px 43px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .04);
+      color: var(--text);
+      outline: 0;
+    }
+
+    #search:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(77, 228, 255, .11); }
+    .toolbar-actions { display: flex; gap: 8px; }
+    .filter-btn { padding: 8px 13px; color: var(--muted); font-size: 12px; }
+    .filter-btn.active { border-color: rgba(77, 228, 255, .5); background: rgba(77, 228, 255, .09); color: var(--cyan); }
+
+    .learning-map { padding: 30px clamp(20px, 5vw, 72px) 110px; }
+    .level {
+      margin-top: 66px;
+      scroll-margin-top: 150px;
+    }
+
+    .level-head {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .level-badge {
+      display: grid;
+      place-items: center;
+      width: 62px;
+      height: 62px;
+      border: 1px solid color-mix(in srgb, var(--level) 45%, transparent);
+      border-radius: 19px;
+      background: color-mix(in srgb, var(--level) 12%, transparent);
+      color: var(--level);
+      font-size: 22px;
+      font-weight: 950;
+      box-shadow: 0 12px 34px color-mix(in srgb, var(--level) 10%, transparent);
+    }
+
+    .level-head h2 { margin: 0; font-size: clamp(24px, 3vw, 38px); letter-spacing: -.04em; }
+    .level-head p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+    .level-chip {
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .04);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .concept-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .concept {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, .12);
+      overflow: hidden;
+      scroll-margin-top: 150px;
+    }
+
+    .concept[open] { border-color: color-mix(in srgb, var(--level) 42%, var(--line)); }
+    .concept.hidden, .level.hidden { display: none; }
+    .concept summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      min-height: 92px;
+      padding: 20px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .concept summary::-webkit-details-marker { display: none; }
+    .concept-kicker { display: block; margin-bottom: 4px; color: var(--level); font-size: 10px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .concept h3 { margin: 0; font-size: 21px; letter-spacing: -.025em; }
+    .one-liner { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }
+    .summary-actions { display: flex; gap: 8px; align-items: center; }
+    .expand-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .05);
+      color: var(--muted);
+      transition: transform .2s ease;
+    }
+
+    .concept[open] .expand-icon { transform: rotate(45deg); color: var(--level); }
+    .bookmark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .04);
+      color: var(--muted);
+    }
+
+    .bookmark.saved { color: var(--yellow); background: rgba(255, 225, 122, .1); }
+    .concept-body { padding: 0 20px 22px; border-top: 1px solid var(--line); }
+    .wh-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-top: 18px; }
+    .wh {
+      min-height: 104px;
+      padding: 13px;
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .025);
+    }
+
+    .wh.how { grid-column: 1 / -1; }
+    .wh strong { display: block; margin-bottom: 4px; color: var(--level); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+    .wh p { margin: 0; color: var(--muted); font-size: 13px; }
+    .math-note {
+      margin: 12px 0 0;
+      padding: 12px 14px;
+      border-left: 3px solid var(--level);
+      border-radius: 8px;
+      background: rgba(5, 12, 24, .6);
+      color: #dcecff;
+      font: 12px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+      overflow-x: auto;
+    }
+
+    .examples-title { margin: 18px 0 9px; font-size: 12px; letter-spacing: .09em; text-transform: uppercase; }
+    .examples { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+    .example {
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, .07);
+      border-radius: 13px;
+      background: color-mix(in srgb, var(--level) 5%, transparent);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .example b { color: var(--text); }
+    .level-check {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      margin-top: 16px;
+      padding: 18px 20px;
+      border: 1px dashed color-mix(in srgb, var(--level) 38%, transparent);
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--level) 6%, transparent);
+    }
+
+    .level-check h3 { margin: 0 0 3px; font-size: 15px; }
+    .level-check p { margin: 0; color: var(--muted); font-size: 12px; }
+    .challenge-answer { display: none; margin-top: 8px !important; color: var(--green) !important; }
+    .level-check.revealed .challenge-answer { display: block; }
+
+    .quiz {
+      margin-top: 80px;
+      padding: clamp(24px, 5vw, 52px);
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background: linear-gradient(145deg, rgba(77, 228, 255, .08), rgba(179, 140, 255, .08));
+    }
+
+    .quiz h2 { margin: 0 0 7px; font-size: clamp(28px, 4vw, 48px); }
+    .quiz > p { margin: 0 0 22px; color: var(--muted); }
+    .quiz-card { max-width: 760px; }
+    .quiz-question { font-size: 20px; font-weight: 800; }
+    .quiz-options { display: grid; gap: 9px; margin-top: 16px; }
+    .quiz-option {
+      padding: 12px 15px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .04);
+      text-align: left;
+    }
+
+    .quiz-option.correct { border-color: var(--green); background: rgba(99, 230, 173, .1); }
+    .quiz-option.wrong { border-color: var(--red); background: rgba(255, 126, 145, .1); }
+    .quiz-feedback { min-height: 25px; margin-top: 12px; color: var(--muted); }
+    .empty {
+      display: none;
+      padding: 70px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    footer {
+      padding: 34px clamp(20px, 5vw, 72px);
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .light {
+      color-scheme: light;
+      --bg: #f4f8ff;
+      --bg-soft: #eaf1fb;
+      --panel: rgba(255, 255, 255, .9);
+      --panel-solid: #fff;
+      --text: #14213a;
+      --muted: #52627a;
+      --line: rgba(34, 59, 100, .15);
+      --cyan: #007b94;
+      --blue: #315fd4;
+      --violet: #7041c4;
+      --pink: #b82b73;
+      --orange: #a64b00;
+      --yellow: #8b6600;
+      --green: #087548;
+      --red: #b0233b;
+      --shadow: 0 22px 60px rgba(62, 83, 118, .16);
+    }
+
+    .light .topbar, .light .toolbar { background: rgba(244, 248, 255, .9); }
+    .light .primary-btn { color: #fff; }
+    .light .math-note { background: #edf3fb; color: #24395e; }
+    .light .brand-mark { color: #fff; }
+
+    .menu-btn { display: none; }
+    @media (max-width: 1120px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        z-index: 95;
+        top: 72px;
+        left: 0;
+        width: min(310px, 88vw);
+        transform: translateX(-105%);
+        visibility: hidden;
+        pointer-events: none;
+        background: var(--bg-soft);
+        transition: transform .25s ease, visibility 0s linear .25s;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+        visibility: visible;
+        pointer-events: auto;
+        transition-delay: 0s;
+      }
+      .menu-btn { display: grid; }
+      .hero { grid-template-columns: 1fr; }
+      .map-visual { max-width: 650px; width: 100%; min-height: 480px; transform: none; }
+      .stair { height: 390px; }
+    }
+
+    @media (max-width: 760px) {
+      .brand > span:last-child, .status { display: none; }
+      .hero { min-height: auto; padding-top: 72px; }
+      .hero-stats { gap: 16px; }
+      .map-visual { min-height: 445px; padding: 22px; }
+      .step { transform: none; }
+      .toolbar { grid-template-columns: 1fr; top: 72px; }
+      .toolbar-actions { overflow-x: auto; }
+      .concept-grid { grid-template-columns: 1fr; }
+      .level-head { grid-template-columns: 52px minmax(0, 1fr); }
+      .level-badge { width: 52px; height: 52px; border-radius: 16px; }
+      .level-chip { display: none; }
+      .examples { grid-template-columns: 1fr; }
+      .level-check { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 43px; }
+      .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); }
+      .hero-stats strong { font-size: 20px; }
+      .map-visual { min-height: 430px; }
+      .wh-grid { grid-template-columns: 1fr; }
+      .wh.how { grid-column: auto; }
+      .concept summary { padding: 17px; }
+      .concept-body { padding-inline: 15px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+  <header class="topbar">
+    <a class="brand" href="../llm-tutorial/" aria-label="Back to the interactive LLM course">
+      <span class="brand-mark">AI</span>
+      <span>AI Learning Map</span>
+    </a>
+    <div class="top-actions">
+      <span class="status" id="status">0 of 96 concepts explored</span>
+      <button class="icon-btn menu-btn" id="menuButton" aria-label="Open level menu" aria-expanded="false" aria-controls="sidebar">☰</button>
+      <button class="icon-btn" id="themeButton" aria-label="Switch to light theme" title="Change theme">☀</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <p class="side-label">Nine-level journey</p>
+      <nav id="levelNav" aria-label="Course levels"></nav>
+      <div class="side-card">
+        <strong>How to use 4W+H</strong>
+        First understand <b>what</b> and <b>why</b>. Then connect <b>when</b> and <b>where</b>. Finally, study <b>how</b> it works.
+      </div>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">No jargon left behind</span>
+          <h1>AI to Agents,<br><span class="gradient-text">one idea at a time.</span></h1>
+          <p>A separate, searchable learning map for the full modern AI stack. Every concept uses <strong>What · Why · When · Where · How</strong>, friendly math, and three memorable examples.</p>
+          <div class="hero-actions">
+            <a class="primary-btn" href="#level-1">Start at Level 1</a>
+            <button class="filter-btn" id="randomButton">Surprise me</button>
+          </div>
+          <div class="hero-stats">
+            <div><strong>9</strong>levels</div>
+            <div><strong id="conceptCount">96</strong>concepts</div>
+            <div><strong>3×</strong>examples</div>
+          </div>
+        </div>
+        <div class="map-visual" aria-label="A staircase showing the nine learning levels">
+          <p class="map-title">Your route to production AI</p>
+          <div class="stair" id="heroSteps"></div>
+        </div>
+      </section>
+
+      <div class="toolbar">
+        <label class="search-wrap">
+          <span aria-hidden="true">⌕</span>
+          <input id="search" type="search" placeholder="Find attention, RAG, latency, agents…" aria-label="Search course concepts">
+        </label>
+        <div class="toolbar-actions">
+          <button class="filter-btn active" data-filter="all">All concepts</button>
+          <button class="filter-btn" data-filter="saved">Bookmarked</button>
+          <button class="filter-btn" id="expandButton">Expand all</button>
+        </div>
+      </div>
+
+      <div class="learning-map" id="learningMap"></div>
+      <div class="empty" id="emptyState">
+        <h2>No concept found</h2>
+        <p>Try a shorter search such as “attention”, “memory”, or “GPU”.</p>
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    Learn layer by layer. You do not need to memorize everything—build connections, revisit examples, and keep experimenting.
+  </footer>
+
+  <script>
+    const t = (name, what, why, when, where, how, examples, math = "") =>
+      ({ name, what, why, when, where, how, examples, math });
+
+    const levels = [
+      {
+        title: "Foundation",
+        subtitle: "The building blocks behind every intelligent system",
+        color: "#4de4ff",
+        challenge: ["If a spam filter improves from labeled emails, is it AI, ML, or both?", "Both. Machine learning is one way to build AI."],
+        topics: [
+          t("AI", "Artificial Intelligence is the broad goal of making computers perform tasks that seem intelligent.", "It helps machines perceive, decide, create, and assist at a scale humans alone cannot.", "Use AI when a task needs judgment, patterns, language, vision, or flexible decisions.", "It appears in phones, hospitals, banks, games, factories, cars, and creative tools.", "AI combines rules, search, learning, data, and feedback to choose useful actions.",
+            ["<b>Smart chef:</b> suggests dinner from ingredients in your fridge.", "<b>Game rival:</b> changes strategy when you keep using the same move.", "<b>Photo helper:</b> finds every picture containing your dog."]),
+          t("Machine Learning", "Machine Learning is a part of AI where a system learns patterns from examples instead of receiving every rule.", "Real-world rules are often too numerous or fuzzy to hand-code.", "Use it when you have examples or feedback and expect patterns to repeat.", "Recommendation engines, fraud detection, forecasts, search ranking, and diagnosis use it.", "A model adjusts internal parameters to reduce mistakes on training data, then predicts new cases.",
+            ["<b>Fruit detective:</b> learns apple versus orange from color and weight.", "<b>Inbox bouncer:</b> learns which messages look like spam.", "<b>Movie buddy:</b> learns your taste from ratings."],
+            "Learning ≈ choose parameters θ that minimize error: θ* = argminθ Loss(data, θ)"),
+          t("Deep Learning", "Deep Learning is machine learning with many stacked neural-network layers.", "Multiple layers can discover complex features automatically, from edges to faces or letters to meaning.", "Use it for large, messy data such as images, audio, text, and video.", "It powers speech recognition, computer vision, LLMs, and generative media.", "Each layer transforms a representation; training adjusts millions or billions of weights end to end.",
+            ["<b>Face ladder:</b> pixels → edges → eyes → face.", "<b>Music ear:</b> waveform → notes → melody → song style.", "<b>Story brain:</b> tokens → phrases → themes → next word."]),
+          t("Neural Networks", "A neural network is a collection of simple mathematical units connected in layers.", "Together, many simple units can approximate complicated relationships.", "Use one when inputs interact in nonlinear ways and simple formulas are not enough.", "Neural networks live inside vision models, language models, robots, and forecasting systems.", "A neuron computes a weighted sum, adds a bias, and applies an activation function.",
+            ["<b>Pizza neuron:</b> cheese, price, and distance vote on whether to order.", "<b>Weather neuron:</b> humidity and clouds vote on rain.", "<b>Dance judge:</b> rhythm, balance, and timing combine into a score."],
+            "Neuron: y = activation(w₁x₁ + w₂x₂ + … + b)"),
+          t("Vectors", "A vector is an ordered list of numbers that represents direction, features, or meaning.", "Vectors let computers measure similarity and perform transformations with ordinary math.", "Use vectors whenever one item needs several numerical properties.", "Coordinates, colors, user profiles, token embeddings, and model states are vectors.", "Each dimension stores a feature; distance and angle compare two vectors.",
+            ["<b>Pet vector:</b> [size, fluffiness, energy].", "<b>Snack vector:</b> [sweet, salty, crunchy].", "<b>Word vector:</b> “king” and “queen” point in similar semantic directions."],
+            "v = [v₁, v₂, …, vₙ],  dot(a,b) = Σ aᵢbᵢ"),
+          t("Matrices", "A matrix is a rectangular grid of numbers; think of it as many vectors organized together.", "Matrices efficiently transform, mix, and store large batches of information.", "Use them for image pixels, datasets, neural layers, attention scores, and geometric transforms.", "They are central to GPUs, linear algebra, statistics, graphics, and deep learning.", "Matrix multiplication combines rows and columns to create new representations.",
+            ["<b>Photo grid:</b> brightness values arranged by row and column.", "<b>Class roster:</b> students × quiz scores.", "<b>Meaning mixer:</b> a weight matrix rotates token vectors into useful features."],
+            "C = AB,  Cᵢⱼ = Σₖ AᵢₖBₖⱼ"),
+          t("Probability", "Probability measures uncertainty using values from 0 (impossible) to 1 (certain).", "AI rarely knows the future exactly, so it ranks plausible outcomes and risks.", "Use probability when outcomes are uncertain or several answers may be reasonable.", "Forecasting, classification, sampling, medical risk, and language generation depend on it.", "A model assigns scores, normalizes them into probabilities, and chooses or samples an outcome.",
+            ["<b>Rain plan:</b> 80% means carry an umbrella, not build an ark.", "<b>Cookie jar:</b> random sampling favors the flavor with more cookies.", "<b>Word race:</b> after “peanut butter and”, “jelly” gets the biggest probability."],
+            "0 ≤ P(event) ≤ 1,  ΣᵢP(outcomeᵢ) = 1")
+        ]
+      },
+      {
+        title: "Language",
+        subtitle: "How text becomes numbers and predictions",
+        color: "#74a4ff",
+        challenge: ["Does a language model read a sentence as one giant object?", "No. It processes a sequence of tokens represented by numbers."],
+        topics: [
+          t("NLP", "Natural Language Processing is the field of making computers work with human language.", "Language contains ambiguity, context, slang, structure, and meaning that ordinary string matching misses.", "Use NLP to understand, classify, search, translate, summarize, or generate text and speech.", "Chatbots, search, support, analytics, translation, moderation, and voice assistants use it.", "NLP pipelines turn language into representations, process patterns, and produce labels or text.",
+            ["<b>Mood reader:</b> detects whether a review is happy or angry.", "<b>Tiny editor:</b> rewrites a long email politely.", "<b>World traveler:</b> translates a menu without ordering mystery soup."]),
+          t("Tokens", "Tokens are the small units a language model actually reads and writes.", "Breaking text into reusable pieces keeps the vocabulary manageable and supports unfamiliar words.", "Think about tokens when estimating model input size, speed, context, and cost.", "They sit between raw text and every language-model computation.", "A tokenizer maps each text piece to an integer ID from a fixed vocabulary.",
+            ["<b>Word token:</b> “banana” may be one piece.", "<b>Subword tokens:</b> “unbelievable” may become “un” + “believ” + “able”.", "<b>Punctuation token:</b> “!” may get its own ID."]),
+          t("Tokenization", "Tokenization is the process that splits text into tokens and converts them to IDs.", "Models need consistent numerical input, including for new names, spelling, code, and many languages.", "It happens before training, prompting, counting context, or billing an API request.", "Every language model has a tokenizer paired with its vocabulary.", "Rules or learned algorithms prefer useful text pieces, then look up their IDs.",
+            ["<b>Robot snack:</b> “cupcakes!” → [“cup”, “cakes”, “!”].", "<b>Code meal:</b> “user_id” may split differently from normal prose.", "<b>Emoji guest:</b> one visible emoji may require several Unicode pieces."]),
+          t("Embeddings", "Embeddings are learned vectors that place related items near one another in a meaning space.", "They turn meaning into geometry, enabling models to compare concepts mathematically.", "Use embeddings for semantic search, recommendations, clustering, RAG, and token representations.", "They live inside language models and in external vector-search systems.", "A learned table or model maps each item to a dense vector; similarity uses distance or angle.",
+            ["<b>Meaning neighborhood:</b> “puppy” lives near “dog”, not “volcano”.", "<b>Recipe search:</b> “quick breakfast” finds “10-minute oatmeal” without exact words.", "<b>Support sorter:</b> similar complaints land in the same cluster."],
+            "cosine(a,b) = (a · b) / (||a|| ||b||)"),
+          t("Language Models", "A language model estimates how likely sequences of tokens are.", "This ability supports completion, generation, classification, translation, and reasoning-like behavior.", "Use one whenever language patterns can help predict or construct useful text.", "They power autocomplete, chat, coding tools, search assistance, and content generation.", "The model reads context and outputs a probability distribution for the next token.",
+            ["<b>Sentence finisher:</b> “The sun rises in the…” → “east”.", "<b>Code partner:</b> completes a function from nearby code.", "<b>Role player:</b> continues a pirate story in pirate style."],
+            "P(text) = Πₜ P(tokenₜ | earlier tokens)"),
+          t("Next-token prediction", "Next-token prediction asks: given all earlier tokens, which token is likely to come next?", "A simple repeated prediction objective teaches grammar, facts, styles, code patterns, and many useful behaviors.", "It is used during most LLM pretraining and during every step of generation.", "It happens at the model output after the transformer processes the current context.", "The model produces logits, converts them to probabilities, picks one token, appends it, and repeats.",
+            ["<b>Classic:</b> “Twinkle, twinkle, little…” → “star”.", "<b>Cooking:</b> “Bake for 20…” → “minutes”.", "<b>Silly:</b> “The dragon opened a bakery selling…” → maybe “fire-roasted bagels”."],
+            "Generate: context → P(next token) → choose → append → repeat")
+        ]
+      },
+      {
+        title: "Transformer",
+        subtitle: "The engine that lets tokens communicate",
+        color: "#b38cff",
+        challenge: ["Why divide attention scores by √dₖ?", "To stop large dot products from making softmax too sharp and gradients too weak."],
+        topics: [
+          t("Transformer", "A Transformer is a neural architecture that processes token relationships mainly with attention and feed-forward blocks.", "It handles long-range relationships and trains efficiently in parallel.", "Use transformers for language, vision, audio, biology, and multimodal sequence tasks.", "Modern LLMs are stacks of transformer blocks between embeddings and output logits.", "Each block applies attention, residual paths, normalization, and an FFN repeatedly.",
+            ["<b>Pronoun clue:</b> connects “it” with the correct earlier noun.", "<b>Code clue:</b> links a function call to its definition.", "<b>Recipe clue:</b> remembers which ingredient “it” refers to."]),
+          t("Self-Attention", "Self-attention lets each token gather information from other tokens in the same sequence.", "A token’s meaning often depends on distant context, not just its nearest neighbors.", "Use it when relationships across a sequence matter.", "It is the token-mixing stage inside transformer blocks.", "Queries request information, keys advertise information, and values carry the information to mix.",
+            ["<b>Bank:</b> “river bank” attends to “river”, not “money”.", "<b>Robot:</b> in “Sam fixed the robot because it broke,” “it” attends to robot.", "<b>Mystery:</b> the final clue looks back at the first chapter."]),
+          t("Q / K / V", "Query, Key, and Value are three learned versions of every token vector.", "Separating asking, matching, and carrying makes attention flexible.", "They are created every time an attention layer processes tokens.", "Q/K/V projections sit at the start of each attention head.", "Query–key dot products decide relevance; the matching value vectors are blended.",
+            ["<b>Library:</b> query = your question, keys = book labels, values = book contents.", "<b>Party:</b> query = “who likes chess?”, keys = name tags, values = conversations.", "<b>Fridge:</b> query = “sweet snack”, keys = food labels, values = actual foods."],
+            "Q = XWQ, K = XWK, V = XWV"),
+          t("Scaled Dot Product Attention", "This is the standard formula that scores Q against K, scales the scores, applies softmax, and mixes V.", "It creates a smooth, trainable way to route information between tokens.", "Use it inside transformer attention for every input sequence.", "It runs in each attention head, often accelerated by specialized GPU kernels.", "Multiply QKᵀ, divide by √dₖ, mask forbidden positions, softmax, then multiply by V.",
+            ["<b>Detective board:</b> stronger clue matches receive thicker strings.", "<b>Playlist:</b> songs matching your mood contribute more to the mix.", "<b>Soup:</b> attention weights decide how much of each value ingredient enters."],
+            "Attention(Q,K,V) = softmax(QKᵀ / √dₖ)V"),
+          t("Multi-Head Attention", "Multi-head attention runs several attention mechanisms in parallel with different learned projections.", "Different heads can notice different relationships at the same time.", "Use it when a sequence contains multiple kinds of structure.", "It replaces one large attention view with several smaller views inside each transformer block.", "Each head computes attention; their outputs are concatenated and projected together.",
+            ["<b>Book club:</b> one reader tracks characters, one timeline, one jokes.", "<b>Soccer replay:</b> heads watch the ball, defenders, and open space.", "<b>Sentence:</b> heads may track syntax, references, and topic."],
+            "MultiHead = Concat(head₁,…,headₕ)WO"),
+          t("FFN", "The Feed-Forward Network is a small neural network applied independently to each token position.", "Attention shares information; the FFN transforms and stores useful features within each token.", "It runs after attention in every transformer block.", "It is usually the largest parameter component of dense LLM blocks.", "A vector expands to a wider hidden size, passes through a nonlinear activation, then shrinks back.",
+            ["<b>Kitchen:</b> attention gathers ingredients; FFN cooks each plate.", "<b>Workshop:</b> token features enter raw and leave refined.", "<b>Notebook:</b> shared clues become a useful local conclusion."],
+            "FFN(x) = W₂ activation(W₁x + b₁) + b₂"),
+          t("LayerNorm", "Layer normalization rescales a token’s features to a stable range.", "Stable activations make very deep networks easier and safer to train.", "Use it around attention and FFN sublayers.", "Modern transformers often use pre-normalization before each major sublayer.", "For each token vector, subtract its mean, divide by standard deviation, then learn scale and shift.",
+            ["<b>Choir coach:</b> keeps one singer from overpowering everyone.", "<b>Volume knob:</b> different songs enter at a manageable loudness.", "<b>Recipe scale:</b> normalizes ingredient amounts before mixing."],
+            "LayerNorm(x) = γ ⊙ (x − μ) / √(σ² + ε) + β"),
+          t("Residual connections", "A residual connection adds a block’s input back to its output.", "It preserves information and gives gradients a shorter path through deep networks.", "Use it around attention and FFN transformations.", "Residual streams form the main information highway through a transformer.", "Instead of replacing x, a sublayer learns a useful change: x ← x + f(x).",
+            ["<b>Photo edit:</b> keep the original and add only the improvement layer.", "<b>Road bypass:</b> traffic can skip a slow neighborhood.", "<b>Story revision:</b> retain the draft while adding a better sentence."],
+            "output = x + sublayer(x)"),
+          t("Positional encoding", "Positional encoding gives tokens information about order and location.", "Attention alone sees a set of tokens and needs help distinguishing “dog bites man” from “man bites dog”.", "Use it for any ordered sequence.", "Position information is added to or combined with token representations before or inside attention.", "Fixed, learned, or rotational patterns encode relative or absolute positions.",
+            ["<b>Queue tickets:</b> each person knows whether they are first or tenth.", "<b>Music:</b> the same note means something different at the start and ending.", "<b>Recipe:</b> “mix then bake” is not “bake then mix”."]),
+          t("RoPE", "Rotary Positional Embedding rotates Q and K vector pairs according to token position.", "It makes attention naturally sensitive to relative distance and often extends better to long sequences.", "Use RoPE in modern decoder-only LLMs and long-context variants.", "It is applied to query and key vectors before their dot products.", "Each vector pair rotates by a position-dependent angle; relative rotations affect similarity.",
+            ["<b>Clock hands:</b> token positions get different angles.", "<b>Dance partners:</b> relative rotation reveals how far apart they stand.", "<b>Spiral notebook:</b> nearby lines have similar orientation, distant lines differ."],
+            "RoPE(qₘ) = R(mθ)q;  qₘ · kₙ depends on relative position m−n")
+        ]
+      },
+      {
+        title: "LLM internals",
+        subtitle: "How models learn, score, remember, and generate",
+        color: "#ff82bd",
+        challenge: ["Temperature changes logits, weights, or training data?", "Logits during generation. It changes randomness, not learned weights."],
+        topics: [
+          t("Pretraining", "Pretraining teaches a model broad patterns by predicting tokens across a huge dataset.", "It creates general language, world, code, and reasoning capabilities before task-specific adaptation.", "Do it once at large scale before instruction tuning or application deployment.", "Training clusters process curated text, code, images, or multimodal data.", "Sample sequences, predict hidden next tokens, measure loss, update weights, repeat billions of times.",
+            ["<b>Library marathon:</b> reading many genres builds broad familiarity.", "<b>Code dojo:</b> millions of examples teach syntax and common APIs.", "<b>Pattern school:</b> repeated facts and forms shape the weights."]),
+          t("Cross-entropy", "Cross-entropy is a loss that penalizes the model when it gives low probability to the correct token.", "Training needs one number that says how wrong each prediction was.", "Use it for next-token training and many classification tasks.", "It sits between output probabilities and the optimization step.", "Take the negative logarithm of the probability assigned to the correct answer and average it.",
+            ["<b>Confidently correct:</b> 0.9 probability earns a small penalty.", "<b>Unsure:</b> 0.4 gets a larger penalty.", "<b>Confidently wrong:</b> 0.001 gets a giant “please learn this” penalty."],
+            "Loss = −log P(correct token)"),
+          t("Backpropagation", "Backpropagation efficiently computes how every weight contributed to the final loss.", "A billion weights need precise blame signals, not random guessing.", "Use it after a forward pass during neural-network training.", "It runs backward through the computation graph from loss to earliest layers.", "The chain rule multiplies local derivatives to produce each parameter’s gradient.",
+            ["<b>Burnt cake:</b> trace the bad taste back through baking time, heat, and ingredients.", "<b>Relay review:</b> send correction signals backward through every runner.", "<b>Math detective:</b> follow cause-and-effect arrows in reverse."],
+            "Chain rule: ∂L/∂x = (∂L/∂y)(∂y/∂x)"),
+          t("Gradient descent", "Gradient descent updates parameters in the direction that reduces loss.", "It turns gradients into learning.", "Use it repeatedly throughout model training.", "The optimizer applies it to model weights after gradients are computed.", "Move each weight a small step opposite its loss gradient.",
+            ["<b>Foggy mountain:</b> feel the slope and step downhill.", "<b>Soup tuning:</b> too salty means reduce salt next round.", "<b>Dart practice:</b> adjust aim opposite the latest miss."],
+            "θnew = θold − learning_rate × ∇θLoss"),
+          t("Optimizers", "Optimizers are update algorithms that turn gradients into practical parameter changes.", "Raw gradient descent can be slow, noisy, or unstable.", "Choose an optimizer when setting up training; AdamW is common for LLMs.", "They maintain update state alongside each trainable parameter.", "Momentum smooths direction; adaptive methods scale updates; weight decay regularizes size.",
+            ["<b>Bicycle momentum:</b> keeps moving through tiny bumps.", "<b>Smart shoes:</b> take smaller steps on steep ground and larger ones on flat ground.", "<b>Coach:</b> remembers recent misses instead of reacting to only one throw."],
+            "Adam-style update uses moving averages of gradient and gradient²"),
+          t("Learning rate", "The learning rate controls the size of each optimization step.", "Too large can explode or skip good solutions; too small wastes compute.", "Tune it before and during training, often with warmup and decay.", "It multiplies optimizer updates for every parameter.", "Schedules start carefully, rise, then gradually shrink as training settles.",
+            ["<b>Treasure hunt:</b> giant jumps miss the coin; tiny steps take forever.", "<b>Shower knob:</b> turn gently near the perfect temperature.", "<b>Parking:</b> move quickly in open space, slowly near the spot."],
+            "update size ∝ learning rate η"),
+          t("Scaling laws", "Scaling laws describe predictable trends as model size, data, and compute increase.", "They help teams allocate a fixed compute budget instead of guessing blindly.", "Use them when planning model size, dataset size, and training duration.", "They guide research and infrastructure decisions before expensive training runs.", "Empirical power laws fit how loss falls with more parameters, tokens, or compute.",
+            ["<b>Recipe planning:</b> a bigger oven is useless without enough dough.", "<b>Study plan:</b> a larger brain still needs enough books.", "<b>Budget puzzle:</b> balance model, data, and compute."]),
+          t("Parameters", "Parameters are all learnable numerical values inside a model.", "They provide the model’s capacity to store and transform patterns.", "Count them when comparing model size, memory, and compute needs.", "Embedding tables, attention projections, FFNs, norms, and output layers contain them.", "Training changes parameters; inference reads them to compute outputs.",
+            ["<b>Mixing-board knobs:</b> billions of settings shape the final sound.", "<b>Recipe constants:</b> learned amounts combine ingredients.", "<b>Maze policy:</b> stored tendencies guide each turn."]),
+          t("Weights", "Weights are the main parameter values multiplying inputs in neural layers.", "They determine which features are strengthened, weakened, or mixed.", "Inspect or update them during training, fine-tuning, merging, or quantization.", "They live in matrices throughout the network.", "Matrix multiplication applies weights to activation vectors.",
+            ["<b>Voting power:</b> important clues get stronger votes.", "<b>Audio mixer:</b> raise vocals, lower drums.", "<b>Pizza choice:</b> taste may outweigh delivery time."],
+            "y = Wx + b"),
+          t("Logits", "Logits are raw, unnormalized scores for possible output tokens.", "Keeping scores unnormalized makes training and transformations numerically convenient.", "Use logits before softmax, sampling filters, or classification decisions.", "The final model layer produces one logit per vocabulary token.", "Softmax converts logits into probabilities; temperature and masks modify them first.",
+            ["<b>Talent show:</b> judges’ raw scores before percentages.", "<b>Word race:</b> “cat” scores 8, “car” 6, “banana” −1.", "<b>Menu ranking:</b> dishes have appeal scores before probabilities."]),
+          t("Sampling", "Sampling randomly chooses a token according to the model’s probability distribution.", "It creates varied, creative outputs instead of always taking the top token.", "Use it for stories, brainstorming, dialogue, and diverse candidates.", "Sampling happens after logits become a filtered probability distribution.", "Draw one token, append it to context, and repeat.",
+            ["<b>Weighted dice:</b> common answers occupy more faces.", "<b>Story fork:</b> the hero may enter the cave or climb the tower.", "<b>Playlist:</b> favorites play often, surprises sometimes."]),
+          t("Temperature", "Temperature controls how sharp or flat the token probability distribution becomes.", "It offers a simple creativity-versus-consistency dial.", "Use lower values for factual or structured work and higher values for creative variety.", "It divides logits immediately before softmax.", "Low T magnifies score gaps; high T makes alternatives more competitive.",
+            ["<b>T = 0.2:</b> careful librarian mode.", "<b>T = 0.8:</b> friendly storyteller mode.", "<b>T = 1.4:</b> improv comedian riding a unicycle."],
+            "Pᵢ = exp(logitᵢ/T) / Σⱼ exp(logitⱼ/T)"),
+          t("Top-K", "Top-K keeps only the K highest-scoring next tokens before sampling.", "It blocks the long tail of bizarre low-probability choices.", "Use it when you want a fixed-size candidate pool.", "It is a decoding filter between logits and sampling.", "Sort candidates, keep K, set all others to impossible, then renormalize.",
+            ["<b>Top-1:</b> only the class favorite enters.", "<b>Top-5:</b> choose among five finalists.", "<b>Snack shelf:</b> sample only from your ten best snacks."]),
+          t("Top-P", "Top-P, or nucleus sampling, keeps the smallest token set whose combined probability reaches P.", "The candidate count adapts to model confidence.", "Use it for natural generation where some steps are obvious and others are open-ended.", "It is often combined with temperature in decoding.", "Sort by probability, accumulate until P is reached, discard the rest, and sample.",
+            ["<b>Confident step:</b> one token alone may cover 92%.", "<b>Creative step:</b> twenty tokens may be needed to reach 92%.", "<b>Party guest list:</b> invite enough likely friends to fill 90% of the room."]),
+          t("Context window", "The context window is the maximum token span a model can consider in one request.", "It limits how much prompt, history, retrieved text, and output can fit together.", "Plan for it when sending long documents, conversations, codebases, or examples.", "It covers tokens used during prefill plus tokens generated during decode.", "Inputs beyond the limit must be truncated, summarized, chunked, or handled by another strategy.",
+            ["<b>Desk space:</b> only papers on the desk are visible.", "<b>Conversation backpack:</b> old messages may fall out when it is full.", "<b>Novel review:</b> chunk chapters instead of stuffing the whole library."]),
+          t("KV Cache", "The KV cache stores attention keys and values from previously processed tokens.", "Without it, generation would repeatedly recompute the entire prefix.", "Use it during autoregressive inference and manage it carefully for many users.", "It resides mainly in GPU memory during serving.", "Prefill creates cached K/V tensors; each decode step appends one new position.",
+            ["<b>Chef notes:</b> remember chopped ingredients instead of chopping again.", "<b>Bookmark:</b> continue reading without restarting page one.", "<b>Conversation memory pad:</b> reuse processed history each new word."]),
+          t("Prefill", "Prefill is the first inference phase that processes all prompt tokens together.", "It builds the internal state and KV cache needed for generation.", "It happens once at the start of each request or newly added prompt segment.", "It is compute-heavy and highly parallel on GPUs.", "The model performs a forward pass across the input sequence and stores each layer’s K/V.",
+            ["<b>Read first:</b> scan the whole question before answering.", "<b>Stage setup:</b> place every prop before the show.", "<b>Map loading:</b> process the route before giving turn-by-turn directions."]),
+          t("Decode", "Decode is the repeated phase that generates one new token at a time.", "Autoregressive outputs depend on the token chosen immediately before.", "It follows prefill until a stop token or output limit is reached.", "It is often memory-bandwidth-bound and latency-sensitive.", "Read cached history, compute one token’s logits, sample, append its K/V, and repeat.",
+            ["<b>Comic strip:</b> draw one next panel using all earlier panels.", "<b>Chess commentary:</b> produce one phrase, then use it for the next.", "<b>Bead necklace:</b> add one bead at a time without rebuilding the necklace."])
+        ]
+      },
+      {
+        title: "Modern LLM architecture",
+        subtitle: "Efficiency tricks inside today’s large models",
+        color: "#ffad66",
+        challenge: ["Which saves KV-cache memory more directly: GQA or a larger FFN?", "GQA, because several query heads share fewer key/value heads."],
+        topics: [
+          t("MoE", "Mixture of Experts uses many specialized FFN modules but activates only a few for each token.", "It increases parameter capacity without using every parameter on every token.", "Use it when training or serving very large models with sparse compute.", "MoE layers replace selected dense FFNs inside a transformer.", "A router scores experts, sends each token to top experts, then combines their outputs.",
+            ["<b>Hospital:</b> reception routes patients to the right specialists.", "<b>School:</b> math questions visit one teacher, poetry another.", "<b>Kitchen:</b> sushi orders and dessert orders go to different chefs."]),
+          t("Dense vs MoE", "Dense models activate all layer parameters for every token; MoE models activate a selected subset of experts.", "The choice trades simplicity and predictable compute against larger sparse capacity.", "Use dense for simpler deployment; use MoE when capacity-per-compute matters enough to justify routing complexity.", "This design choice affects training, communication, serving, and memory.", "Dense applies one FFN; MoE routes tokens, balances expert load, and gathers results.",
+            ["<b>Dense meeting:</b> every employee handles every question.", "<b>MoE help desk:</b> only relevant specialists answer.", "<b>Trade-off:</b> more experts fit knowledge, but routing needs coordination."]),
+          t("GQA", "Grouped-Query Attention lets groups of query heads share a smaller number of key/value heads.", "It reduces KV-cache size and memory traffic while keeping more diversity than one shared pair.", "Use it in decoder LLMs that need efficient long-context serving.", "GQA changes the head arrangement inside self-attention.", "Many Q heads map to each shared K/V head, then compute attention normally.",
+            ["<b>Study groups:</b> several students share one textbook and notes.", "<b>Newsroom:</b> many reporters consult a few common archives.", "<b>Road trip:</b> multiple passengers ask questions using the same maps."]),
+          t("MQA", "Multi-Query Attention gives all query heads one shared key head and one shared value head.", "It greatly shrinks KV cache and speeds memory-bound decoding.", "Use it when serving speed and memory matter more than maximum attention flexibility.", "It is a more aggressive sharing design than GQA.", "All Q heads attend using the same cached K and V projections.",
+            ["<b>One librarian:</b> many readers ask different questions of one catalog.", "<b>Shared notebook:</b> the whole team uses one memory record.", "<b>Compact luggage:</b> fewer duplicate maps leave more room."]),
+          t("FlashAttention", "FlashAttention is an exact attention algorithm organized to minimize slow GPU memory reads and writes.", "Standard attention materializes a huge score matrix; avoiding that saves memory and time.", "Use it for training and inference, especially with long sequences.", "It runs as a fused GPU kernel for attention.", "It processes Q/K/V in tiles, keeps intermediate work in fast on-chip memory, and uses online softmax.",
+            ["<b>Kitchen counter:</b> cook small batches without moving everything to the pantry.", "<b>Whiteboard:</b> summarize sections before erasing instead of storing every scribble.", "<b>Laundry:</b> sort and fold one basket at a time."]),
+          t("Quantization", "Quantization stores or computes model numbers with fewer bits.", "Lower precision reduces memory, bandwidth, energy, and often inference cost.", "Use it when deploying large models on limited or expensive hardware.", "Weights, activations, and sometimes KV cache can be quantized.", "Map continuous values into a smaller set of representable levels, with scales that preserve useful ranges.",
+            ["<b>Map simplification:</b> round centimeters to meters when precision is enough.", "<b>Paint palette:</b> use 16 shades instead of millions.", "<b>Suitcase:</b> fold numbers smaller so more model fits."]),
+          t("FP16", "FP16 is a 16-bit floating-point format with relatively more fraction precision but a limited numeric range.", "It halves storage versus FP32 and speeds supported GPU operations.", "Use it for mixed-precision training or inference when overflow is controlled.", "Weights, activations, gradients, and matrix operations may use FP16.", "One sign, five exponent, and ten fraction bits represent values; loss scaling can protect tiny gradients.",
+            ["<b>Compact ruler:</b> detailed markings but not built for giant distances.", "<b>Fast notebook:</b> half-size pages move quickly.", "<b>Training:</b> compute in FP16 while keeping safer master values."]),
+          t("BF16", "BF16 is a 16-bit float with FP32-like exponent range but fewer fraction bits than FP16.", "Its wide range makes training less likely to overflow, often without manual loss scaling.", "Use it on modern accelerators for stable training and inference.", "It commonly stores activations, weights, or gradients during large-model training.", "Eight exponent bits preserve range; seven fraction bits trade some precision for stability.",
+            ["<b>Long-distance ruler:</b> reaches far but has coarser markings.", "<b>Mountain map:</b> covers sea level to Everest with less fine detail.", "<b>Training favorite:</b> keeps huge and tiny activations representable."]),
+          t("FP8", "FP8 uses 8-bit floating-point formats for very compact matrix computation.", "It can roughly double throughput and halve memory movement versus 16-bit formats on supported hardware.", "Use it with modern accelerators and carefully calibrated training or inference recipes.", "Different FP8 formats may represent activations, weights, or gradients.", "Dynamic scaling and format choice balance range and precision.",
+            ["<b>Pocket ruler:</b> tiny and fast but needs smart scale choices.", "<b>Express lane:</b> more numbers travel per memory trip.", "<b>Camera mode:</b> adjust exposure so important details stay visible."]),
+          t("INT8", "INT8 represents values using 8-bit integers plus scaling information.", "It cuts model memory and often speeds inference with small quality loss.", "Use it for production inference when hardware has efficient INT8 kernels.", "Weights and sometimes activations are converted from floating point.", "Calibration or learned scales map float ranges to integers from roughly −128 to 127.",
+            ["<b>Volume levels:</b> 256 steps are enough for many settings.", "<b>Travel edition:</b> a large model fits into a smaller suitcase.", "<b>Fast cashier:</b> integer arithmetic totals items quickly."]),
+          t("INT4", "INT4 stores values in only four bits, giving about 16 representable levels per group.", "It can reduce weight memory dramatically, making large models run on fewer GPUs or local devices.", "Use it mainly for inference when memory savings justify extra calibration and quality checks.", "Model weights are grouped and quantized with per-group scales or zero points.", "Two 4-bit values fit in one byte; specialized kernels unpack them for matrix multiplication.",
+            ["<b>Mini palette:</b> only 16 shades, carefully assigned.", "<b>Carry-on model:</b> four times smaller than FP16 weights.", "<b>Phone assistant:</b> a compressed model runs closer to the user."]),
+          t("Distributed inference", "Distributed inference serves one model or workload across multiple accelerators or machines.", "A model may not fit on one GPU, or one GPU may not meet traffic targets.", "Use it for very large models, long contexts, or high request volume.", "Serving frameworks coordinate compute, memory, and network communication across workers.", "Partition model tensors or layers, replicate instances, and route requests efficiently.",
+            ["<b>Moving a piano:</b> several people share one heavy object.", "<b>Restaurant chain:</b> many kitchens handle dinner rush.", "<b>Puzzle team:</b> workers solve different pieces and combine results."]),
+          t("Tensor parallelism", "Tensor parallelism splits individual matrix operations across multiple GPUs.", "It lets GPUs compute one large layer together when its tensors are too big or slow for one device.", "Use it within a fast connected node for large-model inference or training.", "Weight matrices are divided by rows or columns; partial results communicate at each layer.", "Each GPU computes a shard, then collective operations combine or redistribute outputs.",
+            ["<b>Giant poster:</b> artists paint different sections at once.", "<b>Pizza:</b> chefs prepare slices of one enormous pizza.", "<b>Spreadsheet:</b> workers calculate separate column groups then merge."]),
+          t("Pipeline parallelism", "Pipeline parallelism assigns different groups of model layers to different GPUs.", "It allows a deep model to span devices with less per-layer communication than tensor parallelism.", "Use it when layers divide cleanly and batching can keep pipeline stages busy.", "Tokens or microbatches move sequentially through stage GPUs.", "GPU 1 runs early layers, passes activations to GPU 2, and so on.",
+            ["<b>Car factory:</b> chassis, paint, and inspection happen at different stations.", "<b>Sandwich line:</b> one person adds bread, one filling, one wrap.", "<b>Relay race:</b> each runner owns one section of the route."])
+        ]
+      },
+      {
+        title: "LLM engineering",
+        subtitle: "Serving models quickly, reliably, and affordably",
+        color: "#ffe17a",
+        challenge: ["If users complain about slow first words, inspect TTFT or tokens/sec first?", "Time to first token (TTFT), which is strongly affected by queueing and prefill."],
+        topics: [
+          t("vLLM", "vLLM is an open-source high-throughput LLM serving engine.", "It simplifies efficient batching, OpenAI-compatible APIs, and KV-cache memory management.", "Use it when self-hosting supported models for many concurrent requests.", "It runs between clients and GPU model workers.", "It schedules requests continuously and uses paged KV-cache management to reduce wasted memory.",
+            ["<b>Hotel manager:</b> assigns memory rooms without reserving empty floors.", "<b>Busy café:</b> adds new orders while old orders are still cooking.", "<b>API translator:</b> exposes familiar chat and completion endpoints."]),
+          t("NVIDIA NIM", "NVIDIA NIM packages optimized model inference behind standardized containers and APIs.", "It shortens deployment work by combining runtimes, model profiles, and GPU-specific optimizations.", "Use it when deploying supported models on NVIDIA infrastructure with enterprise operational needs.", "NIM microservices run in data centers or clouds and connect to applications through APIs.", "A container selects an optimized backend/profile, loads the model, and serves standard endpoints.",
+            ["<b>Ready-made kitchen:</b> appliances and recipes arrive configured.", "<b>Race-car tune:</b> profiles match the engine to available GPUs.", "<b>Building block:</b> applications call a stable service instead of raw kernels."]),
+          t("Model serving", "Model serving exposes a trained model as a reliable service that accepts requests and returns predictions.", "A useful model needs APIs, scheduling, scaling, monitoring, and failure handling.", "Use serving whenever multiple applications or users need live inference.", "It sits between client applications and accelerator workers.", "Load model weights, validate inputs, schedule compute, stream outputs, and record metrics.",
+            ["<b>Restaurant:</b> menu = API, kitchen = GPUs, meal = response.", "<b>Taxi dispatch:</b> requests are matched to available workers.", "<b>Power grid:</b> capacity scales with demand."]),
+          t("Batching", "Batching combines several inputs into one model execution.", "GPUs are efficient when many operations run together rather than one tiny job at a time.", "Use it when requests can wait briefly and have compatible shapes.", "The serving scheduler forms tensors containing multiple sequences.", "Pad or pack inputs, run them together, then separate their outputs.",
+            ["<b>Bus:</b> carry many passengers in one trip.", "<b>Dishwasher:</b> wash a rack, not one spoon.", "<b>Class photo:</b> capture many students in one shot."]),
+          t("Continuous batching", "Continuous batching adds and removes requests between decode steps instead of waiting for a whole batch to finish.", "Ordinary batches waste slots when short requests finish early.", "Use it for online generation with requests arriving and ending at different times.", "The inference scheduler rebuilds the active batch every iteration.", "Finished sequences leave; waiting sequences enter; active sequences generate their next token together.",
+            ["<b>Moving escalator:</b> riders join and exit continuously.", "<b>Theme-park ride:</b> empty seats refill every round.", "<b>Shared kitchen:</b> new dishes use burners as soon as others finish."]),
+          t("GPU memory", "GPU memory stores model weights, activations, temporary workspaces, and KV caches near compute cores.", "Capacity and bandwidth often limit which model, context, and batch size can run.", "Plan it before deployment and monitor it under peak traffic.", "It lives on each accelerator and may be pooled only through explicit distribution strategies.", "Estimate each memory component, leave safety margin, and trade precision, cache, or parallelism to fit.",
+            ["<b>Worktable:</b> weights are tools, KV cache is customer paperwork.", "<b>Suitcase:</b> quantization folds clothes smaller.", "<b>Parking garage:</b> long conversations occupy spots longer."]),
+          t("KV-cache optimization", "KV-cache optimization reduces the memory and movement used by stored attention history.", "KV cache grows with users, layers, context length, heads, and precision.", "Use it for long-context or high-concurrency serving.", "Techniques operate in the serving allocator, attention design, or cache precision.", "Page memory, share prefixes, use GQA/MQA, quantize cache, and evict or offload wisely.",
+            ["<b>Shared textbook:</b> common system prompts reuse one copy.", "<b>Storage boxes:</b> pages fill only as needed.", "<b>Archive:</b> inactive notes move to slower storage."]),
+          t("Latency", "Latency is how long one request or stage takes.", "Users experience delays directly, especially before the first token and between tokens.", "Optimize it for chat, voice, coding, and other interactive workloads.", "Measure queue time, prefill, time to first token, decode gaps, and total duration.", "Reduce waiting, right-size batches, use faster kernels, cache work, or add capacity.",
+            ["<b>Elevator:</b> how long one rider waits and travels.", "<b>Chat pause:</b> a two-second silence feels much longer than 200 ms.", "<b>Race timing:</b> split times reveal the slow stage."]),
+          t("Throughput", "Throughput is the amount of useful work completed per unit time.", "High throughput serves more traffic and lowers hardware cost per request.", "Optimize it for batch processing and busy production systems.", "Measure requests/second or tokens/second across a server or cluster.", "Increase batching and utilization while keeping latency within service targets.",
+            ["<b>Bakery:</b> loaves per hour, not time for one loaf.", "<b>Highway:</b> cars passing per minute.", "<b>Printer room:</b> pages produced across all printers."]),
+          t("Tokens/sec", "Tokens per second measures generation or processing speed.", "It provides a model-serving speed metric that is more comparable than words per second.", "Use it to benchmark decode speed per user and aggregate server throughput.", "Measure separately for prefill tokens and generated decode tokens.", "Count tokens completed over elapsed time, with clear batch and concurrency settings.",
+            ["<b>Typing robot:</b> 50 tokens/sec feels faster than 8.", "<b>Team score:</b> aggregate rate may be 2,000 while each user sees 40.", "<b>Prompt sprint:</b> prefill can process many tokens in parallel."]),
+          t("Cost/token", "Cost per token estimates money or resources used for each processed or generated token.", "It connects architecture and serving choices to product economics.", "Use it for pricing, model routing, capacity plans, and optimization decisions.", "Compute it from accelerator, energy, platform, and operational costs divided by useful tokens.", "Improve utilization, choose efficient models, quantize, batch, cache, and avoid waste.",
+            ["<b>Taxi meter:</b> every token moves the fare slightly.", "<b>Budget chatbot:</b> simple questions route to a smaller model.", "<b>Cache coupon:</b> reused prefixes avoid paying for repeated work."],
+            "cost/token = total serving cost ÷ useful tokens served")
+        ]
+      },
+      {
+        title: "LLM applications",
+        subtitle: "Turning models into useful and trustworthy products",
+        color: "#63e6ad",
+        challenge: ["A vector search finds 30 passages. What stage should improve final relevance?", "Reranking: score the candidate passages more precisely before generation."],
+        topics: [
+          t("Prompt engineering", "Prompt engineering designs instructions and context that guide a model toward useful output.", "Models respond better when goals, constraints, examples, and formats are explicit.", "Use it for every application before reaching for training changes.", "Prompts live in system instructions, user messages, templates, and retrieved context.", "Specify role, task, context, constraints, examples, and desired output; then evaluate and iterate.",
+            ["<b>Vague:</b> “Write about space.”", "<b>Clear:</b> “Explain black holes to a curious 10-year-old in 5 bullets.”", "<b>Chef prompt:</b> include ingredients, allergies, time, and output format."]),
+          t("Structured output", "Structured output asks a model to return data matching a schema such as JSON.", "Software needs predictable fields, types, and validation instead of free-form prose.", "Use it when model results feed databases, APIs, workflows, or UI components.", "Schemas are enforced in prompting, constrained decoding, or API response formats.", "Define the schema, restrict generation, parse, validate, and retry or reject invalid results.",
+            ["<b>Invoice:</b> {vendor, total, due_date}.", "<b>Movie card:</b> {title, rating, summary}.", "<b>Support router:</b> {category, urgency, team}."]),
+          t("Function calling", "Function calling lets a model select a named function and produce its arguments.", "It connects flexible language understanding to deterministic application code.", "Use it when a request needs an API, calculation, database action, or workflow.", "The application advertises function schemas to the model and executes approved calls.", "Model emits function name plus arguments; code validates, runs it, and returns the result.",
+            ["<b>Weather:</b> call get_weather(city=\"Pune\").", "<b>Calendar:</b> call create_event only after confirming time.", "<b>Calculator:</b> call exact math instead of inventing arithmetic."]),
+          t("Tool use", "Tool use is the broader ability of a model or agent to operate external capabilities.", "Tools provide fresh data, exact computation, actions, and access beyond model weights.", "Use tools when knowledge may be stale, precision matters, or the world must change.", "Tools include search, code execution, databases, browsers, sensors, and business APIs.", "Choose a tool, construct validated input, execute with permissions, inspect output, and continue.",
+            ["<b>Travel agent:</b> searches live flights.", "<b>Data analyst:</b> runs SQL rather than guessing sales totals.", "<b>Developer:</b> executes tests after editing code."]),
+          t("RAG", "Retrieval-Augmented Generation finds relevant external information and gives it to the model before answering.", "It grounds answers in current or private knowledge without retraining the whole model.", "Use it for documents, policies, support knowledge, research, and enterprise search.", "A retrieval pipeline sits between the user question and the generation prompt.", "Embed or search the query, retrieve chunks, optionally rerank, add citations, and generate from evidence.",
+            ["<b>Open-book exam:</b> fetch the right pages before answering.", "<b>Company helper:</b> reads the latest leave policy.", "<b>Manual mechanic:</b> retrieves the exact repair section."]),
+          t("Vector databases", "A vector database stores embeddings and searches for nearby vectors.", "It enables fast semantic retrieval across millions or billions of items.", "Use it when similarity matters more than exact keyword matching.", "It holds document chunks, products, images, or user-item representations plus metadata.", "Build an approximate nearest-neighbor index, filter metadata, and return closest candidates.",
+            ["<b>Meaning librarian:</b> “car problem” finds “engine troubleshooting”.", "<b>Style finder:</b> locates visually similar shoes.", "<b>Duplicate detector:</b> finds paraphrased support tickets."]),
+          t("Embeddings", "Application embeddings represent queries, documents, images, or items as vectors outside the generative model.", "They power semantic matching, clustering, recommendations, and retrieval.", "Use them when your application must compare meaning at scale.", "An embedding model feeds vector storage or an in-memory index.", "Encode items with the same model, normalize if needed, then compare vectors.",
+            ["<b>Job matcher:</b> skills align even when wording differs.", "<b>Meme sorter:</b> similar joke themes cluster together.", "<b>FAQ finder:</b> “forgot password” matches “account access recovery”."]),
+          t("Chunking", "Chunking divides long documents into retrieval-sized pieces.", "Retrieving an entire book adds noise and may exceed context limits; pieces improve precision.", "Use it while preparing documents for RAG.", "Chunking happens before embedding and indexing.", "Split by semantic boundaries, add overlap when needed, preserve headings, and attach metadata.",
+            ["<b>Cookbook:</b> retrieve one recipe, not all 800 pages.", "<b>Contract:</b> keep a clause with its heading.", "<b>Transcript:</b> group complete speaking turns instead of random character counts."]),
+          t("Reranking", "Reranking applies a stronger relevance model to a small retrieved candidate set.", "Fast first-stage retrieval may return approximate or superficially similar results.", "Use it when answer quality matters and initial retrieval returns too much noise.", "It sits after vector or keyword search and before prompt construction.", "Score each query–candidate pair more carefully, sort again, and keep the best few.",
+            ["<b>Talent audition:</b> quick screening finds 50; judges choose the final 5.", "<b>Restaurant:</b> distance search first, cuisine-and-review ranking second.", "<b>Research:</b> reranker promotes the paragraph that directly answers the question."]),
+          t("Long context", "Long context means using models that can process very large token windows.", "It allows richer documents, histories, code, and examples in one request.", "Use it when relationships span many pages and retrieval alone may miss global structure.", "Long context affects prompting, attention compute, cache memory, and evaluation.", "Select content carefully, organize it, use position-aware models, and test whether the model actually finds distant facts.",
+            ["<b>Whole screenplay:</b> track a character arc from scene 1 to 90.", "<b>Code review:</b> include several related modules.", "<b>Meeting historian:</b> compare decisions across months of notes."]),
+          t("Evaluation", "Evaluation measures whether an AI system meets defined quality, safety, speed, and cost goals.", "A demo that feels good once may fail across real users and edge cases.", "Evaluate before launch, after changes, and continuously in production.", "Use offline datasets, human review, model judges, red teams, and online metrics.", "Define tasks and rubrics, build representative cases, score outputs, inspect failures, and track regressions.",
+            ["<b>Driving test:</b> practice route plus surprise hazards.", "<b>Chef panel:</b> taste, safety, speed, and cost all matter.", "<b>RAG test:</b> measure retrieval hit, citation faithfulness, and answer correctness."]),
+          t("Guardrails", "Guardrails are controls that keep AI inputs, actions, and outputs within acceptable boundaries.", "Models can misunderstand, hallucinate, expose data, or attempt unsafe actions.", "Use layered guardrails wherever AI affects users, sensitive data, or real systems.", "Controls surround the model: input filters, permissions, schemas, policies, validators, and monitoring.", "Minimize privileges, validate data, require confirmations, filter risky content, and log decisions.",
+            ["<b>Bowling bumpers:</b> guide the ball away from dangerous lanes.", "<b>Bank transfer:</b> model may draft, but a human confirms.", "<b>Privacy gate:</b> remove secrets before sending text to a model."])
+        ]
+      },
+      {
+        title: "Agentic AI",
+        subtitle: "From one response to goal-directed loops",
+        color: "#ff7e91",
+        challenge: ["What turns a chatbot into an agent: a longer prompt or an action loop?", "An action loop with tools, state, observations, and stopping rules."],
+        topics: [
+          t("LLM", "The LLM is the language-and-reasoning component that interprets goals and proposes next actions.", "Agents need a flexible controller for messy instructions and observations.", "Use an LLM when the workflow cannot be fully represented by fixed rules.", "It sits inside an orchestrated loop, not alone.", "The orchestrator provides state and tools; the LLM returns a plan, answer, or tool call.",
+            ["<b>Trip planner:</b> interprets “quiet beach under budget”.", "<b>Bug fixer:</b> reads errors and proposes the next inspection.", "<b>Researcher:</b> decides which question to investigate next."]),
+          t("Tool calling", "Agent tool calling lets an agent choose and invoke capabilities while pursuing a goal.", "Actions and live information require more than text prediction.", "Use it for search, files, code, APIs, databases, devices, and business processes.", "Tools are registered with schemas, permissions, and execution handlers.", "The agent selects a tool, supplies arguments, receives an observation, and updates its next step.",
+            ["<b>Calendar agent:</b> checks availability before proposing a meeting.", "<b>Shopper:</b> compares live prices.", "<b>Engineer:</b> runs a failing test, edits, then reruns it."]),
+          t("Planning", "Planning decomposes a goal into ordered steps and dependencies.", "Multi-step tasks fail when the system jumps ahead or forgets prerequisites.", "Use planning for long, uncertain, or tool-heavy goals.", "A plan may be explicit text, a task graph, or policy encoded in orchestration.", "Generate candidate steps, validate dependencies, execute incrementally, and revise from observations.",
+            ["<b>Birthday mission:</b> guests → venue → food → invitations.", "<b>Data project:</b> inspect → clean → analyze → visualize.", "<b>Escape room:</b> solve clues whose answers unlock later clues."]),
+          t("Memory", "Agent memory stores useful information beyond the immediate model call.", "Without memory, an agent repeats work and loses user or task context.", "Use it for preferences, prior findings, long tasks, and cross-session continuity.", "Memory may live in the prompt, database, vector store, event log, or structured profile.", "Write selected facts with provenance, retrieve them when relevant, and update or forget them safely.",
+            ["<b>Coffee preference:</b> remember oat milk, not every sip.", "<b>Research notebook:</b> store verified sources and conclusions.", "<b>Game companion:</b> recalls which quests are complete."]),
+          t("State", "State is the current structured snapshot of an agent’s task and environment.", "The agent needs to know what has happened, what is pending, and what resources exist.", "Use state in every multi-step or resumable workflow.", "It lives in workflow records, task objects, messages, and tool results.", "Update state after each action, validate transitions, persist checkpoints, and pass only relevant parts to the model.",
+            ["<b>Pizza tracker:</b> ordered → baking → dispatched → delivered.", "<b>Code task:</b> files changed, tests passed, blockers open.", "<b>Board game:</b> pieces, scores, and whose turn it is."]),
+          t("Reflection", "Reflection is a deliberate review of an agent’s result or process to find errors and improve the next attempt.", "A first answer can be incomplete, unsupported, or inconsistent.", "Use it at meaningful checkpoints, especially before costly or irreversible actions.", "Reflection can be self-review, a separate critic model, tests, or rule-based validation.", "Compare output to goals and evidence, identify gaps, then revise or choose another action.",
+            ["<b>Essay editor:</b> check facts, structure, and tone before submitting.", "<b>Math student:</b> plug the answer back into the equation.", "<b>Coder:</b> inspect test failures instead of declaring victory."]),
+          t("Multi-agent systems", "A multi-agent system uses several agents with distinct roles, tools, or perspectives.", "Specialization and parallel work can improve complex tasks, but coordination adds cost and risk.", "Use it when work naturally separates or benefits from independent review.", "Agents communicate through an orchestrator, shared state, messages, or task queues.", "Assign bounded roles, define handoffs, avoid duplicated work, and combine results with validation.",
+            ["<b>Newsroom:</b> reporter, fact-checker, and editor.", "<b>Software team:</b> implementer, tester, and security reviewer.", "<b>Travel crew:</b> flight, hotel, and activity specialists."]),
+          t("Agent orchestration", "Agent orchestration controls which agent or tool runs, in what order, with what state and limits.", "Uncontrolled agents can loop, conflict, overspend, or take unsafe actions.", "Use orchestration for any production agent workflow.", "An orchestrator surrounds agents with routing, queues, checkpoints, budgets, permissions, and observability.", "Represent the workflow as a loop or graph, enforce transitions and stopping rules, and handle retries and human approvals.",
+            ["<b>Conductor:</b> musicians are skilled, but timing comes from coordination.", "<b>Air-traffic control:</b> routes prevent collisions.", "<b>Film director:</b> specialists contribute in a planned sequence."])
+        ]
+      },
+      {
+        title: "AI systems architecture",
+        subtitle: "Combining every layer into a production platform",
+        color: "#8ea5ff",
+        challenge: ["Where should a production team detect rising hallucinations: GPU infrastructure or observability?", "Observability detects the trend; evaluation and product controls help diagnose and reduce it."],
+        topics: [
+          t("LLM", "The LLM is one probabilistic component inside the larger AI system.", "It provides language understanding and generation, but not guaranteed truth, permissions, or operations.", "Use it for tasks needing flexible interpretation, synthesis, and interaction.", "Place it behind an application layer that supplies context and validates outputs.", "Route requests to an appropriate model, construct prompts, generate, and verify before use.",
+            ["<b>Brain, not body:</b> the model proposes; systems act safely.", "<b>Writer:</b> drafts text while validators check format.", "<b>Router:</b> a small model handles easy tasks, a large one hard tasks."]),
+          t("RAG", "System-level RAG is the governed retrieval layer that supplies trusted, current evidence.", "Production answers need freshness, provenance, access control, and citations.", "Use it for private knowledge, changing facts, and auditable answers.", "It connects content ingestion, search, permissions, reranking, prompts, and feedback.", "Ingest and index approved sources, enforce user filters, retrieve, rerank, cite, and measure grounding.",
+            ["<b>HR helper:</b> retrieves policies the employee may access.", "<b>Support:</b> cites the latest product manual.", "<b>Legal search:</b> preserves document version and source."]),
+          t("Agents", "System agents execute bounded, multi-step workflows using models and tools.", "They automate goals that require observation, decisions, and several actions.", "Use agents only when a fixed workflow is insufficient and benefits exceed added risk.", "They run inside orchestration with budgets, state, permissions, and human checkpoints.", "Plan or route, call allowed tools, update state, validate progress, and stop under clear conditions.",
+            ["<b>Incident helper:</b> gathers logs, suggests causes, asks before remediation.", "<b>Onboarding:</b> coordinates accounts and checklists.", "<b>Research:</b> collects, compares, and cites multiple sources."]),
+          t("Tools", "Tools are governed interfaces to data and actions outside the model.", "They make answers current and actions real while keeping execution deterministic.", "Use tools for exact data, calculations, business operations, and external systems.", "A tool gateway exposes approved schemas, authentication, rate limits, and audit logs.", "Validate arguments, authorize the user and agent, execute idempotently when possible, and return structured observations.",
+            ["<b>Read tool:</b> fetch an allowed customer record.", "<b>Write tool:</b> create a ticket after confirmation.", "<b>Math tool:</b> compute finance totals exactly."]),
+          t("Memory", "System memory is a managed layer for user, task, and organizational knowledge over time.", "Production memory must be useful without becoming a privacy leak or source of stale truth.", "Use it when continuity measurably improves the experience.", "Profiles, event stores, vector indexes, and workflow databases hold different memory types.", "Classify memories, obtain consent, store provenance and expiry, retrieve selectively, and support correction or deletion.",
+            ["<b>Preference:</b> remember preferred report format.", "<b>Task:</b> resume a long migration from a checkpoint.", "<b>Expiry:</b> forget a temporary travel location after the trip."]),
+          t("Security", "AI security protects models, data, tools, infrastructure, and users from misuse or compromise.", "AI systems add prompt injection, data leakage, unsafe actions, model theft, and supply-chain risks.", "Design security from the first architecture sketch and enforce it continuously.", "Controls span identity, networking, prompts, retrieval, tools, storage, deployment, and monitoring.", "Apply least privilege, isolate untrusted content, validate actions, protect secrets, patch dependencies, and red-team the system.",
+            ["<b>Prompt injection:</b> a document cannot override system permissions.", "<b>Secret vault:</b> tools receive scoped credentials, not keys in prompts.", "<b>Approval gate:</b> deleting data requires a human."]),
+          t("Observability", "Observability collects signals that explain what the AI system is doing and why it fails.", "Probabilistic, multi-component systems are difficult to debug from errors alone.", "Use it in development, evaluation, launch, and ongoing operations.", "Capture traces, model calls, retrievals, tool actions, tokens, latency, cost, quality, and safety events.", "Assign trace IDs, log structured metadata safely, build dashboards and alerts, and inspect representative failures.",
+            ["<b>Request movie:</b> replay retrieval → prompt → tool → answer.", "<b>Cost alarm:</b> detect a sudden token spike.", "<b>Quality watch:</b> find which document version caused bad answers."]),
+          t("MLOps", "MLOps applies engineering practices to build, version, deploy, monitor, and improve machine-learning models.", "Models and data change, so reproducibility and controlled releases matter.", "Use it across the model lifecycle from experiments to production.", "Pipelines manage datasets, features, training, registries, deployments, and monitoring.", "Version code/data/models, automate tests and training, approve releases, monitor drift, and roll back safely.",
+            ["<b>Model passport:</b> know dataset, metrics, owner, and version.", "<b>Canary release:</b> send 5% traffic to the new model.", "<b>Drift alarm:</b> detect when real inputs stop resembling training data."]),
+          t("AIOps", "AIOps uses analytics and AI to help operate complex IT systems.", "Large systems produce more alerts and telemetry than humans can manually correlate.", "Use it for anomaly detection, incident triage, capacity forecasting, and guided remediation.", "It sits over logs, metrics, traces, tickets, topology, and operational runbooks.", "Correlate events, detect patterns, rank likely causes, recommend actions, and learn from incident outcomes.",
+            ["<b>Alert detective:</b> groups 500 symptoms into one incident.", "<b>Capacity oracle:</b> predicts storage exhaustion.", "<b>Runbook helper:</b> suggests verified recovery steps with approval."]),
+          t("GPU infrastructure", "GPU infrastructure is the hardware and platform layer that supplies accelerated compute for AI.", "LLMs require high-throughput math, large memory, fast interconnects, and reliable scheduling.", "Plan it for training, fine-tuning, or self-hosted inference at meaningful scale.", "It includes accelerators, hosts, networks, storage, drivers, runtimes, schedulers, and cooling.", "Match workloads to GPUs, pool and schedule capacity, optimize communication, monitor health, and plan redundancy.",
+            ["<b>AI factory:</b> GPUs are machines, network is conveyor belt, scheduler is foreman.", "<b>Traffic planning:</b> inference peaks need spare lanes.", "<b>Training cluster:</b> fast interconnects keep thousands of workers synchronized."])
+        ]
+      }
+    ];
+
+    const quizQuestions = [
+      ["What converts raw model scores into probabilities?", ["LayerNorm", "Softmax", "Chunking"], 1, "Softmax normalizes logits into a probability distribution."],
+      ["Which component stores earlier attention keys and values?", ["KV cache", "Vector database", "Optimizer"], 0, "KV cache reuses prior attention state during generation."],
+      ["What does RAG add before generation?", ["More model weights", "Retrieved evidence", "A higher temperature"], 1, "RAG retrieves relevant external evidence."],
+      ["Which metric means completed work per unit time?", ["Latency", "Throughput", "Context window"], 1, "Throughput measures total useful work over time."],
+      ["What should surround an action-taking agent?", ["Only a longer prompt", "Orchestration and permissions", "Maximum temperature"], 1, "Production agents need state, limits, permissions, validation, and stopping rules."],
+      ["Which method splits one layer’s matrix work across GPUs?", ["Tensor parallelism", "Pipeline parallelism", "Top-P"], 0, "Tensor parallelism shards operations within a layer."],
+      ["Why use reranking after retrieval?", ["To train the LLM", "To improve candidate relevance", "To increase context randomly"], 1, "Reranking applies a stronger relevance score to a small candidate set."],
+      ["What is the first inference phase over the prompt?", ["Decode", "Reflection", "Prefill"], 2, "Prefill processes prompt tokens and builds the KV cache."],
+      ["Which practice versions and safely deploys ML models?", ["AIOps", "MLOps", "Tokenization"], 1, "MLOps governs the machine-learning lifecycle."]
+    ];
+
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => [...document.querySelectorAll(selector)];
+    const saved = new Set(JSON.parse(localStorage.getItem("ai-map-bookmarks") || "[]"));
+    const explored = new Set(JSON.parse(localStorage.getItem("ai-map-explored") || "[]"));
+    let currentFilter = "all";
+    let quizIndex = 0;
+    let quizScore = 0;
+
+    const escapeHtml = value => value.replace(/[&<>"']/g, char => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    })[char]);
+
+    const slugify = value => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const allTopics = levels.flatMap((level, levelIndex) =>
+      level.topics.map(topic => ({ ...topic, levelIndex, id: `l${levelIndex + 1}-${slugify(topic.name)}` }))
+    );
+
+    function renderNavigation() {
+      $("#levelNav").innerHTML = levels.map((level, index) => `
+        <a class="level-link" href="#level-${index + 1}">
+          <span class="level-number" style="color:${level.color}">${index + 1}</span>
+          <span><b>${escapeHtml(level.title)}</b><br>${level.topics.length} concepts</span>
+        </a>`).join("");
+
+      $("#heroSteps").innerHTML = levels.map((level, index) => `
+        <div class="step" style="--step:${level.color};--i:${index + 1}">
+          ${index + 1}. ${escapeHtml(level.title)} <span>${level.topics.length} ideas</span>
+        </div>`).join("");
+    }
+
+    function conceptCard(topic, level, levelIndex, topicIndex) {
+      const id = `l${levelIndex + 1}-${slugify(topic.name)}`;
+      const oneLine = topic.what.split(".")[0] + ".";
+      return `
+        <details class="concept" id="${id}" data-id="${id}" data-search="${escapeHtml([
+          topic.name, topic.what, topic.why, topic.when, topic.where, topic.how, ...topic.examples
+        ].join(" ").toLowerCase())}" style="--level:${level.color}">
+          <summary>
+            <span>
+              <span class="concept-kicker">Level ${levelIndex + 1} · Concept ${topicIndex + 1}</span>
+              <h3>${escapeHtml(topic.name)}</h3>
+              <span class="one-liner">${escapeHtml(oneLine)}</span>
+            </span>
+            <span class="summary-actions">
+              <button class="bookmark ${saved.has(id) ? "saved" : ""}" type="button"
+                data-bookmark="${id}" aria-label="${saved.has(id) ? "Remove" : "Add"} ${escapeHtml(topic.name)} bookmark"
+                aria-pressed="${saved.has(id)}">★</button>
+              <span class="expand-icon" aria-hidden="true">+</span>
+            </span>
+          </summary>
+          <div class="concept-body">
+            <div class="wh-grid">
+              <div class="wh"><strong>What?</strong><p>${escapeHtml(topic.what)}</p></div>
+              <div class="wh"><strong>Why?</strong><p>${escapeHtml(topic.why)}</p></div>
+              <div class="wh"><strong>When?</strong><p>${escapeHtml(topic.when)}</p></div>
+              <div class="wh"><strong>Where?</strong><p>${escapeHtml(topic.where)}</p></div>
+              <div class="wh how"><strong>How?</strong><p>${escapeHtml(topic.how)}</p></div>
+            </div>
+            ${topic.math ? `<div class="math-note" aria-label="Math shortcut">${escapeHtml(topic.math)}</div>` : ""}
+            <h4 class="examples-title">Three fun examples</h4>
+            <div class="examples">${topic.examples.map(example => `<div class="example">${example}</div>`).join("")}</div>
+          </div>
+        </details>`;
+    }
+
+    function renderCourse() {
+      $("#learningMap").innerHTML = levels.map((level, levelIndex) => `
+        <section class="level" id="level-${levelIndex + 1}" style="--level:${level.color}">
+          <div class="level-head">
+            <div class="level-badge">${levelIndex + 1}</div>
+            <div><h2>${escapeHtml(level.title)}</h2><p>${escapeHtml(level.subtitle)}</p></div>
+            <button class="level-chip" data-open-level="${levelIndex + 1}">${level.topics.length} concepts · open level</button>
+          </div>
+          <div class="concept-grid">
+            ${level.topics.map((topic, topicIndex) => conceptCard(topic, level, levelIndex, topicIndex)).join("")}
+          </div>
+          <div class="level-check">
+            <div>
+              <h3>Quick level check</h3>
+              <p>${escapeHtml(level.challenge[0])}</p>
+              <p class="challenge-answer">${escapeHtml(level.challenge[1])}</p>
+            </div>
+            <button class="filter-btn reveal-answer">Reveal answer</button>
+          </div>
+        </section>`).join("") + `
+        <section class="quiz" id="quiz">
+          <span class="eyebrow">Final checkpoint</span>
+          <h2>Can you connect the stack?</h2>
+          <p>Nine quick questions—one from each layer of your journey.</p>
+          <div class="quiz-card" id="quizCard"></div>
+        </section>`;
+
+      $("#conceptCount").textContent = allTopics.length;
+      renderQuiz();
+      updateStatus();
+    }
+
+    function updateStatus() {
+      $("#status").textContent = `${explored.size} of ${allTopics.length} concepts explored`;
+      localStorage.setItem("ai-map-explored", JSON.stringify([...explored]));
+      localStorage.setItem("ai-map-bookmarks", JSON.stringify([...saved]));
+    }
+
+    function applyFilters() {
+      const query = $("#search").value.trim().toLowerCase();
+      let visible = 0;
+      $$(".concept").forEach(card => {
+        const matchesSearch = !query || card.dataset.search.includes(query);
+        const matchesFilter = currentFilter === "all" || saved.has(card.dataset.id);
+        card.classList.toggle("hidden", !(matchesSearch && matchesFilter));
+        if (matchesSearch && matchesFilter) visible++;
+      });
+      $$(".level").forEach(level => {
+        level.classList.toggle("hidden", !level.querySelector(".concept:not(.hidden)"));
+      });
+      $("#emptyState").style.display = visible ? "none" : "block";
+    }
+
+    function renderQuiz() {
+      const card = $("#quizCard");
+      if (quizIndex >= quizQuestions.length) {
+        card.innerHTML = `
+          <p class="quiz-question">You scored ${quizScore}/${quizQuestions.length}</p>
+          <p class="quiz-feedback">${quizScore >= 7 ? "Excellent—you can see how the whole AI stack connects." : "Nice start. Revisit the colorful levels, then try again."}</p>
+          <button class="primary-btn" id="retryQuiz">Try again</button>`;
+        $("#retryQuiz").addEventListener("click", () => { quizIndex = 0; quizScore = 0; renderQuiz(); });
+        return;
+      }
+
+      const [question, options] = quizQuestions[quizIndex];
+      card.innerHTML = `
+        <p class="concept-kicker">Question ${quizIndex + 1} of ${quizQuestions.length}</p>
+        <div class="quiz-question">${escapeHtml(question)}</div>
+        <div class="quiz-options">
+          ${options.map((option, index) => `<button class="quiz-option" data-answer="${index}">${escapeHtml(option)}</button>`).join("")}
+        </div>
+        <p class="quiz-feedback" aria-live="polite"></p>`;
+    }
+
+    $("#learningMap").addEventListener("toggle", event => {
+      const details = event.target;
+      if (!details.matches(".concept") || !details.open) return;
+      explored.add(details.dataset.id);
+      updateStatus();
+    }, true);
+
+    $("#learningMap").addEventListener("click", event => {
+      const bookmark = event.target.closest("[data-bookmark]");
+      if (bookmark) {
+        event.preventDefault();
+        const id = bookmark.dataset.bookmark;
+        const name = bookmark.closest(".concept").querySelector("h3").textContent;
+        saved.has(id) ? saved.delete(id) : saved.add(id);
+        bookmark.classList.toggle("saved", saved.has(id));
+        bookmark.setAttribute("aria-pressed", String(saved.has(id)));
+        bookmark.setAttribute("aria-label", `${saved.has(id) ? "Remove" : "Add"} ${name} bookmark`);
+        updateStatus();
+        applyFilters();
+        return;
+      }
+
+      const levelButton = event.target.closest("[data-open-level]");
+      if (levelButton) {
+        const level = levelButton.closest(".level");
+        const cards = [...level.querySelectorAll(".concept")];
+        const shouldOpen = cards.some(card => !card.open);
+        cards.forEach(card => { card.open = shouldOpen; });
+        levelButton.textContent = shouldOpen ? "Close level" : `${cards.length} concepts · open level`;
+      }
+
+      const reveal = event.target.closest(".reveal-answer");
+      if (reveal) {
+        const check = reveal.closest(".level-check");
+        check.classList.toggle("revealed");
+        reveal.textContent = check.classList.contains("revealed") ? "Hide answer" : "Reveal answer";
+      }
+
+      const answer = event.target.closest("[data-answer]");
+      if (answer) {
+        const [, , correctIndex, feedback] = quizQuestions[quizIndex];
+        const chosen = Number(answer.dataset.answer);
+        $$(".quiz-option").forEach(button => {
+          button.disabled = true;
+          if (Number(button.dataset.answer) === correctIndex) button.classList.add("correct");
+        });
+        if (chosen === correctIndex) quizScore++;
+        else answer.classList.add("wrong");
+        $(".quiz-feedback").textContent = feedback;
+        setTimeout(() => { quizIndex++; renderQuiz(); }, 1150);
+      }
+    });
+
+    $("#search").addEventListener("input", applyFilters);
+    $$(".filter-btn[data-filter]").forEach(button => button.addEventListener("click", () => {
+      currentFilter = button.dataset.filter;
+      $$(".filter-btn[data-filter]").forEach(item => item.classList.toggle("active", item === button));
+      applyFilters();
+    }));
+
+    $("#expandButton").addEventListener("click", () => {
+      const visible = $$(".concept:not(.hidden)");
+      const shouldOpen = visible.some(card => !card.open);
+      visible.forEach(card => { card.open = shouldOpen; });
+      $("#expandButton").textContent = shouldOpen ? "Collapse all" : "Expand all";
+    });
+
+    $("#randomButton").addEventListener("click", () => {
+      const topic = allTopics[Math.floor(Math.random() * allTopics.length)];
+      $("#search").value = "";
+      currentFilter = "all";
+      $$(".filter-btn[data-filter]").forEach(button => button.classList.toggle("active", button.dataset.filter === "all"));
+      applyFilters();
+      const card = document.getElementById(topic.id);
+      card.open = true;
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => card.querySelector("summary").focus(), 450);
+    });
+
+    const themeButton = $("#themeButton");
+    const setTheme = light => {
+      document.body.classList.toggle("light", light);
+      themeButton.textContent = light ? "☾" : "☀";
+      themeButton.setAttribute("aria-label", `Switch to ${light ? "dark" : "light"} theme`);
+      localStorage.setItem("ai-map-theme", light ? "light" : "dark");
+    };
+    setTheme(localStorage.getItem("ai-map-theme") === "light");
+    themeButton.addEventListener("click", () => setTheme(!document.body.classList.contains("light")));
+
+    const sidebar = $("#sidebar");
+    const menuButton = $("#menuButton");
+    const mobile = matchMedia("(max-width: 1120px)");
+    const setMenu = open => {
+      sidebar.classList.toggle("open", open);
+      menuButton.setAttribute("aria-expanded", String(open));
+      menuButton.setAttribute("aria-label", open ? "Close level menu" : "Open level menu");
+      sidebar.inert = mobile.matches && !open;
+    };
+    const syncMenu = () => setMenu(!mobile.matches);
+    mobile.addEventListener("change", syncMenu);
+    menuButton.addEventListener("click", () => setMenu(!sidebar.classList.contains("open")));
+    sidebar.addEventListener("click", event => {
+      if (event.target.closest("a") && mobile.matches) setMenu(false);
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && sidebar.classList.contains("open") && mobile.matches) {
+        setMenu(false);
+        menuButton.focus();
+      }
+    });
+
+    function updateScroll() {
+      const scrollable = document.documentElement.scrollHeight - innerHeight;
+      $("#progressBar").style.width = `${scrollable > 0 ? Math.min(100, scrollY / scrollable * 100) : 0}%`;
+      const center = scrollY + 190;
+      let active = 0;
+      $$(".level").forEach((level, index) => { if (!level.classList.contains("hidden") && level.offsetTop <= center) active = index; });
+      $$(".level-link").forEach((link, index) => link.classList.toggle("active", index === active));
+    }
+
+    renderNavigation();
+    renderCourse();
+    syncMenu();
+    updateScroll();
+    addEventListener("scroll", updateScroll, { passive: true });
+    addEventListener("resize", updateScroll);
+  </script>
+</body>
+</html>

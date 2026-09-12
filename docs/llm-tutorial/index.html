@@ -183,6 +183,7 @@
     }
 
     .sidebar-card {
+      display: block;
       margin-top: 28px;
       padding: 16px;
       border: 1px solid var(--line);
@@ -190,9 +191,12 @@
       background: linear-gradient(145deg, rgba(77, 228, 255, .08), rgba(173, 124, 255, .08));
       color: var(--muted);
       font-size: 12px;
+      text-decoration: none;
     }
 
     .sidebar-card strong { display: block; margin-bottom: 4px; color: var(--ink); }
+    a.sidebar-card:hover { border-color: rgba(77, 228, 255, .5); transform: translateY(-2px); }
+    .course-map-card { margin-top: 12px; }
     main { min-width: 0; }
 
     .hero {
@@ -859,6 +863,10 @@
         <strong>No AI background needed</strong>
         Go in order the first time. Every advanced idea is built from a simple one.
       </div>
+      <a class="sidebar-card course-map-card" href="../ai-learning-path/">
+        <strong>Continue: AI → Agents</strong>
+        Explore 96 concepts with 4W+H and fun examples.
+      </a>
     </aside>
 
     <main id="top">
