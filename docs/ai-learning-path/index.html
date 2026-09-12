@@ -166,6 +166,7 @@
       height: 32px;
       border: 1px solid var(--line);
       border-radius: 10px;
+      color: var(--level);
       font-weight: 900;
     }
 
@@ -998,8 +999,8 @@
 
     function renderNavigation() {
       $("#levelNav").innerHTML = levels.map((level, index) => `
-        <a class="level-link" href="#level-${index + 1}">
-          <span class="level-number" style="color:${level.color}">${index + 1}</span>
+        <a class="level-link" href="#level-${index + 1}" style="--level:${level.color}">
+          <span class="level-number">${index + 1}</span>
           <span><b>${escapeHtml(level.title)}</b><br>${level.topics.length} concepts</span>
         </a>`).join("");
 
