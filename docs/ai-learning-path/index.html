@@ -297,6 +297,7 @@
       border: 1px solid color-mix(in srgb, var(--step) 38%, transparent);
       border-radius: 10px;
       background: color-mix(in srgb, var(--step) 12%, transparent);
+      color: #eef6ff;
       font-size: 12px;
       font-weight: 800;
       transform: translateX(calc((9 - var(--i)) * 9px));
@@ -1268,7 +1269,7 @@
     function updateScroll() {
       const scrollable = document.documentElement.scrollHeight - innerHeight;
       $("#progressBar").style.width = `${scrollable > 0 ? Math.min(100, scrollY / scrollable * 100) : 0}%`;
-      const center = scrollY + 190;
+      const center = scrollY + Math.min(260, innerHeight * .35);
       let active = 0;
       $$(".level").forEach((level, index) => { if (!level.classList.contains("hidden") && level.offsetTop <= center) active = index; });
       $$(".level-link").forEach((link, index) => link.classList.toggle("active", index === active));
