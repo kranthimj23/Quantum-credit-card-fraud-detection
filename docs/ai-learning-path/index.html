@@ -499,6 +499,8 @@
     .quiz-option.correct { border-color: var(--green); background: rgba(99, 230, 173, .1); }
     .quiz-option.wrong { border-color: var(--red); background: rgba(255, 126, 145, .1); }
     .quiz-feedback { min-height: 25px; margin-top: 12px; color: var(--muted); }
+    .quiz-next { margin-top: 4px; }
+    .quiz.hidden { display: none; }
     .empty {
       display: none;
       padding: 70px 20px;
@@ -538,6 +540,9 @@
     .light .primary-btn { color: #fff; }
     .light .math-note { background: #edf3fb; color: #24395e; }
     .light .brand-mark { color: #fff; }
+    .light .level-badge, .light .level-number, .light .concept-kicker, .light .wh strong {
+      color: color-mix(in srgb, var(--level) 35%, #14213a);
+    }
 
     .menu-btn { display: none; }
     @media (max-width: 1120px) {
@@ -650,8 +655,8 @@
           <input id="search" type="search" placeholder="Find attention, RAG, latency, agents…" aria-label="Search course concepts">
         </label>
         <div class="toolbar-actions">
-          <button class="filter-btn active" data-filter="all">All concepts</button>
-          <button class="filter-btn" data-filter="saved">Bookmarked</button>
+          <button class="filter-btn active" data-filter="all" aria-pressed="true">All concepts</button>
+          <button class="filter-btn" data-filter="saved" aria-pressed="false">Bookmarked</button>
           <button class="filter-btn" id="expandButton">Expand all</button>
         </div>
       </div>
@@ -1045,7 +1050,7 @@
           <div class="level-head">
             <div class="level-badge">${levelIndex + 1}</div>
             <div><h2>${escapeHtml(level.title)}</h2><p>${escapeHtml(level.subtitle)}</p></div>
-            <button class="level-chip" data-open-level="${levelIndex + 1}">${level.topics.length} concepts · open level</button>
+            <button class="level-chip" data-open-level="${levelIndex + 1}" aria-expanded="false">${level.topics.length} concepts · open level</button>
           </div>
           <div class="concept-grid">
             ${level.topics.map((topic, topicIndex) => conceptCard(topic, level, levelIndex, topicIndex)).join("")}
@@ -1090,6 +1095,22 @@
         level.classList.toggle("hidden", !level.querySelector(".concept:not(.hidden)"));
       });
       $("#emptyState").style.display = visible ? "none" : "block";
+      $("#quiz").classList.toggle("hidden", Boolean(query) || currentFilter !== "all");
+      syncExpansionControls();
+    }
+
+    function syncExpansionControls() {
+      const visible = $$(".concept:not(.hidden)");
+      const allVisibleOpen = visible.length > 0 && visible.every(card => card.open);
+      $("#expandButton").textContent = allVisibleOpen ? "Collapse all" : "Expand all";
+      $("#expandButton").disabled = visible.length === 0;
+      $$(".level").forEach(level => {
+        const cards = [...level.querySelectorAll(".concept")];
+        const button = level.querySelector("[data-open-level]");
+        const allOpen = cards.every(card => card.open);
+        button.textContent = allOpen ? "Close level" : `${cards.length} concepts · open level`;
+        button.setAttribute("aria-expanded", String(allOpen));
+      });
     }
 
     function renderQuiz() {
@@ -1110,14 +1131,18 @@
         <div class="quiz-options">
           ${options.map((option, index) => `<button class="quiz-option" data-answer="${index}">${escapeHtml(option)}</button>`).join("")}
         </div>
-        <p class="quiz-feedback" aria-live="polite"></p>`;
+        <p class="quiz-feedback" aria-live="polite"></p>
+        <button class="primary-btn quiz-next" id="nextQuiz" hidden>Next question</button>`;
     }
 
     $("#learningMap").addEventListener("toggle", event => {
       const details = event.target;
-      if (!details.matches(".concept") || !details.open) return;
-      explored.add(details.dataset.id);
-      updateStatus();
+      if (!details.matches(".concept")) return;
+      if (details.open) {
+        explored.add(details.dataset.id);
+        updateStatus();
+      }
+      syncExpansionControls();
     }, true);
 
     $("#learningMap").addEventListener("click", event => {
@@ -1141,7 +1166,7 @@
         const cards = [...level.querySelectorAll(".concept")];
         const shouldOpen = cards.some(card => !card.open);
         cards.forEach(card => { card.open = shouldOpen; });
-        levelButton.textContent = shouldOpen ? "Close level" : `${cards.length} concepts · open level`;
+        syncExpansionControls();
       }
 
       const reveal = event.target.closest(".reveal-answer");
@@ -1162,14 +1187,25 @@
         if (chosen === correctIndex) quizScore++;
         else answer.classList.add("wrong");
         $(".quiz-feedback").textContent = feedback;
-        setTimeout(() => { quizIndex++; renderQuiz(); }, 1150);
+        $("#nextQuiz").hidden = false;
+        $("#nextQuiz").textContent = quizIndex === quizQuestions.length - 1 ? "See score" : "Next question";
+      }
+
+      if (event.target.closest("#nextQuiz")) {
+        quizIndex++;
+        renderQuiz();
+        $("#quizCard .quiz-option, #retryQuiz").focus();
       }
     });
 
     $("#search").addEventListener("input", applyFilters);
     $$(".filter-btn[data-filter]").forEach(button => button.addEventListener("click", () => {
       currentFilter = button.dataset.filter;
-      $$(".filter-btn[data-filter]").forEach(item => item.classList.toggle("active", item === button));
+      $$(".filter-btn[data-filter]").forEach(item => {
+        const active = item === button;
+        item.classList.toggle("active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
       applyFilters();
     }));
 
@@ -1177,14 +1213,18 @@
       const visible = $$(".concept:not(.hidden)");
       const shouldOpen = visible.some(card => !card.open);
       visible.forEach(card => { card.open = shouldOpen; });
-      $("#expandButton").textContent = shouldOpen ? "Collapse all" : "Expand all";
+      syncExpansionControls();
     });
 
     $("#randomButton").addEventListener("click", () => {
       const topic = allTopics[Math.floor(Math.random() * allTopics.length)];
       $("#search").value = "";
       currentFilter = "all";
-      $$(".filter-btn[data-filter]").forEach(button => button.classList.toggle("active", button.dataset.filter === "all"));
+      $$(".filter-btn[data-filter]").forEach(button => {
+        const active = button.dataset.filter === "all";
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
       applyFilters();
       const card = document.getElementById(topic.id);
       card.open = true;
